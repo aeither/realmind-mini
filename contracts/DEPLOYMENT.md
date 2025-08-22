@@ -6,6 +6,10 @@
 source .env && rm -rf cache out && forge build && forge script --chain 8453 script/QuizGame.s.sol:QuizGameScript --rpc-url https://mainnet.base.org --broadcast -vvvv --private-key ${PRIVATE_KEY}
 ```
 
+```bash
+source .env && rm -rf cache out && forge build && forge script --chain 8453 script/QuizGame.s.sol:QuizGameScript --rpc-url https://mainnet.base.org --broadcast -vvvv --private-key ${PRIVATE_KEY} --slow --batch-size 1
+```
+
 ## 🌐 Base Mainnet Network Details
 
 | Parameter | Value |

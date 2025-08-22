@@ -2,8 +2,8 @@
 const CONTRACT_ADDRESSES = {
   // Base (Mainnet)
   8453: {
-    token1ContractAddress: "0x0000000000000000000000000000000000000000", // TODO: Deploy to Base mainnet
-    quizGameContractAddress: "0x0000000000000000000000000000000000000000", // TODO: Deploy to Base mainnet
+    token1ContractAddress: "0x528007Fab32134522c44757E31a6d22ba433b5a8",
+    quizGameContractAddress: "0x6e9ecBD827fd702CE6d432F82F08Aef9ada48CCe",
     // New demo contracts (placeholder addresses - update after deployment)
     quizDuelContractAddress: "0x0000000000000000000000000000000000000001",
     guildSystemContractAddress: "0x0000000000000000000000000000000000000002",
