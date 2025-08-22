@@ -14,7 +14,7 @@ import {
 import { formatEther, parseEther } from 'viem'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { hyperionTestnet } from '../wagmi'
+import { baseMainnet } from '../wagmi'
 import Header from '../components/Header'
 
 function ContractDebugPage() {
@@ -29,12 +29,12 @@ function ContractDebugPage() {
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>('');
 
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(hyperionTestnet.id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id);
 
   // Get user balance
   const { data: balance } = useBalance({
     address,
-    chainId: chain?.id || hyperionTestnet.id,
+    chainId: chain?.id || baseMainnet.id,
   });
 
   // Read contract data
@@ -129,7 +129,7 @@ function ContractDebugPage() {
     useWaitForTransactionReceipt({ hash: renounceOwnershipHash });
 
   // Check if current chain is supported
-  const supportedChainIds = [133717, 11155111, 8453, 12345, 1114]; // From CONTRACT_ADDRESSES
+  const supportedChainIds = [8453, 11155111, 12345, 1114]; // From CONTRACT_ADDRESSES - Base Mainnet and others
   const isCorrectChain = chain ? supportedChainIds.includes(chain.id) : false;
 
   const handleStartQuiz = () => {

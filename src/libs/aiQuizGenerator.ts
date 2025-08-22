@@ -32,7 +32,7 @@ export class AIQuizGenerator {
   constructor() {
     // Use backend URL from environment variable or fallback to localhost
     this.backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-    console.log('🔗 AI Quiz Generator using backend:', this.backendUrl);
+    // console.log('🔗 AI Quiz Generator using backend:', this.backendUrl);
   }
 
   async generateQuiz(params: GenerateQuizParams): Promise<AIQuizConfig> {

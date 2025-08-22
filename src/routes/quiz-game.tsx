@@ -6,7 +6,7 @@ import { parseEther } from 'viem'
 import { toast } from 'sonner'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { hyperionTestnet } from '../wagmi'
+import { baseMainnet } from '../wagmi'
 import GlobalHeader from '../components/GlobalHeader'
 import { AIQuizGenerator } from '../libs/aiQuizGenerator'
 
@@ -129,7 +129,7 @@ function QuizGame() {
     setQuestionResults([])
   }
 
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(hyperionTestnet.id)
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id)
   
   // Handle AI-generated quizzes
   let quizConfig = null
@@ -471,7 +471,7 @@ function QuizGame() {
   }
   
   // Check if user is on correct chain
-  const isCorrectChain = chain?.id === hyperionTestnet.id
+  const isCorrectChain = chain?.id === baseMainnet.id
 
   if (!isCorrectChain) {
     return (
@@ -485,10 +485,10 @@ function QuizGame() {
         }}>
           <h2 style={{ color: "#111827", marginBottom: "1rem" }}>Wrong Network</h2>
           <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
-            Please switch to Hyperion (Testnet) to play this quiz.
+            Please switch to Base Mainnet to play this quiz.
           </p>
           <button 
-            onClick={() => switchChain({ chainId: hyperionTestnet.id })}
+            onClick={() => switchChain({ chainId: baseMainnet.id })}
             style={{
               backgroundColor: "#58CC02",
               color: "#ffffff",

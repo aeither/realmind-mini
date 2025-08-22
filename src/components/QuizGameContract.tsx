@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { useAccount, useDisconnect, useReadContract, useSwitchChain, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { getContractAddresses } from '../libs/constants';
 import { quizGameABI } from '../libs/quizGameABI';
-import { hyperionTestnet } from '../wagmi';
+import { baseMainnet } from '../wagmi';
 
 // Currency configuration for different chains
 const CURRENCY_CONFIG = {
@@ -48,7 +48,7 @@ function QuizGameContract() {
   const { disconnect } = useDisconnect();
 
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(hyperionTestnet.id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id);
   
   // Get currency config for current chain
   const currencyConfig = chain ? (CURRENCY_CONFIG[chain.id as keyof typeof CURRENCY_CONFIG] || CURRENCY_CONFIG.default) : CURRENCY_CONFIG.default;
@@ -112,7 +112,7 @@ function QuizGameContract() {
 
 
   // Check if user is on correct chain
-  const supportedChainIds = [133717]; // Only Hyperion (Testnet)
+  const supportedChainIds = [8453]; // Only Base Mainnet
   const isCorrectChain = chain ? supportedChainIds.includes(chain.id) : false;
 
   // If not on correct chain, show network switch options
@@ -126,11 +126,11 @@ function QuizGameContract() {
       }}>
         <h2 style={{ color: "#111827", marginBottom: "1rem" }}>Wrong Network</h2>
         <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
-          Please switch to Hyperion (Testnet) to play the quiz game.
+          Please switch to Base Mainnet to play the quiz game.
         </p>
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2rem" }}>
           <button 
-            onClick={() => switchChain({ chainId: hyperionTestnet.id })}
+            onClick={() => switchChain({ chainId: baseMainnet.id })}
             style={{
               backgroundColor: "#58CC02",
               color: "#ffffff",

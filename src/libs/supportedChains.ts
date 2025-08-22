@@ -1,21 +1,21 @@
-import { hyperionTestnet } from './hyperionTestnetChain';
+import { baseMainnet } from './baseMainnetChain';
 
 // Export all supported chains as a reusable array
-export const SUPPORTED_CHAINS = [hyperionTestnet] as const;
+export const SUPPORTED_CHAINS = [baseMainnet] as const;
 
 // Export chain IDs for easy checking
 export const SUPPORTED_CHAIN_IDS = SUPPORTED_CHAINS.map(chain => chain.id);
 
 // Currency configuration for different chains
 export const CURRENCY_CONFIG = {
-  133717: { // Hyperion (Testnet)
-    symbol: 'tMETIS',
+  8453: { // Base (Mainnet)
+    symbol: 'ETH',
     multiplier: 1,
-    defaultAmounts: ['0.1', '0.5', '2.5']
+    defaultAmounts: ['0.001', '0.01', '0.1']
   },
   default: {
-    symbol: 'tMETIS',
+    symbol: 'ETH',
     multiplier: 1,
-    defaultAmounts: ['0.1', '0.5', '2.5']
+    defaultAmounts: ['0.001', '0.01', '0.1']
   }
 } as const;

@@ -1,6 +1,6 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { SUPPORTED_CHAINS } from './libs/supportedChains';
-import { hyperionTestnet } from './libs/hyperionTestnetChain';
+import { baseMainnet } from './libs/baseMainnetChain';
 
 const config = getDefaultConfig({
   appName: 'Realmind',
@@ -9,7 +9,7 @@ const config = getDefaultConfig({
   ssr: true,
 });
 
-export { config, hyperionTestnet };
+export { config, baseMainnet };
 
 declare module "wagmi" {
   interface Register {
