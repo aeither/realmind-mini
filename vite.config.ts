@@ -11,14 +11,30 @@ export default defineConfig({
     react(),
     tailwindcss(),
     nodePolyfills({
-      include: ['process'],
+      include: ['process', 'buffer'],
       globals: {
         process: true,
+        Buffer: true,
       },
     })
   ],
+  base: '/',
   server: {
     allowedHosts: true,
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          wagmi: ['wagmi', 'viem', '@wagmi/core'],
+          onchainkit: ['@coinbase/onchainkit'],
+        }
+      }
+    }
   },
   define: {
     global: "globalThis",
@@ -26,5 +42,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['pg'],
+    include: ['@coinbase/onchainkit/minikit']
   },
 });
