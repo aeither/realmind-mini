@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import Header from '../components/Header'
 import AIQuizGenerator from '../components/AIQuizGenerator'
 
@@ -46,6 +47,13 @@ const AVAILABLE_QUIZZES: Quiz[] = [
 function HomePage() {
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { setFrameReady, isFrameReady } = useMiniKit();
+
+  useEffect(() => {
+    if (!isFrameReady) {
+      setFrameReady();
+    }
+  }, [isFrameReady, setFrameReady]);
 
   const handleQuizSelect = (quizId: string) => {
     setSelectedQuiz(quizId);

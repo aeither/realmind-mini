@@ -7,6 +7,7 @@ import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { config } from './wagmi'
+import { MiniKitContextProvider } from './providers/MiniKitProvider'
 
 const router = createRouter({ routeTree })
 
@@ -40,19 +41,21 @@ function App() {
             fontStack: 'system',
           })}
         >
-          <RouterProvider router={router} />
-          <Toaster 
-            theme="light"
-            position="bottom-right"
-            toastOptions={{
-              style: {
-                background: '#ffffff',
-                border: '1px solid #e5e7eb',
-                color: '#1f2937',
-                borderRadius: '12px'
-              },
-            }}
-          />
+          <MiniKitContextProvider>
+            <RouterProvider router={router} />
+            <Toaster 
+              theme="light"
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  color: '#1f2937',
+                  borderRadius: '12px'
+                },
+              }}
+            />
+          </MiniKitContextProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
