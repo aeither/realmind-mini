@@ -1,0 +1,20 @@
+{
+  "frame": {
+    "name": "Realmind",
+    "version": "1",
+    "iconUrl": "https://realmind.vercel.app/icon.png",
+    "homeUrl": "https://realmind.vercel.app",
+    "imageUrl": "https://realmind.vercel.app/quiz-preview.jpeg",
+    "splashImageUrl": "https://realmind.vercel.app/splash.jpeg",
+    "splashBackgroundColor": "#6200EA",
+    "webhookUrl": "https://realmind.vercel.app/api/webhook",
+    "subtitle": "Interactive learning",
+    "description": "Realmind is a decentralized learning platform built for the Etherlink ecosystem.",
+    "primaryCategory": "education"
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjIxNjM4MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweENhMDU3RDcxRWY1NDE5RDZDNzhlNTI3MTU2NUFDZEMwMzAxZjA0ODAifQ",
+    "payload": "eyJkb21haW4iOiJyZWFsbWluZC52ZXJjZWwuYXBwIn0",
+    "signature": "Uy+H2EVKBlVeWEk5x9AYnZdeAtzlpMfUSTvUDheCml4qxh2c9WTEPNQqgJUoYfBBcwdoKGi9N73mWH5gZn+xPRs="
+  }
+}
