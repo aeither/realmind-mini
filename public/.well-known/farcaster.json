@@ -9,7 +9,7 @@
     "splashBackgroundColor": "#6200EA",
     "webhookUrl": "https://realmind-mini.vercel.app/api/webhook",
     "subtitle": "Interactive learning",
-    "description": "Realmind is a decentralized learning platform built for the Etherlink ecosystem.",
+    "description": "Realmind is a decentralized learning platform.",
     "primaryCategory": "education"
   },
   "accountAssociation": {
