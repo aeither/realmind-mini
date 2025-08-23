@@ -41,7 +41,7 @@ function App() {
             fontStack: 'system',
           })}
         >
-          <MiniKitContextProvider>
+          {/* <MiniKitContextProvider> */}
             <RouterProvider router={router} />
             <Toaster 
               theme="light"
@@ -55,7 +55,7 @@ function App() {
                 },
               }}
             />
-          </MiniKitContextProvider>
+          {/* </MiniKitContextProvider> */}
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
