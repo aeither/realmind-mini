@@ -16,5 +16,10 @@
     "header": "eyJmaWQiOjIxNjM4MywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDIxNEQxNzJDMERjNjBmQTUxNERmOTU0QTgyOGJjQzU1MkJlMzA4MTUifQ",
     "payload": "eyJkb21haW4iOiJyZWFsbWluZC1taW5pLnZlcmNlbC5hcHAifQ",
     "signature": "MHg0ZmQzMjg3M2UxNmViNDM4ODJlNmI0YTczMjgzMjQwYzY5ODVjYmFmNGMxZTg5N2M0NTQ1YWUzZTQxOTgwYTQxNWUwMjJkMTZmNjUyNDEyYjFmM2Q1NDcwNmU5NmZiOTM1ZDllZTAwNGE2YmIxYTI2MzBiOGVhMWIzY2RkY2FiODFj"
+  },
+  "baseBuilder": {
+    "allowedAddresses": [
+      "0x1eA091521DC4A2035a586995f9fB7ca7b0F646ad"
+    ]
   }
 }
