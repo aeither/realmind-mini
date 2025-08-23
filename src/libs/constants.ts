@@ -2,8 +2,8 @@
 const CONTRACT_ADDRESSES = {
   // Base (Mainnet)
   8453: {
-    token1ContractAddress: "0x528007Fab32134522c44757E31a6d22ba433b5a8",
-    quizGameContractAddress: "0x6e9ecBD827fd702CE6d432F82F08Aef9ada48CCe",
+    token1ContractAddress: "0xBaaB509AAd2fC0b041669A86750631AA76688BeB",
+    quizGameContractAddress: "0x1eC31C737BA41e915CD133a942AFF5F11e52fA97",
     // New demo contracts (placeholder addresses - update after deployment)
     quizDuelContractAddress: "0x0000000000000000000000000000000000000001",
     guildSystemContractAddress: "0x0000000000000000000000000000000000000002",
