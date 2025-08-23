@@ -222,10 +222,6 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
               )}
             </button>
           </div>
-
-          <div className="text-xs text-gray-500 text-center">
-            🤖 Powered by Alith AI • Generate unlimited personalized quizzes
-          </div>
         </div>
       </div>
     </div>

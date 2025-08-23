@@ -10,8 +10,7 @@
     "dev:all": "concurrently \"pnpm run dev\" \"pnpm run dev:ngrok\"",
     "build": "tsc && vite build",
     "lint": "biome check src",
-    "preview": "vite preview",
-    "alith": "cd scripts && tsx alith.ts"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@coinbase/onchainkit": "^0.38.19",
@@ -43,7 +42,6 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.2.1",
     "@wagmi/cli": "latest",
-    "alith": "^0.11.1",
     "concurrently": "^9.1.0",
     "tsx": "^4.20.3",
     "typescript": "^5.4.5",
