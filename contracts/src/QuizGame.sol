@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Token1 is ERC20, Ownable {
-    constructor() ERC20("Token1", "TK1") Ownable(msg.sender) {}
+    constructor() ERC20("XP Points", "XP3") Ownable(msg.sender) {}
 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
@@ -28,6 +28,7 @@ contract Token1 is ERC20, Ownable {
 contract QuizGame is Ownable {
     Token1 public token;
     address public vaultAddress;
+    uint256 public tokenMultiplier = 100; // Default 100x ETH paid
 
     // Mapping: user address => active quiz session (only one allowed at a time)
     mapping(address => QuizSession) public userSessions;
@@ -61,9 +62,15 @@ contract QuizGame is Ownable {
         emit VaultAddressUpdated(oldVault, newVaultAddress);
     }
 
-    function startQuiz(string memory quizId, uint256 userAnswer) external payable {
+    function setTokenMultiplier(uint256 newMultiplier) external onlyOwner {
+        require(newMultiplier > 0, "Multiplier must be greater than zero");
+        tokenMultiplier = newMultiplier;
+    }
+
+    function startQuiz(string memory quizId, uint256 userAnswer, uint256 expectedCorrectAnswers) external payable {
         require(msg.value > 0, "Must send ETH");
         require(bytes(quizId).length > 0, "Quiz ID cannot be empty");
+        require(expectedCorrectAnswers > 0, "Expected correct answers must be greater than zero");
 
         QuizSession storage session = userSessions[msg.sender];
         require(!session.active, "Active quiz in progress. Complete it first.");
@@ -74,44 +81,34 @@ contract QuizGame is Ownable {
         session.amountPaid = msg.value;
         session.timestamp = block.timestamp;
         session.quizId = quizId;
-        session.correctAnswers = 0;
+        session.correctAnswers = expectedCorrectAnswers;
 
-        // Mint initial tokens: 100x ETH paid
-        uint256 initialTokens = msg.value * 100;
+        // Mint initial tokens: configurable multiplier x ETH paid
+        uint256 initialTokens = msg.value * tokenMultiplier;
         token.mint(msg.sender, initialTokens);
 
         emit QuizStarted(msg.sender, quizId, userAnswer);
     }
 
-    function completeQuiz(uint256 correctAnswerCount) external {
+    function completeQuiz(uint256 submittedCorrectAnswers) external {
         QuizSession storage session = userSessions[msg.sender];
         require(session.active, "No active quiz session");
 
         // Mark as inactive first
         session.active = false;
 
-        uint256 initialTokens = session.amountPaid * 100;
+        uint256 initialTokens = session.amountPaid * tokenMultiplier;
         uint256 totalTokens = initialTokens;
 
-        // Calculate bonus based on correct answers (assuming 3 questions total)
-        if (correctAnswerCount >= 3) {
-            // Perfect score: 10% to 90% bonus
-            uint256 bonusPercent = 10 + (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 81);
-            uint256 bonusTokens = (initialTokens * bonusPercent) / 100;
-            totalTokens += bonusTokens;
-
-            token.mint(msg.sender, bonusTokens);
-            emit QuizCompleted(msg.sender, session.quizId, true, totalTokens);
-        } else if (correctAnswerCount >= 2) {
-            // Good score: 5% to 25% bonus
-            uint256 bonusPercent = 5 + (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 21);
-            uint256 bonusTokens = (initialTokens * bonusPercent) / 100;
+        // Fixed bonus: 20% if correct answers match expected, no bonus otherwise
+        if (submittedCorrectAnswers == session.correctAnswers) {
+            uint256 bonusTokens = (initialTokens * 20) / 100; // 20% bonus
             totalTokens += bonusTokens;
 
             token.mint(msg.sender, bonusTokens);
             emit QuizCompleted(msg.sender, session.quizId, true, totalTokens);
         } else {
-            // No bonus for poor performance
+            // No bonus for incorrect answers
             emit QuizCompleted(msg.sender, session.quizId, false, initialTokens);
         }
     }

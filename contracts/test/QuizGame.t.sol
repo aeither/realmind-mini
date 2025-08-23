@@ -29,8 +29,9 @@ contract QuizGameTest is Test {
         // Start quiz with custom amount and quiz ID
         uint256 playAmount = 0.0015 ether;
         string memory quizId = "web3-basics";
+        uint256 expectedCorrectAnswers = 3;
         vm.prank(player);
-        quizGame.startQuiz{value: playAmount}(quizId, 42);
+        quizGame.startQuiz{value: playAmount}(quizId, 42, expectedCorrectAnswers);
         
         // Player gets initial tokens (100x the amount paid)
         uint256 expectedInitialTokens = playAmount * 100;
@@ -42,21 +43,22 @@ contract QuizGameTest is Test {
         assertEq(session.userAnswer, 42);
         assertEq(session.amountPaid, playAmount);
         assertEq(session.quizId, quizId);
+        assertEq(session.correctAnswers, expectedCorrectAnswers);
         assertTrue(quizGame.hasActiveQuiz(player));
         
-        // Complete quiz correctly
+        // Complete quiz correctly (submit same number as expected)
         vm.prank(player);
-        quizGame.completeQuiz(42);
+        quizGame.completeQuiz(expectedCorrectAnswers);
         
         // Session should be inactive
         session = quizGame.getQuizSession(player);
         assertFalse(session.active);
         assertFalse(quizGame.hasActiveQuiz(player));
         
-        // Player should get bonus tokens (10% to 90% of initial tokens)
+        // Player should get bonus tokens (20% fixed bonus)
         uint256 finalTokens = token.balanceOf(player);
-        assertTrue(finalTokens > expectedInitialTokens); // Should have more tokens than initial
-        assertTrue(finalTokens <= expectedInitialTokens * 190 / 100); // Max 190% of initial (100% + 90% bonus)
+        uint256 expectedFinalTokens = expectedInitialTokens + (expectedInitialTokens * 20 / 100); // 120% of initial
+        assertEq(finalTokens, expectedFinalTokens);
     }
 
     function testCompleteQuizFlow_IncorrectAnswer() public {
@@ -65,16 +67,17 @@ contract QuizGameTest is Test {
         // Start quiz
         uint256 playAmount = 0.001 ether;
         string memory quizId = "defi-fundamentals";
+        uint256 expectedCorrectAnswers = 3;
         vm.prank(player);
-        quizGame.startQuiz{value: playAmount}(quizId, 42);
+        quizGame.startQuiz{value: playAmount}(quizId, 42, expectedCorrectAnswers);
         
         // Player gets initial tokens
         uint256 expectedInitialTokens = playAmount * 100;
         assertEq(token.balanceOf(player), expectedInitialTokens);
         
-        // Complete with wrong answer
+        // Complete with wrong number of correct answers
         vm.prank(player);
-        quizGame.completeQuiz(999);
+        quizGame.completeQuiz(2); // submitted 2 but expected 3
         
         // Player keeps initial tokens but gets no bonus
         assertEq(token.balanceOf(player), expectedInitialTokens);
@@ -87,14 +90,14 @@ contract QuizGameTest is Test {
         vm.deal(player, 1 ether);
         vm.prank(player);
         vm.expectRevert("Must send ETH");
-        quizGame.startQuiz{value: 0}("coredao", 42);
+        quizGame.startQuiz{value: 0}("coredao", 42, 3);
     }
 
     function testStartQuiz_EmptyQuizId() public {
         vm.deal(player, 1 ether);
         vm.prank(player);
         vm.expectRevert("Quiz ID cannot be empty");
-        quizGame.startQuiz{value: 0.001 ether}("", 42);
+        quizGame.startQuiz{value: 0.001 ether}("", 42, 3);
     }
 
     function testStartQuiz_AlreadyActive() public {
@@ -102,18 +105,18 @@ contract QuizGameTest is Test {
         
         // Start first quiz
         vm.prank(player);
-        quizGame.startQuiz{value: 0.001 ether}("web3-basics", 42);
+        quizGame.startQuiz{value: 0.001 ether}("web3-basics", 42, 3);
         
         // Try to start another
         vm.prank(player);
         vm.expectRevert("Active quiz in progress. Complete it first.");
-        quizGame.startQuiz{value: 0.001 ether}("defi-fundamentals", 123);
+        quizGame.startQuiz{value: 0.001 ether}("defi-fundamentals", 123, 2);
     }
 
     function testCompleteQuiz_NoActiveSession() public {
         vm.prank(player);
         vm.expectRevert("No active quiz session");
-        quizGame.completeQuiz(42);
+        quizGame.completeQuiz(3);
     }
 
     function testQuizIdStoredCorrectly() public {
@@ -123,7 +126,7 @@ contract QuizGameTest is Test {
         
         // Start quiz
         vm.prank(player);
-        quizGame.startQuiz{value: 0.001 ether}(quizId, 42);
+        quizGame.startQuiz{value: 0.001 ether}(quizId, 42, 3);
         
         // Verify quiz ID is stored correctly
         QuizGame.QuizSession memory session = quizGame.getQuizSession(player);
@@ -132,7 +135,7 @@ contract QuizGameTest is Test {
         
         // Complete quiz
         vm.prank(player);
-        quizGame.completeQuiz(42);
+        quizGame.completeQuiz(3);
         
         // Quiz ID should still be stored even after completion
         session = quizGame.getQuizSession(player);
@@ -146,11 +149,11 @@ contract QuizGameTest is Test {
         
         // Player 1 starts quiz
         vm.prank(player);
-        quizGame.startQuiz{value: 0.001 ether}("web3-basics", 42);
+        quizGame.startQuiz{value: 0.001 ether}("web3-basics", 42, 3);
         
         // Player 2 starts quiz
         vm.prank(player2);
-        quizGame.startQuiz{value: 0.002 ether}("defi-fundamentals", 123);
+        quizGame.startQuiz{value: 0.002 ether}("defi-fundamentals", 123, 2);
         
         // Verify both sessions
         assertTrue(quizGame.getQuizSession(player).active);
@@ -166,11 +169,11 @@ contract QuizGameTest is Test {
         
         // Player 1 completes correctly
         vm.prank(player);
-        quizGame.completeQuiz(42);
+        quizGame.completeQuiz(3);
         
         // Player 2 completes incorrectly
         vm.prank(player2);
-        quizGame.completeQuiz(999);
+        quizGame.completeQuiz(1);
         
         // Verify outcomes
         assertFalse(quizGame.getQuizSession(player).active);
@@ -178,8 +181,10 @@ contract QuizGameTest is Test {
         assertFalse(quizGame.hasActiveQuiz(player));
         assertFalse(quizGame.hasActiveQuiz(player2));
         
-        // Player 1 should have more tokens than initial (got bonus)
-        assertTrue(token.balanceOf(player) > 0.001 ether * 100);
+        // Player 1 should have more tokens than initial (got 20% bonus)
+        uint256 player1Initial = 0.001 ether * 100;
+        uint256 player1Expected = player1Initial + (player1Initial * 20 / 100);
+        assertEq(token.balanceOf(player), player1Expected);
         
         // Player 2 should have exactly initial tokens (no bonus for wrong answer)
         assertEq(token.balanceOf(player2), 0.002 ether * 100);
@@ -205,7 +210,7 @@ contract QuizGameTest is Test {
         uint256 playAmount = 0.01 ether;
         string memory quizId = "web3-basics";
         vm.prank(player);
-        quizGame.startQuiz{value: playAmount}(quizId, 42);
+        quizGame.startQuiz{value: playAmount}(quizId, 42, 5);
         
         // Should get 1 token (0.01 ETH * 100 = 1 token)
         assertEq(token.balanceOf(player), 1 ether);
@@ -217,16 +222,91 @@ contract QuizGameTest is Test {
         
         // Complete correctly
         vm.prank(player);
-        quizGame.completeQuiz(42);
+        quizGame.completeQuiz(5);
         
-        // Should get bonus tokens (10% to 90% of 1 token)
+        // Should get bonus tokens (20% fixed bonus)
         uint256 finalTokens = token.balanceOf(player);
-        assertTrue(finalTokens > 1 ether); // More than initial 1 token
-        assertTrue(finalTokens <= 1.9 ether); // Max 1.9 tokens (1 + 0.9 bonus)
+        uint256 expectedFinalTokens = 1 ether + (1 ether * 20 / 100); // 1.2 tokens
+        assertEq(finalTokens, expectedFinalTokens);
         
         // Session should be inactive but quiz ID preserved
         session = quizGame.getQuizSession(player);
         assertEq(session.quizId, quizId);
         assertFalse(session.active);
+    }
+
+    function testSetTokenMultiplier() public {
+        // Initially should be 100
+        assertEq(quizGame.tokenMultiplier(), 100);
+        
+        // Owner can set new multiplier
+        quizGame.setTokenMultiplier(200);
+        assertEq(quizGame.tokenMultiplier(), 200);
+        
+        // Test with updated multiplier
+        vm.deal(player, 1 ether);
+        vm.prank(player);
+        quizGame.startQuiz{value: 0.001 ether}("test", 42, 3);
+        
+        // Should get tokens with new multiplier (0.001 * 200 = 0.2 tokens)
+        assertEq(token.balanceOf(player), 0.001 ether * 200);
+    }
+
+    function testSetTokenMultiplierOnlyOwner() public {
+        vm.prank(player);
+        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", player));
+        quizGame.setTokenMultiplier(200);
+    }
+
+    function testSetTokenMultiplierZeroReverts() public {
+        vm.expectRevert("Multiplier must be greater than zero");
+        quizGame.setTokenMultiplier(0);
+    }
+
+    function testStartQuizZeroExpectedAnswersReverts() public {
+        vm.deal(player, 1 ether);
+        vm.prank(player);
+        vm.expectRevert("Expected correct answers must be greater than zero");
+        quizGame.startQuiz{value: 0.001 ether}("test", 42, 0);
+    }
+
+    function testBonusCalculationFixed20Percent() public {
+        vm.deal(player, 1 ether);
+        
+        // Start quiz
+        uint256 playAmount = 0.005 ether;
+        vm.prank(player);
+        quizGame.startQuiz{value: playAmount}("test", 42, 4);
+        
+        uint256 initialTokens = playAmount * 100; // 0.5 tokens
+        assertEq(token.balanceOf(player), initialTokens);
+        
+        // Complete with correct answers
+        vm.prank(player);
+        quizGame.completeQuiz(4);
+        
+        // Should get exactly 20% bonus
+        uint256 expectedBonus = (initialTokens * 20) / 100;
+        uint256 expectedTotal = initialTokens + expectedBonus;
+        assertEq(token.balanceOf(player), expectedTotal);
+    }
+
+    function testNoBonusForWrongAnswerCount() public {
+        vm.deal(player, 1 ether);
+        
+        // Start quiz expecting 5 correct answers
+        uint256 playAmount = 0.005 ether;
+        vm.prank(player);
+        quizGame.startQuiz{value: playAmount}("test", 42, 5);
+        
+        uint256 initialTokens = playAmount * 100;
+        assertEq(token.balanceOf(player), initialTokens);
+        
+        // Complete with 4 correct answers (not matching expected 5)
+        vm.prank(player);
+        quizGame.completeQuiz(4);
+        
+        // Should get no bonus, only initial tokens
+        assertEq(token.balanceOf(player), initialTokens);
     }
 }
