@@ -13,8 +13,8 @@
     "primaryCategory": "education"
   },
   "accountAssociation": {
-    "header": "eyJmaWQiOjIxNjM4MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweENhMDU3RDcxRWY1NDE5RDZDNzhlNTI3MTU2NUFDZEMwMzAxZjA0ODAifQ",
-    "payload": "eyJkb21haW4iOiJyZWFsbWluZC52ZXJjZWwuYXBwIn0",
-    "signature": "Uy+H2EVKBlVeWEk5x9AYnZdeAtzlpMfUSTvUDheCml4qxh2c9WTEPNQqgJUoYfBBcwdoKGi9N73mWH5gZn+xPRs="
+    "header": "eyJmaWQiOjIxNjM4MywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDIxNEQxNzJDMERjNjBmQTUxNERmOTU0QTgyOGJjQzU1MkJlMzA4MTUifQ",
+    "payload": "eyJkb21haW4iOiJyZWFsbWluZC1taW5pLnZlcmNlbC5hcHAifQ",
+    "signature": "MHg0ZmQzMjg3M2UxNmViNDM4ODJlNmI0YTczMjgzMjQwYzY5ODVjYmFmNGMxZTg5N2M0NTQ1YWUzZTQxOTgwYTQxNWUwMjJkMTZmNjUyNDEyYjFmM2Q1NDcwNmU5NmZiOTM1ZDllZTAwNGE2YmIxYTI2MzBiOGVhMWIzY2RkY2FiODFj"
   }
 }
