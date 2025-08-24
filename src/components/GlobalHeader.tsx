@@ -138,149 +138,20 @@ function GlobalHeader({
         
         {/* RainbowKit Connect Button */}
         <motion.div whileHover={{ scale: 1.02 }}>
-          <ConnectButton.Custom>
-            {({
-              account,
-              chain,
-              openAccountModal,
-              openChainModal,
-              openConnectModal,
-              mounted,
-            }) => {
-              const ready = mounted;
-              const connected = ready && account && chain;
-
-              return (
-                <div
-                  {...(!ready && {
-                    'aria-hidden': true,
-                    'style': {
-                      opacity: 0,
-                      pointerEvents: 'none',
-                      userSelect: 'none',
-                    },
-                  })}
-                >
-                  {(() => {
-                    if (!connected) {
-                      return (
-                        <button
-                          onClick={openConnectModal}
-                          type="button"
-                          style={{
-                            background: "hsl(var(--primary))",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "8px",
-                            padding: "0.5rem 1rem",
-                            fontSize: "0.9rem",
-                            fontWeight: "600",
-                            cursor: "pointer",
-                            minWidth: "auto"
-                          }}
-                        >
-                          <span className="hidden sm:inline">Connect</span>
-                          <span className="sm:hidden">C</span>
-                        </button>
-                      );
-                    }
-
-                    if (chain.unsupported) {
-                      return (
-                        <button
-                          onClick={openChainModal}
-                          type="button"
-                          style={{
-                            background: "#ef4444",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "8px",
-                            padding: "0.5rem 1rem",
-                            fontSize: "0.9rem",
-                            fontWeight: "600",
-                            cursor: "pointer"
-                          }}
-                        >
-                          <span className="hidden sm:inline">Wrong network</span>
-                          <span className="sm:hidden">!</span>
-                        </button>
-                      );
-                    }
-
-                    return (
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <button
-                          onClick={openChainModal}
-                          type="button"
-                          style={{
-                            background: "hsl(var(--quiz-selected))",
-                            color: "hsl(var(--primary))",
-                            border: "1px solid hsl(var(--primary))",
-                            borderRadius: "8px",
-                            padding: "0.5rem",
-                            fontSize: "0.8rem",
-                            fontWeight: "600",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.25rem"
-                          }}
-                        >
-                          {chain.hasIcon && (
-                            <div
-                              style={{
-                                background: chain.iconBackground,
-                                width: "12px",
-                                height: "12px",
-                                borderRadius: "50%",
-                                overflow: "hidden",
-                                marginRight: "4px",
-                              }}
-                            >
-                              {chain.iconUrl && (
-                                <img
-                                  alt={chain.name ?? 'Chain icon'}
-                                  src={chain.iconUrl}
-                                  style={{ width: "100%", height: "100%" }}
-                                />
-                              )}
-                            </div>
-                          )}
-                          <span className="hidden sm:inline">{chain.name}</span>
-                          <span className="sm:hidden">{chain.name?.charAt(0)}</span>
-                        </button>
-
-                        <button
-                          onClick={openAccountModal}
-                          type="button"
-                          style={{
-                            background: "hsl(var(--quiz-selected))",
-                            color: "hsl(var(--primary))",
-                            border: "1px solid hsl(var(--primary))",
-                            borderRadius: "8px",
-                            padding: "0.5rem 1rem",
-                            fontSize: "0.9rem",
-                            fontWeight: "600",
-                            cursor: "pointer"
-                          }}
-                        >
-                          <span className="hidden sm:inline">
-                            {account.displayName}
-                            {account.displayBalance
-                              ? ` (${account.displayBalance})`
-                              : ''}
-                          </span>
-                          <span className="sm:hidden">
-                            {account.displayName?.charAt(0) || account.address?.slice(2, 4)}
-                          </span>
-                        </button>
-                      </div>
-                    );
-                  })()}
-                </div>
-              );
+          <ConnectButton
+            accountStatus={{
+              smallScreen: 'avatar',
+              largeScreen: 'full',
             }}
-          </ConnectButton.Custom>
+            chainStatus={{
+              smallScreen: 'icon',
+              largeScreen: 'full',
+            }}
+            showBalance={{
+              smallScreen: false,
+              largeScreen: true,
+            }}
+          />
         </motion.div>
       </motion.div>
     </motion.header>

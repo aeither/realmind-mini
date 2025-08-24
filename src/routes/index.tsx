@@ -1,7 +1,6 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
 import { sdk } from '@farcaster/miniapp-sdk'
-import Header from '../components/Header'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 import AIQuizGenerator from '../components/AIQuizGenerator'
 
 interface Quiz {

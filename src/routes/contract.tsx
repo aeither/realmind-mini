@@ -245,13 +245,6 @@ function ContractDebugPage() {
         alignItems: "center",
         justifyContent: "center"
       }}>
-        <Header 
-          title="🔧 Contract Debug"
-          subtitle="Debug and test smart contract functions"
-          showBackButton={true}
-          backTo="/"
-          backText="← Back to Home"
-        />
         
         <div style={{
           background: "#ffffff",
