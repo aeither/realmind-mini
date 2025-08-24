@@ -500,7 +500,7 @@ function QuizGame() {
               cursor: "pointer"
             }}
           >
-            Switch to Hyperion Testnet
+            Switch to {baseMainnet.name}
           </button>
         </div>
       </motion.div>

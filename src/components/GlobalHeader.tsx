@@ -56,7 +56,7 @@ function GlobalHeader({
         background: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(10px)",
         borderBottom: "1px solid hsl(var(--border))",
-        padding: "1rem clamp(1rem, 4vw, 2rem)",
+        padding: "0.75rem clamp(0.5rem, 3vw, 2rem)",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -64,7 +64,7 @@ function GlobalHeader({
       }}
     >
       {/* Left side - Logo and Back button */}
-      <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "clamp(0.5rem, 4vw, 2rem)" }}>
         {showBackButton && (
           <Link
             to={backTo}
@@ -112,13 +112,13 @@ function GlobalHeader({
       <nav />
 
       {/* Right side - Token Balance and Connect Button */}
-      <motion.div style={{ display: "flex", alignItems: "center", gap: "1rem" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+      <motion.div style={{ display: "flex", alignItems: "center", gap: "clamp(0.5rem, 2vw, 1rem)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
         {/* Token Balance Display */}
         {address && tokenBalance !== undefined && tokenBalance !== 0n && tokenSymbol && (
           <div style={{
             background: "hsl(var(--quiz-selected))",
             borderRadius: "8px",
-            padding: "0.5rem 1rem",
+            padding: "clamp(0.25rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 1rem)",
             border: "1px solid hsl(var(--primary))"
           }}>
             <div style={{

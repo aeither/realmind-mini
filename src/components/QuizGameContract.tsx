@@ -143,7 +143,7 @@ function QuizGameContract() {
               transition: "all 0.3s ease"
             }}
           >
-            Switch to Hyperion Testnet
+            Switch to {baseMainnet.name}
           </button>
         </div>
         <button 
