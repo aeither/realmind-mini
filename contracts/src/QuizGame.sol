@@ -3,9 +3,10 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract Token1 is ERC20, Ownable {
-    constructor() ERC20("XP Points", "XP3") Ownable(msg.sender) {}
+    constructor(string memory name, string memory symbol) ERC20(name, symbol) Ownable(msg.sender) {}
 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
@@ -25,7 +26,8 @@ contract Token1 is ERC20, Ownable {
     }
 }
 
-contract QuizGame is Ownable {
+
+contract QuizGame is Ownable, ReentrancyGuard {
     Token1 public token;
     address public vaultAddress;
     uint256 public tokenMultiplier = 100; // Default 100x ETH paid
@@ -35,24 +37,48 @@ contract QuizGame is Ownable {
 
     struct QuizSession {
         bool active;
+        uint128 amountPaid; 
+        uint128 timestamp; 
         uint256 userAnswer;
-        uint256 amountPaid;
-        uint256 timestamp;
-        string quizId;
         uint256 correctAnswers; // Track correct answers for bonus calculation
+        string quizId;
     }
 
-    event QuizStarted(address indexed user, string quizId, uint256 userAnswer);
-    event QuizCompleted(address indexed user, string quizId, bool success, uint256 tokensMinted);
+    event QuizStarted(
+        address indexed user,
+        string quizId,
+        uint256 userAnswer,
+        uint128 amountPaid,
+        uint256 initialTokensMinted
+    );
+
+    event QuizCompleted(
+        address indexed user,
+        string quizId,
+        bool success,
+        uint256 tokensMinted,
+        uint256 submittedCorrectAnswers,
+        uint256 expectedCorrectAnswers
+    );
+
     event VaultAddressUpdated(address indexed oldVault, address indexed newVault);
 
+    event TokenAddressUpdated(address indexed oldToken, address indexed newToken);
+
+    event TokenMultiplierUpdated(uint256 oldMultiplier, uint256 newMultiplier);
+
     constructor(address tokenAddress) Ownable(msg.sender) {
+        require(tokenAddress != address(0), "Token address cannot be zero");
         token = Token1(tokenAddress);
         vaultAddress = msg.sender; // Initialize vault to deployer
     }
 
     function setToken(address tokenAddress) external onlyOwner {
+        require(tokenAddress != address(0), "Token address cannot be zero");
+        // Optional: Could add code to verify this is a Token1 by checking a function or interface
+        address oldToken = address(token);
         token = Token1(tokenAddress);
+        emit TokenAddressUpdated(oldToken, tokenAddress);
     }
 
     function setVaultAddress(address newVaultAddress) external onlyOwner {
@@ -64,52 +90,82 @@ contract QuizGame is Ownable {
 
     function setTokenMultiplier(uint256 newMultiplier) external onlyOwner {
         require(newMultiplier > 0, "Multiplier must be greater than zero");
+        uint256 oldMultiplier = tokenMultiplier;
         tokenMultiplier = newMultiplier;
+        emit TokenMultiplierUpdated(oldMultiplier, newMultiplier);
     }
 
+    // On startQuiz, automatically complete any active quiz session with no bonus (fail)
+    // Adds expiration: quiz session is auto-finished when new start begins, so no indefinite lock.
     function startQuiz(string memory quizId, uint256 userAnswer, uint256 expectedCorrectAnswers) external payable {
         require(msg.value > 0, "Must send ETH");
         require(bytes(quizId).length > 0, "Quiz ID cannot be empty");
         require(expectedCorrectAnswers > 0, "Expected correct answers must be greater than zero");
-
+        
         QuizSession storage session = userSessions[msg.sender];
-        require(!session.active, "Active quiz in progress. Complete it first.");
 
-        // Start new session
+        // Automatically complete previous quiz session if active: fail with no bonus, mint no additional tokens
+        if (session.active) {
+            session.active = false;
+            // Emit event for previous session fail completion
+            uint256 initialTokensPrev = uint256(session.amountPaid) * tokenMultiplier;
+            emit QuizCompleted(
+                msg.sender, 
+                session.quizId, 
+                false, 
+                initialTokensPrev, 
+                0, 
+                session.correctAnswers
+            );
+        }
+
+        // start new session
         session.active = true;
         session.userAnswer = userAnswer;
-        session.amountPaid = msg.value;
-        session.timestamp = block.timestamp;
+        // Cast down to uint128 safe because msg.value fits in 128 bits (~3.4e38 wei)
+        session.amountPaid = uint128(msg.value);
+        session.timestamp = uint128(block.timestamp);
         session.quizId = quizId;
         session.correctAnswers = expectedCorrectAnswers;
 
-        // Mint initial tokens: configurable multiplier x ETH paid
         uint256 initialTokens = msg.value * tokenMultiplier;
         token.mint(msg.sender, initialTokens);
 
-        emit QuizStarted(msg.sender, quizId, userAnswer);
+        emit QuizStarted(msg.sender, quizId, userAnswer, uint128(msg.value), initialTokens);
     }
 
     function completeQuiz(uint256 submittedCorrectAnswers) external {
         QuizSession storage session = userSessions[msg.sender];
         require(session.active, "No active quiz session");
 
-        // Mark as inactive first
         session.active = false;
 
-        uint256 initialTokens = session.amountPaid * tokenMultiplier;
+        uint256 initialTokens = uint256(session.amountPaid) * tokenMultiplier;
         uint256 totalTokens = initialTokens;
 
-        // Fixed bonus: 20% if correct answers match expected, no bonus otherwise
         if (submittedCorrectAnswers == session.correctAnswers) {
-            uint256 bonusTokens = (initialTokens * 20) / 100; // 20% bonus
+            // 20% bonus if answers match
+            uint256 bonusTokens = (initialTokens * 20) / 100;
             totalTokens += bonusTokens;
-
             token.mint(msg.sender, bonusTokens);
-            emit QuizCompleted(msg.sender, session.quizId, true, totalTokens);
+            emit QuizCompleted(
+                msg.sender,
+                session.quizId,
+                true,
+                totalTokens,
+                submittedCorrectAnswers,
+                session.correctAnswers
+            );
         } else {
-            // No bonus for incorrect answers
-            emit QuizCompleted(msg.sender, session.quizId, false, initialTokens);
+            // No bonus for mismatch
+            emit QuizCompleted(
+                msg.sender,
+                session.quizId,
+                false,
+                initialTokens,
+                submittedCorrectAnswers,
+                session.correctAnswers
+            );
         }
     }
 
@@ -128,12 +184,14 @@ contract QuizGame is Ownable {
         token.mint(to, amount);
     }
 
-    // Withdraw ETH collected
-    function withdraw() external onlyOwner {
-        (bool sent, ) = vaultAddress.call{value: address(this).balance}("");
+    // Withdraw ETH collected with reentrancy guard
+    function withdraw() external onlyOwner nonReentrant {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No ETH to withdraw");
+        (bool sent, ) = vaultAddress.call{value: balance}("");
         require(sent, "Withdrawal failed");
     }
 
-    // Allow receiving ETH
+    // Allow receiving ETH with empty receive fallback
     receive() external payable {}
 }

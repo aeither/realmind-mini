@@ -14,9 +14,15 @@ contract QuizGameScript is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
+        // Get token name and symbol from environment variables with defaults
+        string memory tokenName = vm.envOr("TOKEN_NAME", string("XP Points"));
+        string memory tokenSymbol = vm.envOr("TOKEN_SYMBOL", string("XP3"));
+
         // Deploy Token1
-        token = new Token1();
+        token = new Token1(tokenName, tokenSymbol);
         console.log("Token1 deployed at:", address(token));
+        console.log("Token name:", tokenName);
+        console.log("Token symbol:", tokenSymbol);
 
         // Deploy QuizGame
         quizGame = new QuizGame(address(token));

@@ -14,7 +14,7 @@ contract QuizGameTest is Test {
     function setUp() public {
         owner = address(this);
         // Deploy Token1 with custom name/symbol
-        token = new Token1();
+        token = new Token1("XP Points", "XP3");
         
         // Deploy QuizGame
         quizGame = new QuizGame(address(token));
@@ -107,10 +107,30 @@ contract QuizGameTest is Test {
         vm.prank(player);
         quizGame.startQuiz{value: 0.001 ether}("web3-basics", 42, 3);
         
-        // Try to start another
+        uint256 tokensAfterFirst = token.balanceOf(player);
+        assertEq(tokensAfterFirst, 0.001 ether * 100); // Initial tokens from first quiz
+        
+        // Verify first session is active
+        QuizGame.QuizSession memory session = quizGame.getQuizSession(player);
+        assertTrue(session.active);
+        assertEq(session.quizId, "web3-basics");
+        
+        // Start another quiz - should auto-complete previous one and start new one
         vm.prank(player);
-        vm.expectRevert("Active quiz in progress. Complete it first.");
-        quizGame.startQuiz{value: 0.001 ether}("defi-fundamentals", 123, 2);
+        quizGame.startQuiz{value: 0.002 ether}("defi-fundamentals", 123, 2);
+        
+        // Verify new session is active
+        session = quizGame.getQuizSession(player);
+        assertTrue(session.active);
+        assertEq(session.quizId, "defi-fundamentals");
+        assertEq(session.userAnswer, 123);
+        assertEq(session.correctAnswers, 2);
+        assertEq(session.amountPaid, 0.002 ether);
+        
+        // Verify total tokens (first quiz tokens + second quiz initial tokens)
+        uint256 finalTokens = token.balanceOf(player);
+        uint256 expectedTokens = (0.001 ether * 100) + (0.002 ether * 100);
+        assertEq(finalTokens, expectedTokens);
     }
 
     function testCompleteQuiz_NoActiveSession() public {
