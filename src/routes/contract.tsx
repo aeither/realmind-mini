@@ -24,6 +24,7 @@ function ContractDebugPage() {
   
   const [selectedAmount, setSelectedAmount] = useState<number>(0.001);
   const [userAnswer, setUserAnswer] = useState<number>(42);
+  const [expectedCorrectAnswers, setExpectedCorrectAnswers] = useState<number>(3);
   const [submittedAnswer, setSubmittedAnswer] = useState<number>(42);
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>('');
 
@@ -139,7 +140,7 @@ function ContractDebugPage() {
       abi: quizGameABI,
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       functionName: 'startQuiz',
-      args: ["demo-quiz", BigInt(userAnswer)],
+      args: ["demo-quiz", BigInt(userAnswer), BigInt(expectedCorrectAnswers)],
       value: parseEther(selectedAmount.toString()),
       chainId: chain?.id,
     });
@@ -217,17 +218,13 @@ function ContractDebugPage() {
   // Calculate token rewards
   const calculateTokenRewards = () => {
     const initialTokens = selectedAmount * 100; // 100x multiplier
-    const minBonus = initialTokens * 0.1; // 10% bonus
-    const maxBonus = initialTokens * 0.9; // 90% bonus
-    const minTotal = initialTokens + minBonus;
-    const maxTotal = initialTokens + maxBonus;
+    const bonusTokens = initialTokens * 0.2; // 20% fixed bonus
+    const totalWithBonus = initialTokens + bonusTokens;
     
     return {
       initialTokens,
-      minBonus,
-      maxBonus,
-      minTotal,
-      maxTotal
+      bonusTokens,
+      totalWithBonus
     };
   };
 
@@ -556,10 +553,10 @@ function ContractDebugPage() {
                 <strong>Initial Tokens:</strong> {rewards.initialTokens.toFixed(2)} TK1 (100x entry)
               </p>
               <p style={{ margin: "0.25rem 0" }}>
-                <strong>Bonus Range:</strong> {rewards.minBonus.toFixed(2)} - {rewards.maxBonus.toFixed(2)} TK1 (10-90%)
+                <strong>Bonus (if correct):</strong> {rewards.bonusTokens.toFixed(2)} TK1 (20% fixed)
               </p>
               <p style={{ margin: "0.25rem 0" }}>
-                <strong>Total Range:</strong> {rewards.minTotal.toFixed(2)} - {rewards.maxTotal.toFixed(2)} TK1
+                <strong>Total (if correct):</strong> {rewards.totalWithBonus.toFixed(2)} TK1
               </p>
             </div>
           </div>
@@ -576,8 +573,9 @@ function ContractDebugPage() {
             <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "0.9rem", color: "#155e75" }}>
               <li>Pay ETH to start quiz</li>
               <li>Get 100x tokens immediately</li>
-              <li>Answer correctly for 10-90% bonus</li>
-              <li>Keep tokens even if wrong!</li>
+              <li>Answer correctly for 20% bonus</li>
+              <li>Keep initial tokens even if wrong!</li>
+              <li>Starting new quiz auto-completes previous one</li>
             </ul>
           </div>
         </motion.div>
@@ -623,9 +621,27 @@ function ContractDebugPage() {
               onChange={(e) => setUserAnswer(parseInt(e.target.value) || 0)}
               style={{
                 width: "100%",
-                padding: "0.5rem",
-                borderRadius: "6px",
-                border: "1px solid #d1d5db",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "2px solid hsl(var(--border))",
+                fontSize: "1rem"
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
+              Expected Correct Answers:
+            </label>
+            <input
+              type="number"
+              value={expectedCorrectAnswers}
+              onChange={(e) => setExpectedCorrectAnswers(parseInt(e.target.value) || 0)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "2px solid hsl(var(--border))",
                 fontSize: "1rem"
               }}
             />
@@ -811,7 +827,13 @@ function ContractDebugPage() {
                 <strong>Active:</strong> {(userSession as any).active ? "✅ Yes" : "❌ No"}
               </div>
               <div style={{ marginBottom: "1rem" }}>
+                <strong>Quiz ID:</strong> {(userSession as any).quizId || "N/A"}
+              </div>
+              <div style={{ marginBottom: "1rem" }}>
                 <strong>User Answer:</strong> {(userSession as any).userAnswer?.toString() || "N/A"}
+              </div>
+              <div style={{ marginBottom: "1rem" }}>
+                <strong>Expected Correct Answers:</strong> {(userSession as any).correctAnswers?.toString() || "N/A"}
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <strong>Amount Paid:</strong> {(userSession as any).amountPaid ? formatEther((userSession as any).amountPaid) : "0"} ETH
