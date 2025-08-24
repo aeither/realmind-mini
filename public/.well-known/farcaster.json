@@ -4,12 +4,12 @@
     "version": "1",
     "iconUrl": "https://realmind-mini.vercel.app/icon.png",
     "homeUrl": "https://realmind-mini.vercel.app",
-    "imageUrl": "https://realmind-mini.vercel.app/quiz-preview.jpeg",
-    "splashImageUrl": "https://realmind-mini.vercel.app/splash.jpeg",
-    "splashBackgroundColor": "#6200EA",
+    "imageUrl": "https://realmind-mini.vercel.app/icon.png",
+    "splashImageUrl": "https://realmind-mini.vercel.app/icon.png",
+    "splashBackgroundColor": "#FFC117",
     "webhookUrl": "https://realmind-mini.vercel.app/api/webhook",
     "subtitle": "Interactive learning",
-    "description": "Realmind is a decentralized learning platform.",
+    "description": "Dailywiser is a decentralized learning platform.",
     "primaryCategory": "education"
   },
   "accountAssociation": {

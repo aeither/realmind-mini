@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-// import { useMiniKit } from '@coinbase/onchainkit/minikit'
+import { sdk } from '@farcaster/miniapp-sdk'
 import Header from '../components/Header'
 import AIQuizGenerator from '../components/AIQuizGenerator'
 
@@ -46,20 +46,40 @@ const AVAILABLE_QUIZZES: Quiz[] = [
 
 function HomePage() {
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [isAppReady, setIsAppReady] = useState(false);
   const navigate = useNavigate();
-  // const { setFrameReady, isFrameReady } = useMiniKit();
 
-  // useEffect(() => {
-  //   if (!isFrameReady) {
-  //     setFrameReady();
-  //   }
-  // }, [isFrameReady, setFrameReady]);
+  useEffect(() => {
+    const initializeFarcasterSDK = async () => {
+      try {
+        // Initialize any app setup here if needed
+        // Only call ready() when your UI is fully loaded
+        await sdk.actions.ready();
+        setIsAppReady(true);
+      } catch (error) {
+        console.error('Error initializing Farcaster SDK:', error);
+        // Fallback: set app ready even if SDK fails
+        setIsAppReady(true);
+      }
+    };
+
+    if (sdk && !isSDKLoaded) {
+      setIsSDKLoaded(true);
+      initializeFarcasterSDK();
+    }
+  }, [isSDKLoaded]);
 
   const handleQuizSelect = (quizId: string) => {
     setSelectedQuiz(quizId);
     // Navigate to quiz using TanStack Router
     navigate({ to: '/quiz-game', search: { quiz: quizId } });
   };
+
+  // Show nothing while loading - Farcaster shows splash screen
+  if (!isAppReady) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
