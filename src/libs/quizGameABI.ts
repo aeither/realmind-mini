@@ -1,344 +1,479 @@
 const quizGameABI = [
     {
-        "type": "constructor",
         "inputs": [
             {
+                "internalType": "address",
                 "name": "tokenAddress",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "type": "error",
+        "name": "OwnableInvalidOwner"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount"
+    },
+    {
+        "inputs": [],
+        "type": "error",
+        "name": "ReentrancyGuardReentrantCall"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "previousOwner",
                 "type": "address",
-                "internalType": "address"
+                "indexed": true
+            },
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address",
+                "indexed": true
             }
         ],
-        "stateMutability": "nonpayable"
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
     },
     {
-        "type": "receive",
-        "stateMutability": "payable"
-    },
-    {
-        "type": "function",
-        "name": "completeQuiz",
         "inputs": [
             {
-                "name": "correctAnswerCount",
-                "type": "uint256",
-                "internalType": "uint256"
-            }
-        ],
-        "outputs": [],
-        "stateMutability": "nonpayable"
-    },
-    {
-        "type": "function",
-        "name": "getQuizSession",
-        "inputs": [
-            {
+                "internalType": "address",
                 "name": "user",
                 "type": "address",
-                "internalType": "address"
+                "indexed": true
+            },
+            {
+                "internalType": "string",
+                "name": "quizId",
+                "type": "string",
+                "indexed": false
+            },
+            {
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool",
+                "indexed": false
+            },
+            {
+                "internalType": "uint256",
+                "name": "tokensMinted",
+                "type": "uint256",
+                "indexed": false
+            },
+            {
+                "internalType": "uint256",
+                "name": "submittedCorrectAnswers",
+                "type": "uint256",
+                "indexed": false
+            },
+            {
+                "internalType": "uint256",
+                "name": "expectedCorrectAnswers",
+                "type": "uint256",
+                "indexed": false
             }
         ],
+        "type": "event",
+        "name": "QuizCompleted",
+        "anonymous": false
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address",
+                "indexed": true
+            },
+            {
+                "internalType": "string",
+                "name": "quizId",
+                "type": "string",
+                "indexed": false
+            },
+            {
+                "internalType": "uint256",
+                "name": "userAnswer",
+                "type": "uint256",
+                "indexed": false
+            },
+            {
+                "internalType": "uint128",
+                "name": "amountPaid",
+                "type": "uint128",
+                "indexed": false
+            },
+            {
+                "internalType": "uint256",
+                "name": "initialTokensMinted",
+                "type": "uint256",
+                "indexed": false
+            }
+        ],
+        "type": "event",
+        "name": "QuizStarted",
+        "anonymous": false
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "oldToken",
+                "type": "address",
+                "indexed": true
+            },
+            {
+                "internalType": "address",
+                "name": "newToken",
+                "type": "address",
+                "indexed": true
+            }
+        ],
+        "type": "event",
+        "name": "TokenAddressUpdated",
+        "anonymous": false
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "oldMultiplier",
+                "type": "uint256",
+                "indexed": false
+            },
+            {
+                "internalType": "uint256",
+                "name": "newMultiplier",
+                "type": "uint256",
+                "indexed": false
+            }
+        ],
+        "type": "event",
+        "name": "TokenMultiplierUpdated",
+        "anonymous": false
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "oldVault",
+                "type": "address",
+                "indexed": true
+            },
+            {
+                "internalType": "address",
+                "name": "newVault",
+                "type": "address",
+                "indexed": true
+            }
+        ],
+        "type": "event",
+        "name": "VaultAddressUpdated",
+        "anonymous": false
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "submittedCorrectAnswers",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "completeQuiz"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getQuizSession",
         "outputs": [
             {
+                "internalType": "struct QuizGame.QuizSession",
                 "name": "",
                 "type": "tuple",
-                "internalType": "struct QuizGame.QuizSession",
                 "components": [
                     {
+                        "internalType": "bool",
                         "name": "active",
-                        "type": "bool",
-                        "internalType": "bool"
+                        "type": "bool"
                     },
                     {
-                        "name": "userAnswer",
-                        "type": "uint256",
-                        "internalType": "uint256"
-                    },
-                    {
+                        "internalType": "uint128",
                         "name": "amountPaid",
-                        "type": "uint256",
-                        "internalType": "uint256"
+                        "type": "uint128"
                     },
                     {
+                        "internalType": "uint128",
                         "name": "timestamp",
-                        "type": "uint256",
-                        "internalType": "uint256"
+                        "type": "uint128"
                     },
                     {
-                        "name": "quizId",
-                        "type": "string",
-                        "internalType": "string"
+                        "internalType": "uint256",
+                        "name": "userAnswer",
+                        "type": "uint256"
                     },
                     {
+                        "internalType": "uint256",
                         "name": "correctAnswers",
-                        "type": "uint256",
-                        "internalType": "uint256"
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "quizId",
+                        "type": "string"
                     }
                 ]
             }
-        ],
-        "stateMutability": "view"
+        ]
     },
     {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function",
         "name": "hasActiveQuiz",
-        "inputs": [
-            {
-                "name": "user",
-                "type": "address",
-                "internalType": "address"
-            }
-        ],
         "outputs": [
             {
+                "internalType": "bool",
                 "name": "",
-                "type": "bool",
-                "internalType": "bool"
+                "type": "bool"
             }
-        ],
-        "stateMutability": "view"
+        ]
     },
     {
-        "type": "function",
-        "name": "mintToken",
         "inputs": [
             {
+                "internalType": "address",
                 "name": "to",
-                "type": "address",
-                "internalType": "address"
+                "type": "address"
             },
             {
+                "internalType": "uint256",
                 "name": "amount",
-                "type": "uint256",
-                "internalType": "uint256"
+                "type": "uint256"
             }
         ],
-        "outputs": [],
-        "stateMutability": "nonpayable"
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "mintToken"
     },
     {
+        "inputs": [],
+        "stateMutability": "view",
         "type": "function",
         "name": "owner",
-        "inputs": [],
         "outputs": [
             {
+                "internalType": "address",
                 "name": "",
-                "type": "address",
-                "internalType": "address"
+                "type": "address"
             }
-        ],
-        "stateMutability": "view"
+        ]
     },
     {
-        "type": "function",
-        "name": "renounceOwnership",
         "inputs": [],
-        "outputs": [],
-        "stateMutability": "nonpayable"
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "renounceOwnership"
     },
     {
-        "type": "function",
-        "name": "setToken",
         "inputs": [
             {
+                "internalType": "address",
                 "name": "tokenAddress",
-                "type": "address",
-                "internalType": "address"
+                "type": "address"
             }
         ],
-        "outputs": [],
-        "stateMutability": "nonpayable"
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setToken"
     },
     {
-        "type": "function",
-        "name": "startQuiz",
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "newMultiplier",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setTokenMultiplier"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newVaultAddress",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setVaultAddress"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
                 "name": "quizId",
-                "type": "string",
-                "internalType": "string"
+                "type": "string"
             },
             {
+                "internalType": "uint256",
                 "name": "userAnswer",
-                "type": "uint256",
-                "internalType": "uint256"
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expectedCorrectAnswers",
+                "type": "uint256"
             }
         ],
-        "outputs": [],
-        "stateMutability": "payable"
+        "stateMutability": "payable",
+        "type": "function",
+        "name": "startQuiz"
     },
     {
+        "inputs": [],
+        "stateMutability": "view",
         "type": "function",
         "name": "token",
-        "inputs": [],
         "outputs": [
             {
+                "internalType": "contract Token1",
                 "name": "",
-                "type": "address",
-                "internalType": "contract Token1"
+                "type": "address"
             }
-        ],
-        "stateMutability": "view"
+        ]
     },
     {
+        "inputs": [],
+        "stateMutability": "view",
         "type": "function",
-        "name": "transferOwnership",
+        "name": "tokenMultiplier",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ]
+    },
+    {
         "inputs": [
             {
+                "internalType": "address",
                 "name": "newOwner",
-                "type": "address",
-                "internalType": "address"
+                "type": "address"
             }
         ],
-        "outputs": [],
-        "stateMutability": "nonpayable"
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferOwnership"
     },
     {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function",
         "name": "userSessions",
-        "inputs": [
-            {
-                "name": "",
-                "type": "address",
-                "internalType": "address"
-            }
-        ],
         "outputs": [
             {
+                "internalType": "bool",
                 "name": "active",
-                "type": "bool",
-                "internalType": "bool"
+                "type": "bool"
             },
             {
-                "name": "userAnswer",
-                "type": "uint256",
-                "internalType": "uint256"
-            },
-            {
+                "internalType": "uint128",
                 "name": "amountPaid",
-                "type": "uint256",
-                "internalType": "uint256"
+                "type": "uint128"
             },
             {
+                "internalType": "uint128",
                 "name": "timestamp",
-                "type": "uint256",
-                "internalType": "uint256"
+                "type": "uint128"
             },
             {
-                "name": "quizId",
-                "type": "string",
-                "internalType": "string"
-            },
-            {
-                "name": "correctAnswers",
-                "type": "uint256",
-                "internalType": "uint256"
-            }
-        ],
-        "stateMutability": "view"
-    },
-    {
-        "type": "function",
-        "name": "withdraw",
-        "inputs": [],
-        "outputs": [],
-        "stateMutability": "nonpayable"
-    },
-    {
-        "type": "event",
-        "name": "OwnershipTransferred",
-        "inputs": [
-            {
-                "name": "previousOwner",
-                "type": "address",
-                "indexed": true,
-                "internalType": "address"
-            },
-            {
-                "name": "newOwner",
-                "type": "address",
-                "indexed": true,
-                "internalType": "address"
-            }
-        ],
-        "anonymous": false
-    },
-    {
-        "type": "event",
-        "name": "QuizCompleted",
-        "inputs": [
-            {
-                "name": "user",
-                "type": "address",
-                "indexed": true,
-                "internalType": "address"
-            },
-            {
-                "name": "quizId",
-                "type": "string",
-                "indexed": false,
-                "internalType": "string"
-            },
-            {
-                "name": "success",
-                "type": "bool",
-                "indexed": false,
-                "internalType": "bool"
-            },
-            {
-                "name": "tokensMinted",
-                "type": "uint256",
-                "indexed": false,
-                "internalType": "uint256"
-            }
-        ],
-        "anonymous": false
-    },
-    {
-        "type": "event",
-        "name": "QuizStarted",
-        "inputs": [
-            {
-                "name": "user",
-                "type": "address",
-                "indexed": true,
-                "internalType": "address"
-            },
-            {
-                "name": "quizId",
-                "type": "string",
-                "indexed": false,
-                "internalType": "string"
-            },
-            {
+                "internalType": "uint256",
                 "name": "userAnswer",
-                "type": "uint256",
-                "indexed": "false",
-                "internalType": "uint256"
-            }
-        ],
-        "anonymous": false
-    },
-    {
-        "type": "error",
-        "name": "OwnableInvalidOwner",
-        "inputs": [
+                "type": "uint256"
+            },
             {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
+                "internalType": "uint256",
+                "name": "correctAnswers",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "quizId",
+                "type": "string"
             }
         ]
     },
     {
-        "type": "error",
-        "name": "OwnableUnauthorizedAccount",
-        "inputs": [
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "vaultAddress",
+        "outputs": [
             {
-                "name": "account",
-                "type": "address",
-                "internalType": "address"
+                "internalType": "address",
+                "name": "",
+                "type": "address"
             }
         ]
+    },
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "withdraw"
+    },
+    {
+        "inputs": [],
+        "stateMutability": "payable",
+        "type": "receive"
     }
 ] as const
 
