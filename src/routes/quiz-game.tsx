@@ -370,16 +370,18 @@ function QuizGame() {
     if (!address || !quizConfig) return
     
     const actualAmount = parseEther(FIXED_ENTRY_AMOUNT)
-    const userAnswerValue = BigInt(Math.floor(Math.random() * 100) + 1)
     
     // For AI-generated quizzes, use a generic quiz ID for the contract
     const contractQuizId = quizId === 'ai-custom' ? 'ai-generated' : quizConfig.id
+    
+    // Expected correct answers is the total number of questions
+    const expectedCorrectAnswers = BigInt(quizConfig.questions.length)
     
     startQuiz({
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       abi: quizGameABI,
       functionName: 'startQuiz',
-      args: [contractQuizId, userAnswerValue],
+      args: [contractQuizId, expectedCorrectAnswers],
       value: actualAmount,
     })
   }

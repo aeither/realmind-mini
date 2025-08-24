@@ -39,7 +39,6 @@ contract QuizGame is Ownable, ReentrancyGuard {
         bool active;
         uint128 amountPaid; 
         uint128 timestamp; 
-        uint256 userAnswer;
         uint256 correctAnswers; // Track correct answers for bonus calculation
         string quizId;
     }
@@ -47,7 +46,6 @@ contract QuizGame is Ownable, ReentrancyGuard {
     event QuizStarted(
         address indexed user,
         string quizId,
-        uint256 userAnswer,
         uint128 amountPaid,
         uint256 initialTokensMinted
     );
@@ -97,7 +95,7 @@ contract QuizGame is Ownable, ReentrancyGuard {
 
     // On startQuiz, automatically complete any active quiz session with no bonus (fail)
     // Adds expiration: quiz session is auto-finished when new start begins, so no indefinite lock.
-    function startQuiz(string memory quizId, uint256 userAnswer, uint256 expectedCorrectAnswers) external payable {
+    function startQuiz(string memory quizId, uint256 expectedCorrectAnswers) external payable {
         require(msg.value > 0, "Must send ETH");
         require(bytes(quizId).length > 0, "Quiz ID cannot be empty");
         require(expectedCorrectAnswers > 0, "Expected correct answers must be greater than zero");
@@ -121,7 +119,6 @@ contract QuizGame is Ownable, ReentrancyGuard {
 
         // start new session
         session.active = true;
-        session.userAnswer = userAnswer;
         // Cast down to uint128 safe because msg.value fits in 128 bits (~3.4e38 wei)
         session.amountPaid = uint128(msg.value);
         session.timestamp = uint128(block.timestamp);
@@ -131,7 +128,7 @@ contract QuizGame is Ownable, ReentrancyGuard {
         uint256 initialTokens = msg.value * tokenMultiplier;
         token.mint(msg.sender, initialTokens);
 
-        emit QuizStarted(msg.sender, quizId, userAnswer, uint128(msg.value), initialTokens);
+        emit QuizStarted(msg.sender, quizId, uint128(msg.value), initialTokens);
     }
 
     function completeQuiz(uint256 submittedCorrectAnswers) external {

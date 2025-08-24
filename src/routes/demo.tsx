@@ -73,13 +73,15 @@ function DemoPage() {
     if (!address) return
     
     const actualAmount = parseEther('0.0001')
-    const userAnswerValue = BigInt(Math.floor(Math.random() * 100) + 1)
+    
+    // Demo quiz expects 3 questions to be answered correctly
+    const expectedCorrectAnswers = BigInt(3)
     
     startQuiz({
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       abi: quizGameABI,
       functionName: 'startQuiz',
-      args: ['demo-quiz', userAnswerValue],
+      args: ['demo-quiz', expectedCorrectAnswers],
       value: actualAmount,
     })
   }

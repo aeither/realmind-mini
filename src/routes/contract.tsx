@@ -140,7 +140,7 @@ function ContractDebugPage() {
       abi: quizGameABI,
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       functionName: 'startQuiz',
-      args: ["demo-quiz", BigInt(userAnswer), BigInt(expectedCorrectAnswers)],
+      args: ["demo-quiz", BigInt(expectedCorrectAnswers)],
       value: parseEther(selectedAmount.toString()),
       chainId: chain?.id,
     });
