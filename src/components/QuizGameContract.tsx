@@ -8,15 +8,15 @@ import { baseMainnet } from '../wagmi';
 
 // Currency configuration for different chains
 const CURRENCY_CONFIG = {
-  1114: { // Core Testnet2
-    symbol: 'CORE',
+  8453: { // Base Mainnet
+    symbol: 'ETH',
     multiplier: 1,
-    defaultAmounts: ['0.1', '0.5', '2.5']
+    defaultAmounts: ['0.001', '0.01', '0.1']
   },
   default: { // Fallback configuration
-    symbol: 'CORE',
+    symbol: 'ETH',
     multiplier: 1,
-    defaultAmounts: ['0.1', '0.5', '2.5']
+    defaultAmounts: ['0.001', '0.01', '0.1']
   }
 } as const;
 

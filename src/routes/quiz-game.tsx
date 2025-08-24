@@ -108,7 +108,7 @@ function QuizGame() {
   const [quizStarted, setQuizStarted] = useState(false)
   const [questionResults, setQuestionResults] = useState<Array<{userAnswered: boolean, userCorrect: boolean, aiCorrect: boolean}>>([])
   const [justCompletedQuiz, setJustCompletedQuiz] = useState(false)
-  const FIXED_ENTRY_AMOUNT = '0.0001' // Fixed entry amount in tMETIS
+  const FIXED_ENTRY_AMOUNT = '0.0001' // Fixed entry amount in ETH
 
   // Function to restart the quiz in AI challenge mode
   const handleRestartQuiz = () => {
@@ -733,7 +733,7 @@ function QuizGame() {
                   }}>
                     <h3 style={{ color: "#14532d", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                       Base Tokens: {FIXED_ENTRY_AMOUNT} tMETIS × 100 = {parseFloat(FIXED_ENTRY_AMOUNT) * 100} TK1
+                       Base Tokens: {FIXED_ENTRY_AMOUNT} ETH × 100 = {parseFloat(FIXED_ENTRY_AMOUNT) * 100} TK1
                     </p>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
                       AI Challenge Bonus: 50% extra for beating the bot!
@@ -776,7 +776,7 @@ function QuizGame() {
                   }}>
                     <h3 style={{ color: "#92400e", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                       Base Tokens: {FIXED_ENTRY_AMOUNT} tMETIS × 100 = {parseFloat(FIXED_ENTRY_AMOUNT) * 100} TK1
+                       Base Tokens: {FIXED_ENTRY_AMOUNT} ETH × 100 = {parseFloat(FIXED_ENTRY_AMOUNT) * 100} TK1
                     </p>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
                       Tie Bonus: 25% extra for matching the AI!
@@ -839,7 +839,7 @@ function QuizGame() {
               }}>
                 <h3 style={{ color: "#14532d", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
                 <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                   Base Tokens: {FIXED_ENTRY_AMOUNT} tMETIS × 100 = {parseFloat(FIXED_ENTRY_AMOUNT) * 100} TK1
+                   Base Tokens: {FIXED_ENTRY_AMOUNT} ETH × 100 = {parseFloat(FIXED_ENTRY_AMOUNT) * 100} TK1
                 </p>
                 <p style={{ color: "#374151", margin: "0.5rem 0" }}>
                   Bonus: {score === quizConfig.questions.length ? '10-90% additional tokens for all correct answers!' : 'Better luck next time!'}
@@ -1196,7 +1196,7 @@ function QuizGame() {
                 fontWeight: 600,
                 fontSize: "clamp(0.9rem, 3.5vw, 1rem)"
               }}>
-                Entry Fee: {FIXED_ENTRY_AMOUNT} tMETIS
+                Entry Fee: {FIXED_ENTRY_AMOUNT} ETH
               </p>
               <p style={{ 
                 color: "#0c4a6e", 
@@ -1215,7 +1215,7 @@ function QuizGame() {
               fontSize: "clamp(0.8rem, 3vw, 0.9rem)",
               fontWeight: "500"
             }}>
-              Entry Fee: {FIXED_ENTRY_AMOUNT} tMETIS
+              Entry Fee: {FIXED_ENTRY_AMOUNT} ETH
             </p>
             
             {!isAiChallengeMode && (

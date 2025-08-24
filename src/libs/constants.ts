@@ -96,8 +96,8 @@ export const DEMO_CONFIG = {
   },
   MOCK_DATA: {
     ORACLE_PRICES: {
-      tMETIS: { price: 1.23, index: 1 },
-      ETH: { price: 2450.50, index: 2 }
+      ETH: { price: 2450.50, index: 1 },
+      BASE: { price: 1.23, index: 2 }
     },
     GUILD_MEMBERS: [
       { name: "Alex", score: 850, avatar: "👤", fid: 12345 },

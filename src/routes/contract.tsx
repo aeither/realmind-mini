@@ -15,7 +15,6 @@ import { formatEther, parseEther } from 'viem'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
 import { baseMainnet } from '../wagmi'
-import Header from '../components/Header'
 
 function ContractDebugPage() {
   const { address, isConnected, chain } = useAccount();
@@ -129,7 +128,7 @@ function ContractDebugPage() {
     useWaitForTransactionReceipt({ hash: renounceOwnershipHash });
 
   // Check if current chain is supported
-  const supportedChainIds = [8453, 11155111, 12345, 1114]; // From CONTRACT_ADDRESSES - Base Mainnet and others
+  const supportedChainIds = [8453]; // Base Mainnet only
   const isCorrectChain = chain ? supportedChainIds.includes(chain.id) : false;
 
   const handleStartQuiz = () => {

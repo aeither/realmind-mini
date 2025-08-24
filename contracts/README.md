@@ -49,11 +49,11 @@ $ anvil
 
 The deployment script uses CREATE2 to deploy contracts to the same deterministic address across all blockchains.
 
-#### Deploy to Core Testnet2
+#### Deploy to Base Mainnet
 
 ```shell
-# Core Testnet2
-source .env && rm -rf cache out && forge build && forge script --chain 1114 script/QuizGame.s.sol:QuizGameScript --rpc-url https://rpc.test2.btcs.network --broadcast -vvvv --private-key ${PRIVATE_KEY}
+# Base Mainnet
+source .env && rm -rf cache out && forge build && forge script --chain 8453 script/QuizGame.s.sol:QuizGameScript --rpc-url https://mainnet.base.org --broadcast -vvvv --private-key ${PRIVATE_KEY}
 ```
 
 #### Predict Addresses (Without Deploying)
@@ -61,19 +61,18 @@ source .env && rm -rf cache out && forge build && forge script --chain 1114 scri
 You can predict the contract addresses before deployment:
 
 ```shell
-# Predict addresses for Core Testnet2
-forge script script/QuizGame.s.sol:QuizGameScript --sig "predictAddresses()" --rpc-url https://rpc.test2.btcs.network
+# Predict addresses for Base Mainnet
+forge script script/QuizGame.s.sol:QuizGameScript --sig "predictAddresses()" --rpc-url https://mainnet.base.org
 ```
 
 ### Verify
 
 ```shell
-# Core Testnet2
+# Base Mainnet
 forge verify-contract \
-  --chain-id 1114 \
-  --rpc-url https://rpc.test2.btcs.network \
-  --verifier blockscout \
-  --verifier-url 'https://scan.test2.btcs.network/api/' \
+  --chain-id 8453 \
+  --rpc-url https://mainnet.base.org \
+  --etherscan-api-key $BASESCAN_API_KEY \
   <CONTRACT_ADDRESS> \
   src/QuizGame.sol:QuizGame
 ```
