@@ -177,16 +177,6 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
             </div>
           </div>
 
-          {/* Question Count - Fixed to 3 */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Number of Questions
-            </label>
-            <div className="p-3 rounded-lg border-2 border-purple-500 bg-purple-50 text-purple-700 font-semibold text-center">
-              3 Questions (Fixed)
-            </div>
-          </div>
-
           {/* Generate Button */}
           <div className="pt-4">
             <button

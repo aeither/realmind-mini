@@ -250,7 +250,7 @@ function ContractDebugPage() {
 
   // Calculate token rewards
   const calculateTokenRewards = () => {
-    const initialTokens = selectedAmount * 100; // 100x multiplier
+    const initialTokens = selectedAmount * 1000; // 1000x multiplier
     const bonusTokens = initialTokens * 0.2; // 20% fixed bonus
     const totalWithBonus = initialTokens + bonusTokens;
     
@@ -597,7 +597,7 @@ function ContractDebugPage() {
             </h4>
             <div style={{ fontSize: "0.9rem", color: "#0c4a6e" }}>
               <p style={{ margin: "0.25rem 0" }}>
-                <strong>Initial Tokens:</strong> {rewards.initialTokens.toFixed(2)} TK1 (100x entry)
+                <strong>Initial Tokens:</strong> {rewards.initialTokens.toFixed(2)} TK1 (1000x entry)
               </p>
               <p style={{ margin: "0.25rem 0" }}>
                 <strong>Bonus (if correct):</strong> {rewards.bonusTokens.toFixed(2)} TK1 (20% fixed)
@@ -619,7 +619,7 @@ function ContractDebugPage() {
             </h4>
             <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "0.9rem", color: "#155e75" }}>
               <li>Pay ETH to start quiz</li>
-              <li>Get 100x tokens immediately</li>
+              <li>Get 1000x tokens immediately</li>
               <li>Answer correctly for 20% bonus</li>
               <li>Keep initial tokens even if wrong!</li>
               <li>Starting new quiz auto-completes previous one</li>
@@ -924,7 +924,7 @@ function ContractDebugPage() {
                 <strong>Amount Paid:</strong> {(userSession as any).amountPaid ? formatEther((userSession as any).amountPaid) : "0"} ETH
               </div>
               <div style={{ marginBottom: "1rem" }}>
-                <strong>Initial Tokens:</strong> {(userSession as any).amountPaid ? formatEther((userSession as any).amountPaid * BigInt(100)) : "0"} TK1
+                <strong>Initial Tokens:</strong> {(userSession as any).amountPaid ? formatEther((userSession as any).amountPaid * BigInt(1000)) : "0"} TK1
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <strong>Timestamp:</strong> {(userSession as any).timestamp ? new Date(Number((userSession as any).timestamp) * 1000).toLocaleString() : "N/A"}

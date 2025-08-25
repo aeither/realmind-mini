@@ -26,11 +26,10 @@ contract Token1 is ERC20, Ownable {
     }
 }
 
-
 contract QuizGame is Ownable, ReentrancyGuard {
     Token1 public token;
     address public vaultAddress;
-    uint256 public tokenMultiplier = 100; // Default 100x ETH paid
+    uint256 public tokenMultiplier = 1000; // Default 1000x ETH paid
 
     // Mapping: user address => active quiz session (only one allowed at a time)
     mapping(address => QuizSession) public userSessions;
