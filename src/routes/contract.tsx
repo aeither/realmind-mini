@@ -27,6 +27,7 @@ function ContractDebugPage() {
   const [expectedCorrectAnswers, setExpectedCorrectAnswers] = useState<number>(3);
   const [submittedAnswer, setSubmittedAnswer] = useState<number>(42);
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>('');
+  const [newVaultAddress, setNewVaultAddress] = useState<string>('');
 
   // Get contract addresses based on current chain
   const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id);
@@ -49,6 +50,13 @@ function ContractDebugPage() {
     abi: quizGameABI,
     address: contractAddresses.quizGameContractAddress as `0x${string}`,
     functionName: 'token',
+    chainId: chain?.id,
+  });
+
+  const { data: vaultAddress, refetch: refetchVault } = useReadContract({
+    abi: quizGameABI,
+    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    functionName: 'vaultAddress',
     chainId: chain?.id,
   });
 
@@ -109,6 +117,14 @@ function ContractDebugPage() {
     reset: resetRenounceOwnership
   } = useWriteContract();
 
+  const { 
+    data: setVaultAddressHash, 
+    isPending: isSetVaultAddressPending,
+    writeContract: setVaultAddress,
+    error: setVaultAddressError,
+    reset: resetSetVaultAddress
+  } = useWriteContract();
+
   // Wait for transaction confirmations
   const { isLoading: isStartConfirming, isSuccess: isStartConfirmed } = 
     useWaitForTransactionReceipt({ hash: startQuizHash });
@@ -127,6 +143,9 @@ function ContractDebugPage() {
 
   const { isLoading: isRenounceOwnershipConfirming, isSuccess: isRenounceOwnershipConfirmed } = 
     useWaitForTransactionReceipt({ hash: renounceOwnershipHash });
+
+  const { isLoading: isSetVaultAddressConfirming, isSuccess: isSetVaultAddressConfirmed } = 
+    useWaitForTransactionReceipt({ hash: setVaultAddressHash });
 
   // Check if current chain is supported
   const supportedChainIds = [8453]; // Base Mainnet only
@@ -187,6 +206,7 @@ function ContractDebugPage() {
   const handleRefetchAll = () => {
     refetchOwner();
     refetchToken();
+    refetchVault();
     refetchSession();
   };
 
@@ -211,6 +231,19 @@ function ContractDebugPage() {
       abi: quizGameABI,
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       functionName: 'renounceOwnership',
+      chainId: chain?.id,
+    });
+  };
+
+  const handleSetVaultAddress = () => {
+    if (!isConnected || !newVaultAddress) return;
+    
+    resetSetVaultAddress();
+    setVaultAddress({
+      abi: quizGameABI,
+      address: contractAddresses.quizGameContractAddress as `0x${string}`,
+      functionName: 'setVaultAddress',
+      args: [newVaultAddress as `0x${string}`],
       chainId: chain?.id,
     });
   };
@@ -486,6 +519,20 @@ function ContractDebugPage() {
               borderRadius: "6px"
             }}>
               {tokenAddress ? String(tokenAddress) : "Loading..."}
+            </p>
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <strong>Vault Address:</strong>
+            <p style={{ 
+              fontFamily: "monospace", 
+              fontSize: "0.9rem", 
+              color: "#374151",
+              backgroundColor: "#f9fafb",
+              padding: "0.5rem",
+              borderRadius: "6px"
+            }}>
+              {vaultAddress ? String(vaultAddress) : "Loading..."}
             </p>
           </div>
 
@@ -807,6 +854,44 @@ function ContractDebugPage() {
               {isRenounceOwnershipPending ? "Confirming..." : isRenounceOwnershipConfirming ? "Renouncing..." : "🚫 Renounce Ownership"}
             </button>
           </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
+              🏦 Vault Address Management
+            </label>
+            <input
+              type="text"
+              placeholder="New vault address (0x...)"
+              value={newVaultAddress}
+              onChange={(e) => setNewVaultAddress(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "2px solid hsl(var(--border))",
+                fontSize: "1rem",
+                marginBottom: "0.5rem"
+              }}
+            />
+            
+            <button
+              onClick={handleSetVaultAddress}
+              disabled={isSetVaultAddressPending || isSetVaultAddressConfirming || !newVaultAddress}
+              style={{
+                backgroundColor: isSetVaultAddressPending || isSetVaultAddressConfirming || !newVaultAddress ? "#9ca3af" : "#059669",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                padding: "0.75rem 1rem",
+                fontSize: "1rem",
+                cursor: isSetVaultAddressPending || isSetVaultAddressConfirming || !newVaultAddress ? "not-allowed" : "pointer",
+                width: "100%",
+                fontWeight: 700
+              }}
+            >
+              {isSetVaultAddressPending ? "Confirming..." : isSetVaultAddressConfirming ? "Setting Vault..." : "🏦 Set Vault Address"}
+            </button>
+          </div>
         </motion.div>
 
         {/* User Session */}
@@ -854,7 +939,8 @@ function ContractDebugPage() {
       {/* Transaction Status */}
       {(isStartPending || isStartConfirming || isCompletePending || isCompleteConfirming || 
         isWithdrawPending || isWithdrawConfirming || isMintTokenPending || isMintTokenConfirming ||
-        isTransferOwnershipPending || isTransferOwnershipConfirming || isRenounceOwnershipPending || isRenounceOwnershipConfirming) && (
+        isTransferOwnershipPending || isTransferOwnershipConfirming || isRenounceOwnershipPending || isRenounceOwnershipConfirming ||
+        isSetVaultAddressPending || isSetVaultAddressConfirming) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -875,13 +961,14 @@ function ContractDebugPage() {
              isWithdrawPending || isWithdrawConfirming ? "Withdrawing funds..." :
              isMintTokenPending || isMintTokenConfirming ? "Minting tokens..." :
              isTransferOwnershipPending || isTransferOwnershipConfirming ? "Transferring ownership..." :
-             isRenounceOwnershipPending || isRenounceOwnershipConfirming ? "Renouncing ownership..." : ""}
+             isRenounceOwnershipPending || isRenounceOwnershipConfirming ? "Renouncing ownership..." :
+             isSetVaultAddressPending || isSetVaultAddressConfirming ? "Setting vault address..." : ""}
           </p>
         </div>
       )}
 
       {/* Error Messages */}
-      {(startError || completeError || withdrawError || mintTokenError || transferOwnershipError || renounceOwnershipError) && (
+      {(startError || completeError || withdrawError || mintTokenError || transferOwnershipError || renounceOwnershipError || setVaultAddressError) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -898,14 +985,14 @@ function ContractDebugPage() {
           </p>
           <p style={{ margin: 0, color: "#991b1b", fontSize: "0.9rem" }}>
             {startError?.message || completeError?.message || withdrawError?.message || mintTokenError?.message || 
-             transferOwnershipError?.message || renounceOwnershipError?.message}
+             transferOwnershipError?.message || renounceOwnershipError?.message || setVaultAddressError?.message}
           </p>
         </div>
       )}
 
       {/* Success Messages */}
       {(isStartConfirmed || isCompleteConfirmed || isWithdrawConfirmed || isMintTokenConfirmed || 
-        isTransferOwnershipConfirmed || isRenounceOwnershipConfirmed) && (
+        isTransferOwnershipConfirmed || isRenounceOwnershipConfirmed || isSetVaultAddressConfirmed) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -926,7 +1013,8 @@ function ContractDebugPage() {
              isWithdrawConfirmed ? "Funds withdrawn successfully!" :
              isMintTokenConfirmed ? "Tokens minted successfully!" :
              isTransferOwnershipConfirmed ? "Ownership transferred successfully!" :
-             isRenounceOwnershipConfirmed ? "Ownership renounced successfully!" : ""}
+             isRenounceOwnershipConfirmed ? "Ownership renounced successfully!" :
+             isSetVaultAddressConfirmed ? "Vault address updated successfully!" : ""}
           </p>
         </div>
       )}
