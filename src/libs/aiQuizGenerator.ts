@@ -22,7 +22,6 @@ interface AIQuizConfig {
 interface GenerateQuizParams {
   topic: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
-  questionCount: number;
   userInterests?: string[];
 }
 
@@ -46,8 +45,7 @@ export class AIQuizGenerator {
         },
         body: JSON.stringify({
           topic: params.topic,
-          difficulty: params.difficulty,
-          questionCount: params.questionCount
+          difficulty: params.difficulty
         }),
       });
 

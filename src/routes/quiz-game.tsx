@@ -367,23 +367,36 @@ function QuizGame() {
 
   // Handle quiz start
   const handleStartQuiz = () => {
-    if (!address || !quizConfig) return
+    if (!address) {
+      toast.error('Please connect your wallet first')
+      return
+    }
     
-    const actualAmount = parseEther(FIXED_ENTRY_AMOUNT)
+    if (!quizConfig) {
+      toast.error('No quiz configuration found')
+      return
+    }
     
-    // For AI-generated quizzes, use a generic quiz ID for the contract
-    const contractQuizId = quizId === 'ai-custom' ? 'ai-generated' : quizConfig.id
-    
-    // Expected correct answers is the total number of questions
-    const expectedCorrectAnswers = BigInt(quizConfig.questions.length)
-    
-    startQuiz({
-      address: contractAddresses.quizGameContractAddress as `0x${string}`,
-      abi: quizGameABI,
-      functionName: 'startQuiz',
-      args: [contractQuizId, expectedCorrectAnswers],
-      value: actualAmount,
-    })
+    try {
+      const actualAmount = parseEther(FIXED_ENTRY_AMOUNT)
+      
+      // For AI-generated quizzes, use a generic quiz ID for the contract
+      const contractQuizId = quizId === 'ai-custom' ? 'ai-generated' : quizConfig.id
+      
+      // Expected correct answers is the total number of questions
+      const expectedCorrectAnswers = BigInt(quizConfig.questions.length)
+      
+      startQuiz({
+        address: contractAddresses.quizGameContractAddress as `0x${string}`,
+        abi: quizGameABI,
+        functionName: 'startQuiz',
+        args: [contractQuizId, expectedCorrectAnswers],
+        value: actualAmount,
+      })
+    } catch (error) {
+      console.error('Error in handleStartQuiz:', error)
+      toast.error('Failed to start quiz. Please try again.')
+    }
   }
 
   // Handle quiz answer submission
@@ -1169,14 +1182,12 @@ function QuizGame() {
               )}
               {isAiChallengeMode ? (
                 <>
-                  <li>🤖 Race against AI bot that answers in 5 seconds</li>
-                  <li>🏁 If AI wins, you must restart the quiz</li>
-                  <li>🎯 Beat the AI to earn 50% bonus rewards</li>
-                  <li>🤝 Tie with AI to earn 25% bonus rewards</li>
+                  <li>🤖 Exciting AI bot challenge mode</li>
+                  <li>⚡ Race against the AI for extra fun</li>
                 </>
               ) : (
                 <>
-                  <li>✅ Get all answers correct for bonus rewards (10-90%)</li>
+                  <li>✅ Get all answers correct for bonus rewards (20%)</li>
                   <li>🪙 Receive Token1 tokens equal to your entry fee × 100</li>
                   <li>⏰ Complete the quiz to claim your rewards</li>
                 </>
@@ -1184,41 +1195,9 @@ function QuizGame() {
             </ul>
           </div>
 
-          <div style={{ marginBottom: "2rem" }}>
-            <div style={{
-              background: "#f0f9ff",
-              border: "2px solid #0ea5e9",
-              borderRadius: "12px",
-              padding: "clamp(0.75rem, 3vw, 1rem)",
-              textAlign: "center"
-            }}>
-              <p style={{ 
-                color: "#0c4a6e", 
-                margin: "0", 
-                fontWeight: 600,
-                fontSize: "clamp(0.9rem, 3.5vw, 1rem)"
-              }}>
-                Entry Fee: {FIXED_ENTRY_AMOUNT} ETH
-              </p>
-              <p style={{ 
-                color: "#0c4a6e", 
-                margin: "0.25rem 0 0 0", 
-                fontSize: "clamp(0.8rem, 3vw, 0.9rem)"
-              }}>
-                Earn up to {parseFloat(FIXED_ENTRY_AMOUNT) * 190} TK1 tokens!
-              </p>
-            </div>
-          </div>
+
 
           <div style={{ textAlign: "center" }}>
-            <p style={{ 
-              color: "#6b7280", 
-              marginBottom: "1rem", 
-              fontSize: "clamp(0.8rem, 3vw, 0.9rem)",
-              fontWeight: "500"
-            }}>
-              Entry Fee: {FIXED_ENTRY_AMOUNT} ETH
-            </p>
             
             {!isAiChallengeMode && (
               <div style={{

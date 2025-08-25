@@ -1,6 +1,9 @@
 import { sdk } from '@farcaster/miniapp-sdk'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useAccount } from 'wagmi'
+import { getContractAddresses } from '../libs/constants'
+import { baseMainnet } from '../wagmi'
 import AIQuizGenerator from '../components/AIQuizGenerator'
 
 interface Quiz {
@@ -44,7 +47,11 @@ const AVAILABLE_QUIZZES: Quiz[] = [
 ];
 
 function HomePage() {
+  const { chain } = useAccount();
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
+  
+  // Get contract addresses based on current chain
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [isAppReady, setIsAppReady] = useState(false);
   const navigate = useNavigate();
@@ -93,28 +100,28 @@ function HomePage() {
           </p>
         </div>
 
-        {/* Leaderboard Section */}
-        <div className="text-center mb-3 sm:mb-8 md:mb-12">
-          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 rounded-xl sm:rounded-2xl p-2 sm:p-6 md:p-8 max-w-4xl mx-auto">
-            <div className="flex items-center justify-center mb-2 sm:mb-4">
-              <span className="text-xl sm:text-3xl md:text-4xl mr-1 sm:mr-3">🏆</span>
-              <h2 className="text-sm sm:text-xl md:text-2xl font-bold text-foreground text-center">August Initiation Campaign</h2>
+        {/* Leaderboard Section - Compact Mobile Design */}
+        <div className="text-center mb-2 sm:mb-6 md:mb-8">
+          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-4 md:p-6 max-w-4xl mx-auto">
+            <div className="flex items-center justify-center mb-1 sm:mb-2 md:mb-3">
+              <span className="text-lg sm:text-2xl md:text-3xl mr-1 sm:mr-2">🏆</span>
+              <h2 className="text-xs sm:text-lg md:text-xl font-bold text-foreground text-center">August Initiation Campaign</h2>
             </div>
-            <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-4 mb-2 sm:mb-4 border border-yellow-200">
-              <p className="text-sm sm:text-lg md:text-xl font-bold text-primary mb-1">
-                Season3 Points + $300 USDC Raffle
+            <div className="bg-white rounded-md sm:rounded-lg md:rounded-xl p-1 sm:p-2 md:p-3 mb-1 sm:mb-2 md:mb-3 border border-yellow-200">
+              <p className="text-xs sm:text-sm md:text-lg font-bold text-primary mb-0.5 sm:mb-1">
+                Season3 Points
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Earn points with every quiz
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 md:gap-3 justify-center items-center">
               <a
-                href="https://basescan.org/tokens"
+                href={`https://basescan.org/token/${contractAddresses.token1ContractAddress}#balances`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-3 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 bg-gradient-to-r from-yellow-400 to-orange-400 text-white 
-                           rounded-lg sm:rounded-xl font-bold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-xs sm:text-base"
+                className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-white 
+                           rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base"
               >
                 🏅 View Leaderboard
               </a>
@@ -122,8 +129,8 @@ function HomePage() {
                 href="https://x.com/DailyWiser_/status/1956651487800783034"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-3 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 bg-blue-500 text-white 
-                           rounded-lg sm:rounded-xl font-bold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-xs sm:text-base"
+                className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-blue-500 text-white 
+                           rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base"
               >
                 📖 Learn More
               </a>

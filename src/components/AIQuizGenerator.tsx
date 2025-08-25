@@ -13,7 +13,8 @@ const DIFFICULTY_OPTIONS = [
   { value: 'advanced', label: 'Advanced', icon: '🚀' }
 ] as const;
 
-const QUESTION_COUNT_OPTIONS = [3, 5, 7, 10];
+// Fixed to 3 questions - no longer configurable
+const FIXED_QUESTION_COUNT = 3;
 
 const POPULAR_TOPICS = [
   'Bitcoin Fundamentals',
@@ -35,12 +36,10 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
   const [formData, setFormData] = useState<{
     topic: string;
     difficulty: 'beginner' | 'intermediate' | 'advanced';
-    questionCount: number;
     userInterests: string[];
   }>({
     topic: '',
     difficulty: 'intermediate',
-    questionCount: 5,
     userInterests: []
   });
 
@@ -64,7 +63,6 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
       const quizConfig = await aiQuizGenerator.generateQuiz({
         topic: formData.topic,
         difficulty: formData.difficulty,
-        questionCount: formData.questionCount,
         userInterests: formData.userInterests
       });
 
@@ -179,25 +177,13 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
             </div>
           </div>
 
-          {/* Question Count */}
+          {/* Question Count - Fixed to 3 */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Number of Questions
             </label>
-            <div className="grid grid-cols-4 gap-3">
-              {QUESTION_COUNT_OPTIONS.map((count) => (
-                <button
-                  key={count}
-                  onClick={() => setFormData(prev => ({ ...prev, questionCount: count }))}
-                  className={`p-3 rounded-lg border-2 transition-all font-semibold ${
-                    formData.questionCount === count
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-200 hover:border-purple-300'
-                  }`}
-                >
-                  {count}
-                </button>
-              ))}
+            <div className="p-3 rounded-lg border-2 border-purple-500 bg-purple-50 text-purple-700 font-semibold text-center">
+              3 Questions (Fixed)
             </div>
           </div>
 

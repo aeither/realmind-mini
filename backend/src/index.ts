@@ -54,7 +54,8 @@ app.post('/generate-quiz', async (c) => {
     }
 
     const body = await c.req.json()
-    const { topic, difficulty = 'medium', questionCount = 5 } = body
+    const { topic, difficulty = 'medium' } = body
+    const questionCount = 3 // Fixed to 3 questions
 
     if (!topic) {
       return c.json({
@@ -65,7 +66,7 @@ app.post('/generate-quiz', async (c) => {
     const { object } = await generateObject({
       model: groq('moonshotai/kimi-k2-instruct'),
       schema: QuizSchema,
-      prompt: `Generate a ${difficulty} level quiz about "${topic}" with exactly ${questionCount} questions.
+      prompt: `Generate a ${difficulty} level quiz about "${topic}" with exactly 3 questions.
 
 Requirements:
 - Each question should have exactly 4 multiple choice options
@@ -77,7 +78,7 @@ Requirements:
 
 Topic: ${topic}
 Difficulty: ${difficulty}
-Number of questions: ${questionCount}`
+Number of questions: 3`
     })
 
     return c.json({
