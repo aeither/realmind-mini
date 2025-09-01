@@ -39,6 +39,8 @@ function App() {
             borderRadius: 'medium',
             fontStack: 'system',
           })}
+          modalSize="compact"
+          showRecentTransactions={true}
         >
           <RouterProvider router={router} />
           <Toaster 

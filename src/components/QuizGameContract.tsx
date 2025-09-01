@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { useAccount, useDisconnect, useReadContract, useSwitchChain, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { getContractAddresses } from '../libs/constants';
 import { quizGameABI } from '../libs/quizGameABI';
-import { baseMainnet } from '../wagmi';
+import { base } from 'viem/chains';
 
 // Currency configuration for different chains
 const CURRENCY_CONFIG = {
@@ -48,7 +48,7 @@ function QuizGameContract() {
   const { disconnect } = useDisconnect();
 
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id);
   
   // Get currency config for current chain
   const currencyConfig = chain ? (CURRENCY_CONFIG[chain.id as keyof typeof CURRENCY_CONFIG] || CURRENCY_CONFIG.default) : CURRENCY_CONFIG.default;
@@ -130,7 +130,7 @@ function QuizGameContract() {
         </p>
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2rem" }}>
           <button 
-            onClick={() => switchChain({ chainId: baseMainnet.id })}
+            onClick={() => switchChain({ chainId: base.id })}
             style={{
               backgroundColor: "#58CC02",
               color: "#ffffff",
@@ -143,7 +143,7 @@ function QuizGameContract() {
               transition: "all 0.3s ease"
             }}
           >
-            Switch to {baseMainnet.name}
+            Switch to {base.name}
           </button>
         </div>
         <button 

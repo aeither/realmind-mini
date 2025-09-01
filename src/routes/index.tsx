@@ -3,9 +3,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { getContractAddresses } from '../libs/constants'
-import { baseMainnet } from '../wagmi'
 import AIQuizGenerator from '../components/AIQuizGenerator'
-
+import { base } from 'viem/chains'
 interface Quiz {
   id: string;
   title: string;
@@ -51,7 +50,7 @@ function HomePage() {
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [isAppReady, setIsAppReady] = useState(false);
   const navigate = useNavigate();

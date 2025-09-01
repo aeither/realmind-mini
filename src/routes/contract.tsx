@@ -14,7 +14,7 @@ import {
 import { formatEther, parseEther } from 'viem'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { baseMainnet } from '../wagmi'
+import { base } from 'viem/chains'
 
 function ContractDebugPage() {
   const { address, isConnected, chain } = useAccount();
@@ -30,12 +30,12 @@ function ContractDebugPage() {
   const [newVaultAddress, setNewVaultAddress] = useState<string>('');
 
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id);
 
   // Get user balance
   const { data: balance } = useBalance({
     address,
-    chainId: chain?.id || baseMainnet.id,
+    chainId: chain?.id || base.id,
   });
 
   // Read contract data

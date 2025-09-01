@@ -6,7 +6,7 @@ import { parseEther } from 'viem'
 import { toast } from 'sonner'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { baseMainnet } from '../wagmi'
+import { base } from 'viem/chains'
 import GlobalHeader from '../components/GlobalHeader'
 import { AIQuizGenerator } from '../libs/aiQuizGenerator'
 
@@ -129,7 +129,7 @@ function QuizGame() {
     setQuestionResults([])
   }
 
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id)
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id)
   
   // Handle AI-generated quizzes
   let quizConfig = null
@@ -486,7 +486,7 @@ function QuizGame() {
   }
   
   // Check if user is on correct chain
-  const isCorrectChain = chain?.id === baseMainnet.id
+  const isCorrectChain = chain?.id === base.id
 
   if (!isCorrectChain) {
     return (
@@ -503,7 +503,7 @@ function QuizGame() {
             Please switch to Base Mainnet to play this quiz.
           </p>
           <button 
-            onClick={() => switchChain({ chainId: baseMainnet.id })}
+            onClick={() => switchChain({ chainId: base.id })}
             style={{
               backgroundColor: "#58CC02",
               color: "#ffffff",
@@ -515,7 +515,7 @@ function QuizGame() {
               cursor: "pointer"
             }}
           >
-            Switch to {baseMainnet.name}
+            Switch to {base.name}
           </button>
         </div>
       </motion.div>

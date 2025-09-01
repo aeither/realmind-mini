@@ -6,8 +6,8 @@ import { parseEther } from 'viem'
 import { toast } from 'sonner'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { baseMainnet } from '../wagmi'
 import GlobalHeader from '../components/GlobalHeader'
+import { base } from 'viem/chains'
 
 interface Task {
   id: number
@@ -23,7 +23,7 @@ function DemoPage() {
   const [completedTasks, setCompletedTasks] = useState<number[]>([])
   const [autoPlay, setAutoPlay] = useState(false)
 
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(baseMainnet.id)
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id)
 
   // Contract writes for demo
   const { writeContract: startQuiz, isPending: isStartPending, data: startHash } = useWriteContract()
