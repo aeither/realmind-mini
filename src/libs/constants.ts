@@ -8,6 +8,10 @@ const CONTRACT_ADDRESSES = {
     quizDuelContractAddress: "0x0000000000000000000000000000000000000001",
     guildSystemContractAddress: "0x0000000000000000000000000000000000000002",
     quizNFTContractAddress: "0x0000000000000000000000000000000000000003"
+  },
+  42220: {
+    token1ContractAddress: "0xa933a6Ad2b7DD4c57771A975F9e0E5afdE0e99dc",
+    quizGameContractAddress: "0xD9f245B50558686aF4D0Bf137a32D6fcEfba4054"
   }
 } as const;
 

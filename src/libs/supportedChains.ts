@@ -1,7 +1,7 @@
-import { base } from "viem/chains";
+import { base, celo } from "viem/chains";
 
 // Export all supported chains as a reusable array
-export const SUPPORTED_CHAINS = [base] as const;
+export const SUPPORTED_CHAINS = [base, celo] as const;
 
 // Export chain IDs for easy checking
 export const SUPPORTED_CHAIN_IDS = SUPPORTED_CHAINS.map(chain => chain.id);
@@ -10,6 +10,11 @@ export const SUPPORTED_CHAIN_IDS = SUPPORTED_CHAINS.map(chain => chain.id);
 export const CURRENCY_CONFIG = {
   8453: { // Base (Mainnet)
     symbol: 'ETH',
+    multiplier: 1,
+    defaultAmounts: ['0.001', '0.01', '0.1']
+  },
+  42220: { // Celo (Mainnet)
+    symbol: 'CELO',
     multiplier: 1,
     defaultAmounts: ['0.001', '0.01', '0.1']
   },

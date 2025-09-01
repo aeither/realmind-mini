@@ -4,12 +4,17 @@ import { toast } from 'sonner';
 import { useAccount, useDisconnect, useReadContract, useSwitchChain, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { getContractAddresses } from '../libs/constants';
 import { quizGameABI } from '../libs/quizGameABI';
-import { base } from 'viem/chains';
+import { SUPPORTED_CHAINS } from '../libs/supportedChains';
 
 // Currency configuration for different chains
 const CURRENCY_CONFIG = {
   8453: { // Base Mainnet
     symbol: 'ETH',
+    multiplier: 1,
+    defaultAmounts: ['0.001', '0.01', '0.1']
+  },
+  42220: { // Celo Mainnet
+    symbol: 'CELO',
     multiplier: 1,
     defaultAmounts: ['0.001', '0.01', '0.1']
   },
@@ -48,7 +53,7 @@ function QuizGameContract() {
   const { disconnect } = useDisconnect();
 
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(SUPPORTED_CHAINS[0].id);
   
   // Get currency config for current chain
   const currencyConfig = chain ? (CURRENCY_CONFIG[chain.id as keyof typeof CURRENCY_CONFIG] || CURRENCY_CONFIG.default) : CURRENCY_CONFIG.default;
@@ -111,9 +116,8 @@ function QuizGameContract() {
 
 
 
-  // Check if user is on correct chain
-  const supportedChainIds = [8453]; // Only Base Mainnet
-  const isCorrectChain = chain ? supportedChainIds.includes(chain.id) : false;
+  // Check if user is on a supported chain
+  const isCorrectChain = chain ? SUPPORTED_CHAINS.some(supportedChain => supportedChain.id === chain.id) : false;
 
   // If not on correct chain, show network switch options
   if (!isCorrectChain) {
@@ -126,25 +130,28 @@ function QuizGameContract() {
       }}>
         <h2 style={{ color: "#111827", marginBottom: "1rem" }}>Wrong Network</h2>
         <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
-          Please switch to Base Mainnet to play the quiz game.
+          Please switch to a supported network to play the quiz game.
         </p>
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2rem" }}>
-          <button 
-            onClick={() => switchChain({ chainId: base.id })}
-            style={{
-              backgroundColor: "#58CC02",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.75rem 1.5rem",
-              fontSize: "0.9rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.3s ease"
-            }}
-          >
-            Switch to {base.name}
-          </button>
+          {SUPPORTED_CHAINS.map((supportedChain) => (
+            <button 
+              key={supportedChain.id}
+              onClick={() => switchChain({ chainId: supportedChain.id })}
+              style={{
+                backgroundColor: "#58CC02",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "8px",
+                padding: "0.75rem 1.5rem",
+                fontSize: "0.9rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "all 0.3s ease"
+              }}
+            >
+              Switch to {supportedChain.name}
+            </button>
+          ))}
         </div>
         <button 
           onClick={() => disconnect()}

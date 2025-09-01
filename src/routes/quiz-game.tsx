@@ -6,7 +6,7 @@ import { parseEther } from 'viem'
 import { toast } from 'sonner'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { base } from 'viem/chains'
+import { SUPPORTED_CHAINS } from '../libs/supportedChains'
 import GlobalHeader from '../components/GlobalHeader'
 import { AIQuizGenerator } from '../libs/aiQuizGenerator'
 
@@ -129,7 +129,7 @@ function QuizGame() {
     setQuestionResults([])
   }
 
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id)
+  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(SUPPORTED_CHAINS[0].id)
   
   // Handle AI-generated quizzes
   let quizConfig = null
@@ -485,8 +485,8 @@ function QuizGame() {
     })
   }
   
-  // Check if user is on correct chain
-  const isCorrectChain = chain?.id === base.id
+  // Check if user is on a supported chain
+  const isCorrectChain = chain ? SUPPORTED_CHAINS.some(supportedChain => supportedChain.id === chain.id) : false
 
   if (!isCorrectChain) {
     return (
@@ -500,23 +500,28 @@ function QuizGame() {
         }}>
           <h2 style={{ color: "#111827", marginBottom: "1rem" }}>Wrong Network</h2>
           <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
-            Please switch to Base Mainnet to play this quiz.
+            Please switch to a supported network to play this quiz.
           </p>
-          <button 
-            onClick={() => switchChain({ chainId: base.id })}
-            style={{
-              backgroundColor: "#58CC02",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.75rem 1.5rem",
-              fontSize: "1rem",
-              fontWeight: 700,
-              cursor: "pointer"
-            }}
-          >
-            Switch to {base.name}
-          </button>
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+            {SUPPORTED_CHAINS.map((supportedChain) => (
+              <button 
+                key={supportedChain.id}
+                onClick={() => switchChain({ chainId: supportedChain.id })}
+                style={{
+                  backgroundColor: "#58CC02",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "0.75rem 1.5rem",
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  cursor: "pointer"
+                }}
+              >
+                Switch to {supportedChain.name}
+              </button>
+            ))}
+          </div>
         </div>
       </motion.div>
     )
