@@ -149,7 +149,7 @@ export class RedisService {
     return 'quiz_backlog'
   }
 
-  async addToBacklog(topic: string, addedBy: string = 'user', priority: number = 1): Promise<BacklogItem> {
+  async addToBacklog(topic: string, addedBy: string = 'user'): Promise<BacklogItem> {
     try {
       const backlogKey = this.getBacklogKey()
       
@@ -161,21 +161,16 @@ export class RedisService {
         id: `backlog_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         topic: topic.trim(),
         addedBy,
-        addedAt: new Date().toISOString(),
-        priority,
-        status: 'pending'
+        addedAt: new Date().toISOString()
       }
 
       // Add to existing items
       const items = existingBacklog?.items || []
       items.push(newItem)
       
-      // Sort by priority (higher first) then by date (newer first)
+      // Sort by date (older items first - FIFO queue)
       items.sort((a, b) => {
-        if (a.priority !== b.priority) {
-          return b.priority - a.priority
-        }
-        return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
+        return new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime()
       })
 
       // Update backlog
@@ -187,7 +182,7 @@ export class RedisService {
 
       await this.redis.set(backlogKey, JSON.stringify(updatedBacklog))
       
-      console.log(`✅ Added to backlog: "${topic}" (Priority: ${priority})`)
+      console.log(`✅ Added to backlog: "${topic}"`)
       return newItem
     } catch (error) {
       console.error('❌ Failed to add to backlog:', error)
@@ -227,19 +222,14 @@ export class RedisService {
       const backlog = await this.getBacklog()
       
       if (!backlog || backlog.items.length === 0) {
-        console.log('📭 No pending backlog items')
+        console.log('📭 No backlog items')
         return null
       }
 
-      // Find the first pending item (already sorted by priority)
-      const nextItem = backlog.items.find(item => item.status === 'pending')
+      // Get the first item (oldest by timestamp)
+      const nextItem = backlog.items[0]
       
-      if (!nextItem) {
-        console.log('📭 No pending backlog items (all processed)')
-        return null
-      }
-
-      console.log(`🎯 Next backlog item: "${nextItem.topic}" (Priority: ${nextItem.priority})`)
+      console.log(`🎯 Next backlog item: "${nextItem.topic}" (${nextItem.addedAt})`)
       return nextItem
     } catch (error) {
       console.error('❌ Failed to get next backlog item:', error)
@@ -247,7 +237,7 @@ export class RedisService {
     }
   }
 
-  async markBacklogItemAsProcessing(itemId: string): Promise<void> {
+  async removeBacklogItem(itemId: string): Promise<void> {
     try {
       const backlog = await this.getBacklog()
       
@@ -260,78 +250,21 @@ export class RedisService {
         throw new Error(`Backlog item ${itemId} not found`)
       }
 
-      item.status = 'processing'
+      // Remove the item from the list
+      const updatedItems = backlog.items.filter(i => i.id !== itemId)
       
       const updatedBacklog: BacklogList = {
-        ...backlog,
+        items: updatedItems,
+        totalCount: updatedItems.length,
         lastUpdated: new Date().toISOString()
       }
 
       const backlogKey = this.getBacklogKey()
       await this.redis.set(backlogKey, JSON.stringify(updatedBacklog))
       
-      console.log(`🔄 Marked backlog item as processing: "${item.topic}"`)
+      console.log(`🗑️ Removed backlog item: "${item.topic}"`)
     } catch (error) {
-      console.error('❌ Failed to mark backlog item as processing:', error)
-      throw error
-    }
-  }
-
-  async markBacklogItemAsCompleted(itemId: string): Promise<void> {
-    try {
-      const backlog = await this.getBacklog()
-      
-      if (!backlog) {
-        throw new Error('No backlog found')
-      }
-
-      const item = backlog.items.find(i => i.id === itemId)
-      if (!item) {
-        throw new Error(`Backlog item ${itemId} not found`)
-      }
-
-      item.status = 'completed'
-      
-      const updatedBacklog: BacklogList = {
-        ...backlog,
-        lastUpdated: new Date().toISOString()
-      }
-
-      const backlogKey = this.getBacklogKey()
-      await this.redis.set(backlogKey, JSON.stringify(updatedBacklog))
-      
-      console.log(`✅ Marked backlog item as completed: "${item.topic}"`)
-    } catch (error) {
-      console.error('❌ Failed to mark backlog item as completed:', error)
-      throw error
-    }
-  }
-
-  async clearCompletedBacklogItems(): Promise<number> {
-    try {
-      const backlog = await this.getBacklog()
-      
-      if (!backlog) {
-        return 0
-      }
-
-      const originalCount = backlog.items.length
-      const pendingItems = backlog.items.filter(item => item.status !== 'completed')
-      
-      const updatedBacklog: BacklogList = {
-        items: pendingItems,
-        totalCount: pendingItems.length,
-        lastUpdated: new Date().toISOString()
-      }
-
-      const backlogKey = this.getBacklogKey()
-      await this.redis.set(backlogKey, JSON.stringify(updatedBacklog))
-      
-      const removedCount = originalCount - pendingItems.length
-      console.log(`🗑️ Cleared ${removedCount} completed backlog items`)
-      return removedCount
-    } catch (error) {
-      console.error('❌ Failed to clear completed backlog items:', error)
+      console.error('❌ Failed to remove backlog item:', error)
       throw error
     }
   }

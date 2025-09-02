@@ -108,9 +108,6 @@ function GlobalHeader({
         </motion.div>
       </div>
 
-      {/* Center - Navigation removed (only logo/back remain) */}
-      <nav />
-
       {/* Right side - Token Balance and Connect Button */}
       <motion.div style={{ display: "flex", alignItems: "center", gap: "clamp(0.5rem, 2vw, 1rem)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
         {/* Token Balance Display */}

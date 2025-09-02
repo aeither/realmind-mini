@@ -74,8 +74,6 @@ export interface BacklogItem {
   topic: string
   addedBy: string
   addedAt: string
-  priority: number // Higher number = higher priority
-  status: 'pending' | 'processing' | 'completed'
 }
 
 export interface BacklogList {

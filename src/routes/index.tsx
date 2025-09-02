@@ -55,6 +55,16 @@ function HomePage() {
   const [isAppReady, setIsAppReady] = useState(false);
   const navigate = useNavigate();
 
+  // Countdown timer state
+  const [countdown, setCountdown] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
+  const [quizCreatedAt, setQuizCreatedAt] = useState<string | null>(null);
+  const [currentQuizTitle, setCurrentQuizTitle] = useState<string>('');
+  const [currentQuizDescription, setCurrentQuizDescription] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  
+  // Get backend URL from environment
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   useEffect(() => {
     const initializeFarcasterSDK = async () => {
       try {
@@ -74,6 +84,109 @@ function HomePage() {
       initializeFarcasterSDK();
     }
   }, [isSDKLoaded]);
+
+  // Countdown timer functions - resets at UTC 00:00
+  const calculateCountdown = () => {
+    const now = new Date();
+    const tomorrow = new Date();
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0); // Next UTC midnight
+    
+    const timeDiff = tomorrow.getTime() - now.getTime();
+
+    if (timeDiff <= 0) {
+      return { hours: 0, minutes: 0, seconds: 0 };
+    }
+
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+    return { hours, minutes, seconds };
+  };
+
+  // Fetch current quiz and set countdown
+  const fetchQuizInfo = async () => {
+    try {
+      const res = await fetch(`${backendUrl}/daily-quiz/cached`);
+      const data = await res.json();
+      
+      if (data.success && data.quizzes && data.quizzes.length > 0) {
+        const quiz = data.quizzes[0];
+        setQuizCreatedAt(quiz.createdAt);
+        setCurrentQuizTitle(quiz.title || 'Daily Quiz');
+        setCurrentQuizDescription(quiz.description || 'Test your knowledge');
+      }
+    } catch (error) {
+      console.error('Error fetching quiz info:', error);
+    }
+  };
+
+  // Update countdown every second - resets at UTC 00:00
+  useEffect(() => {
+    const updateCountdown = () => {
+      setCountdown(calculateCountdown());
+    };
+
+    updateCountdown(); // Initial update
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch quiz info on component mount
+  useEffect(() => {
+    fetchQuizInfo();
+  }, []);
+
+  // Start Daily Quiz function
+  const startDailyQuiz = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${backendUrl}/daily-quiz/cached`);
+      const data = await res.json();
+      
+      if (data.success && data.quizzes && data.quizzes.length > 0) {
+        const quiz = data.quizzes[0];
+        // Convert to frontend format and encode for URL
+        const quizConfig = {
+          id: quiz.id,
+          title: quiz.title,
+          description: quiz.description,
+          difficulty: quiz.difficulty,
+          topic: quiz.topic || quiz.trending_topic,
+          questionCount: quiz.questionCount,
+          questions: quiz.questions.map((q: any) => ({
+            question: q.question,
+            options: q.options,
+            correct: q.correct,
+            explanation: q.explanation
+          })),
+          createdAt: quiz.createdAt,
+          source: quiz.source
+        };
+
+        // UTF-8 safe base64 encoding
+        const utf8ToBase64 = (str: string): string => {
+          return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, 
+            (match, p1) => String.fromCharCode(parseInt(p1, 16))
+          ));
+        };
+        
+        const encodedQuiz = utf8ToBase64(JSON.stringify(quizConfig));
+        const quizUrl = `/quiz-game?quiz=ai-custom&data=${encodedQuiz}`;
+        
+        // Navigate to quiz
+        navigate({ to: quizUrl });
+      } else {
+        console.error('No daily quiz available');
+      }
+    } catch (error) {
+      console.error('Error starting daily quiz:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleQuizSelect = (quizId: string) => {
     setSelectedQuiz(quizId);
@@ -139,6 +252,63 @@ function HomePage() {
 
         {/* AI Quiz Generator Section */}
         <AIQuizGenerator className="mb-3 sm:mb-8 md:mb-12" />
+
+        {/* Daily Quiz Countdown */}
+        <div className="mb-3 sm:mb-8 md:mb-12 max-w-2xl mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-orange-600 text-center">⏰ Daily Quiz Countdown</h2>
+            
+            {countdown ? (
+              <div className="text-center">
+                <div className="flex justify-center space-x-2 sm:space-x-4 mb-4">
+                  <div className="bg-orange-100 rounded-lg p-2 sm:p-3 min-w-12 sm:min-w-16">
+                    <div className="text-lg sm:text-2xl font-bold text-orange-600">{countdown.hours.toString().padStart(2, '0')}</div>
+                    <div className="text-xs text-orange-500">Hours</div>
+                  </div>
+                  <div className="bg-orange-100 rounded-lg p-2 sm:p-3 min-w-12 sm:min-w-16">
+                    <div className="text-lg sm:text-2xl font-bold text-orange-600">{countdown.minutes.toString().padStart(2, '0')}</div>
+                    <div className="text-xs text-orange-500">Minutes</div>
+                  </div>
+                  <div className="bg-orange-100 rounded-lg p-2 sm:p-3 min-w-12 sm:min-w-16">
+                    <div className="text-lg sm:text-2xl font-bold text-orange-600">{countdown.seconds.toString().padStart(2, '0')}</div>
+                    <div className="text-xs text-orange-500">Seconds</div>
+                  </div>
+                </div>
+                
+                {/* Quiz Title and Description */}
+                {currentQuizTitle && (
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 sm:p-4 mb-4 border border-orange-200">
+                    <h3 className="text-base sm:text-lg font-semibold text-orange-700 mb-2">
+                      {currentQuizTitle}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      {currentQuizDescription.length > 100 
+                        ? `${currentQuizDescription.substring(0, 100)}...` 
+                        : currentQuizDescription}
+                    </p>
+                  </div>
+                )}
+                
+                {quizCreatedAt && (
+                  <div className="text-xs text-gray-500 mb-3">
+                    Current quiz created: {new Date(quizCreatedAt).toLocaleString()}
+                  </div>
+                )}
+                <button
+                  onClick={startDailyQuiz}
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                  disabled={loading}
+                >
+                  🎯 Start Daily Quiz
+                </button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-gray-500">Loading countdown...</p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Quiz Selection Cards */}
         <div id="topics" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-3 sm:mb-8 md:mb-12">

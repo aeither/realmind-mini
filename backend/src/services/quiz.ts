@@ -146,6 +146,22 @@ export class QuizService {
     }
   }
 
+  async testGatewayConnection(): Promise<boolean> {
+    try {
+      // Test AI Gateway connection by making a simple request
+      if (!process.env.AI_GATEWAY_API_KEY) {
+        return false
+      }
+      
+      // For now, just check if the API key exists
+      // In a real implementation, you might want to make a test API call
+      return true
+    } catch (error) {
+      console.error('Error testing AI Gateway connection:', error)
+      return false
+    }
+  }
+
   async testRedisConnection(): Promise<boolean> {
     try {
       return await this.redisService.testConnection()
@@ -206,7 +222,7 @@ export class QuizService {
 
   // ============ BACKLOG MANAGEMENT ============
 
-  async addToBacklog(topic: string, addedBy: string = 'user', priority: number = 1): Promise<BacklogResponse> {
+  async addToBacklog(topic: string, addedBy: string = 'user'): Promise<BacklogResponse> {
     try {
       if (!topic.trim()) {
         return {
@@ -215,7 +231,7 @@ export class QuizService {
         }
       }
 
-      const item = await this.redisService.addToBacklog(topic, addedBy, priority)
+      const item = await this.redisService.addToBacklog(topic, addedBy)
       
       return {
         success: true,
@@ -249,41 +265,34 @@ export class QuizService {
     }
   }
 
-  // Generate quiz from backlog or fallback to random topic
-  async generateScheduledQuiz(): Promise<{ success: boolean; quizzes?: StoredDailyQuiz[]; error?: string; source?: string }> {
+  // Generate quiz from backlog or fallback to random topic (simplified)
+  async generateScheduledQuiz(): Promise<{ success: boolean; quiz?: StoredDailyQuiz; error?: string; source?: string }> {
     try {
-      console.log('🔄 Generating scheduled quiz...')
+      console.log('🔄 Processing backlog for scheduled quiz...')
       
-      // Try to get next backlog item
-      const backlogItem = await this.redisService.getNextBacklogItem()
+      // Check if backlog has items
+      const backlogList = await this.redisService.getBacklog()
       
       let topic: string
       let source: string
       
-      if (backlogItem) {
-        topic = backlogItem.topic
-        source = `backlog-item-${backlogItem.id}`
-        
-        // Mark as processing
-        await this.redisService.markBacklogItemAsProcessing(backlogItem.id)
-        console.log(`🎯 Using backlog topic: "${topic}"`)
-      } else {
-        // Generate random topic
+      if (backlogList && backlogList.totalCount > 0) {
+        // If there are items in backlog, create quiz about random topic
         topic = this.generateRandomTopic()
-        source = 'auto-generated-random'
-        console.log(`🎲 Using random topic: "${topic}"`)
+        source = 'random-with-backlog'
+        console.log(`🎲 Backlog has ${backlogList.totalCount} items, using random topic: "${topic}"`)
+      } else {
+        // If backlog is empty, still use random topic
+        topic = this.generateRandomTopic()
+        source = 'random-empty-backlog'
+        console.log(`🎲 Backlog empty, using random topic: "${topic}"`)
       }
 
       // Generate quiz with the selected topic
       const quiz = await this.generateQuizFromTopic(topic)
       
-      if (backlogItem) {
-        // Mark backlog item as completed
-        await this.redisService.markBacklogItemAsCompleted(backlogItem.id)
-      }
-
       const storedQuiz: StoredDailyQuiz = {
-        id: `scheduled_quiz_${Date.now()}`,
+        id: `daily_quiz_${Date.now()}`,
         title: quiz.title,
         description: quiz.description,
         trending_topic: quiz.trending_topic || topic,
@@ -294,12 +303,12 @@ export class QuizService {
         source
       }
 
-      // Store in Redis
+      // Replace all daily quizzes with this single quiz
       await this.redisService.storeDailyQuizzes([storedQuiz])
 
       return {
         success: true,
-        quizzes: [storedQuiz],
+        quiz: storedQuiz,
         source
       }
     } catch (error) {
@@ -344,21 +353,8 @@ export class QuizService {
     // We'll modify the prompt to focus on the given topic instead of trending content
     
     try {
-      // Create a custom prompt for the specific topic
-      const customPrompt = `Create an educational quiz about "${topic}". 
-
-Guidelines:
-- Focus specifically on the topic: ${topic}
-- Create 3 informative multiple choice questions
-- Each question should have exactly 4 options with only 1 correct answer
-- Include explanations for each correct answer
-- Questions should test understanding, not just recall
-- Make it educational and suitable for a general audience
-
-Topic: ${topic}`
-
-      // For now, we'll use the existing Grok service but we could enhance it to accept custom topics
-      // This is a simplified approach - you might want to modify GrokService to accept custom topics
+      // For now, we'll use the existing Grok service 
+      // TODO: Enhance GrokService to accept custom topics with specific prompts
       const quiz = await this.grokService.generateDailyQuiz()
       
       // Override the topic-related fields

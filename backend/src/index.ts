@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { groq } from '@ai-sdk/groq'
+import { gateway } from '@ai-sdk/gateway'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import 'dotenv/config'
@@ -31,7 +31,7 @@ app.get('/', (c) => {
       '/backlog/add',
       '/cron/daily-quiz',
       '/test/insert-quiz',
-      '/health/grok',
+      '/health/gateway',
       '/health/redis'
     ]
   })
@@ -51,7 +51,7 @@ const QuizSchema = z.object({
     z.object({
       question: z.string(),
       options: z.array(z.string()),
-      correct: z.number().int().min(0).max(3),
+      answer: z.number().int().min(0).max(3),
       explanation: z.string()
     })
   )
@@ -59,9 +59,9 @@ const QuizSchema = z.object({
 
 app.post('/generate-quiz', async (c) => {
   try {
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.AI_GATEWAY_API_KEY) {
       return c.json({
-        error: 'Groq API key not configured'
+        error: 'AI Gateway API key not configured'
       }, 500)
     }
 
@@ -75,41 +75,92 @@ app.post('/generate-quiz', async (c) => {
       }, 400)
     }
 
+    console.log(`Generating quiz for topic: "${topic}" with difficulty: ${difficulty}`)
+    
     const { object } = await generateObject({
-      model: groq('moonshotai/kimi-k2-instruct'),
+      model: gateway('cerebras/llama-3.1-8b'),
       schema: QuizSchema,
       prompt: `Generate a ${difficulty} level quiz about "${topic}" with exactly 3 questions.
 
 Requirements:
 - Each question should have exactly 4 multiple choice options
-- Only one correct answer per question (index 0-3)
+- Only one correct answer per question (use index 0-3 for the "answer" field)
 - Include a brief explanation for each correct answer
 - Questions should be educational and test understanding
 - Title should be descriptive
 - Description should explain what the quiz covers
+- Return the response in valid JSON format
 
 Topic: ${topic}
 Difficulty: ${difficulty}
-Number of questions: 3`
+Number of questions: 3
+
+Example format:
+{
+  "title": "Sample Quiz",
+  "description": "A sample quiz description",
+  "questions": [
+    {
+      "question": "What is 2+2?",
+      "options": ["3", "4", "5", "6"],
+      "answer": 1,
+      "explanation": "2+2 equals 4"
+    }
+  ]
+}`
     })
+    
+    console.log('Quiz generated successfully:', object.title)
+
+    // Transform the response to match frontend expectations
+    const transformedQuiz = {
+      id: `quiz_${Date.now()}`,
+      title: object.title,
+      description: object.description,
+      difficulty,
+      topic,
+      questionCount: object.questions.length,
+      createdAt: new Date().toISOString(),
+      questions: object.questions.map(q => ({
+        question: q.question,
+        options: q.options,
+        correct: q.answer, // Map answer to correct for frontend
+        explanation: q.explanation
+      }))
+    }
 
     return c.json({
       success: true,
-      quiz: {
-        id: `quiz_${Date.now()}`,
-        ...object,
-        difficulty,
-        topic,
-        questionCount: object.questions.length,
-        createdAt: new Date().toISOString()
-      }
+      quiz: transformedQuiz
     })
 
   } catch (error) {
     console.error('Error generating quiz:', error)
+    
+    // More detailed error handling
+    let errorMessage = 'Failed to generate quiz'
+    let errorDetails = 'Unknown error'
+    
+    if (error instanceof Error) {
+      errorDetails = error.message
+      
+      // Check for specific error types
+      if (error.message.includes('API key')) {
+        errorMessage = 'Invalid API key configuration'
+      } else if (error.message.includes('rate limit')) {
+        errorMessage = 'Rate limit exceeded. Please try again later.'
+      } else if (error.message.includes('model')) {
+        errorMessage = 'Model configuration error'
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        errorMessage = 'Network connection error'
+      }
+    }
+    
     return c.json({
-      error: 'Failed to generate quiz',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      success: false,
+      error: errorMessage,
+      details: errorDetails,
+      timestamp: new Date().toISOString()
     }, 500)
   }
 })
@@ -171,7 +222,7 @@ app.get('/daily-quiz/cached', async (c) => {
 app.post('/backlog/add', async (c) => {
   try {
     const body = await c.req.json()
-    const { topic, priority = 1, addedBy = 'api' } = body
+    const { topic, addedBy = 'api' } = body
 
     if (!topic || typeof topic !== 'string') {
       return c.json({
@@ -180,7 +231,7 @@ app.post('/backlog/add', async (c) => {
       }, 400)
     }
 
-    const result = await quizService.addToBacklog(topic.trim(), addedBy, priority)
+    const result = await quizService.addToBacklog(topic.trim(), addedBy)
     
     if (result.success) {
       return c.json({
@@ -247,23 +298,24 @@ app.get('/cron/daily-quiz', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    console.log('Cron job triggered: Generating scheduled quiz from backlog')
+    console.log('Cron job triggered: Processing backlog for daily quiz')
     const result = await quizService.generateScheduledQuiz()
     
     if (result.success) {
-      console.log(`Scheduled quiz generated successfully from ${result.source}`)
+      console.log(`Daily quiz generated successfully from ${result.source}`)
       return c.json({
         success: true,
-        message: 'Scheduled quiz generated and stored successfully',
+        message: 'Daily quiz processed from backlog and stored successfully',
         source: result.source,
-        quiz_count: result.quizzes?.length || 0,
+        quiz_title: result.quiz?.title,
+        quiz_topic: result.quiz?.trending_topic,
         timestamp: new Date().toISOString()
       })
     } else {
-      console.error('Failed to generate scheduled quiz:', result.error)
+      console.error('Failed to process backlog for daily quiz:', result.error)
       return c.json({
         success: false,
-        error: 'Failed to generate scheduled quiz',
+        error: 'Failed to process backlog for daily quiz',
         details: result.error,
         timestamp: new Date().toISOString()
       }, 500)
@@ -308,20 +360,20 @@ app.get('/test/insert-quiz', async (c) => {
   }
 })
 
-// Health check for Grok API
-app.get('/health/grok', async (c) => {
+// Health check for AI Gateway
+app.get('/health/gateway', async (c) => {
   try {
-    const isConnected = await quizService.testGrokConnection()
+    const isConnected = await quizService.testGatewayConnection()
     
     return c.json({
       status: isConnected ? 'healthy' : 'unhealthy',
-      service: 'grok_api',
+      service: 'ai_gateway',
       timestamp: new Date().toISOString()
     }, isConnected ? 200 : 503)
   } catch (error) {
     return c.json({
       status: 'error',
-      service: 'grok_api',
+      service: 'ai_gateway',
       error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }, 500)
@@ -349,3 +401,18 @@ app.get('/health/redis', async (c) => {
 })
 
 export default app
+
+// Start the server if this file is run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  import('@hono/node-server').then(({ serve }) => {
+    const port = process.env.PORT || 3000
+    console.log(`🚀 Starting server on port ${port}`)
+    
+    serve({
+      fetch: app.fetch,
+      port: parseInt(port.toString()),
+    })
+    
+    console.log(`✅ Server running at http://localhost:${port}`)
+  }).catch(console.error)
+}
