@@ -8,9 +8,25 @@
     "splashImageUrl": "https://realmind-mini.dailywiser.xyz/icon.png",
     "splashBackgroundColor": "#FFC117",
     "webhookUrl": "https://realmind-mini.dailywiser.xyz/api/webhook",
-    "subtitle": "Interactive learning",
-    "description": "Dailywiser is a decentralized learning platform.",
-    "primaryCategory": "education"
+    "subtitle": "Interactive Learning",
+    "description": "Test your knowledge and earn rewards on Hyperion Testnet with interactive quiz games.",
+    "primaryCategory": "education",
+    "screenshotUrls": [
+      "https://realmind-mini.dailywiser.xyz/icon.png"
+    ],
+    "tags": [
+      "quiz",
+      "learning",
+      "education",
+      "blockchain",
+      "rewards"
+    ],
+    "heroImageUrl": "https://realmind-mini.netlify.app/quiz-preview.jpeg",
+    "tagline": "Learn & Earn",
+    "ogTitle": "Realmind - Interactive Learning",
+    "ogDescription": "Test your knowledge and earn rewards on Hyperion Testnet!",
+    "ogImageUrl": "https://realmind-mini.dailywiser.xyz/icon.png",
+    "noindex": false
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjIxNjM4MywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDIxNEQxNzJDMERjNjBmQTUxNERmOTU0QTgyOGJjQzU1MkJlMzA4MTUifQ",
