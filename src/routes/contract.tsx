@@ -14,7 +14,7 @@ import {
 import { formatEther, parseEther } from 'viem'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { base } from 'viem/chains'
+import { CURRENCY_CONFIG } from '../libs/supportedChains'
 
 function ContractDebugPage() {
   const { address, isConnected, chain } = useAccount();
@@ -30,42 +30,57 @@ function ContractDebugPage() {
   const [newVaultAddress, setNewVaultAddress] = useState<string>('');
 
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : null;
+  
+  // Get currency config for current chain
+  const currencyConfig = chain ? (CURRENCY_CONFIG[chain.id as keyof typeof CURRENCY_CONFIG] || CURRENCY_CONFIG.default) : CURRENCY_CONFIG.default;
 
   // Get user balance
   const { data: balance } = useBalance({
     address,
-    chainId: chain?.id || base.id,
+    chainId: chain?.id,
   });
 
   // Read contract data
   const { data: owner, refetch: refetchOwner } = useReadContract({
     abi: quizGameABI,
-    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
     functionName: 'owner',
     chainId: chain?.id,
+    query: {
+      enabled: !!contractAddresses,
+    },
   });
 
   const { data: tokenAddress, refetch: refetchToken } = useReadContract({
     abi: quizGameABI,
-    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
     functionName: 'token',
     chainId: chain?.id,
+    query: {
+      enabled: !!contractAddresses,
+    },
   });
 
   const { data: vaultAddress, refetch: refetchVault } = useReadContract({
     abi: quizGameABI,
-    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
     functionName: 'vaultAddress',
     chainId: chain?.id,
+    query: {
+      enabled: !!contractAddresses,
+    },
   });
 
   const { data: userSession, refetch: refetchSession } = useReadContract({
     abi: quizGameABI,
-    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
     functionName: 'getQuizSession',
     args: address ? [address] : undefined,
     chainId: chain?.id,
+    query: {
+      enabled: !!contractAddresses && !!address,
+    },
   });
 
   // Write contract hooks
@@ -152,7 +167,7 @@ function ContractDebugPage() {
   const isCorrectChain = chain ? supportedChainIds.includes(chain.id) : false;
 
   const handleStartQuiz = () => {
-    if (!isConnected) return;
+    if (!isConnected || !contractAddresses) return;
     
     resetStart();
     startQuiz({
@@ -166,7 +181,7 @@ function ContractDebugPage() {
   };
 
   const handleCompleteQuiz = () => {
-    if (!isConnected) return;
+    if (!isConnected || !contractAddresses) return;
     
     resetComplete();
     completeQuiz({
@@ -179,7 +194,7 @@ function ContractDebugPage() {
   };
 
   const handleWithdraw = () => {
-    if (!isConnected) return;
+    if (!isConnected || !contractAddresses) return;
     
     resetWithdraw();
     withdraw({
@@ -191,7 +206,7 @@ function ContractDebugPage() {
   };
 
   const handleMintToken = () => {
-    if (!isConnected || !address) return;
+    if (!isConnected || !address || !contractAddresses) return;
     
     resetMintToken();
     mintToken({
@@ -211,7 +226,7 @@ function ContractDebugPage() {
   };
 
   const handleTransferOwnership = () => {
-    if (!isConnected || !newOwnerAddress) return;
+    if (!isConnected || !newOwnerAddress || !contractAddresses) return;
     
     resetTransferOwnership();
     transferOwnership({
@@ -224,7 +239,7 @@ function ContractDebugPage() {
   };
 
   const handleRenounceOwnership = () => {
-    if (!isConnected) return;
+    if (!isConnected || !contractAddresses) return;
     
     resetRenounceOwnership();
     renounceOwnership({
@@ -236,7 +251,7 @@ function ContractDebugPage() {
   };
 
   const handleSetVaultAddress = () => {
-    if (!isConnected || !newVaultAddress) return;
+    if (!isConnected || !newVaultAddress || !contractAddresses) return;
     
     resetSetVaultAddress();
     setVaultAddress({
@@ -447,7 +462,7 @@ function ContractDebugPage() {
               borderRadius: "6px",
               wordBreak: "break-all"
             }}>
-              {contractAddresses.quizGameContractAddress}
+              {contractAddresses?.quizGameContractAddress || 'Connect wallet to view'}
             </p>
           </div>
 
@@ -462,7 +477,7 @@ function ContractDebugPage() {
               borderRadius: "6px",
               wordBreak: "break-all"
             }}>
-              {contractAddresses.token1ContractAddress}
+              {contractAddresses?.token1ContractAddress || 'Connect wallet to view'}
             </p>
           </div>
 
@@ -490,7 +505,7 @@ function ContractDebugPage() {
               padding: "0.5rem",
               borderRadius: "6px"
             }}>
-              {balance ? formatEther(balance.value) : "Loading..."} {chain?.nativeCurrency?.symbol || "ETH"}
+              {balance ? formatEther(balance.value) : "Loading..."} {currencyConfig.symbol}
             </p>
           </div>
 
@@ -568,7 +583,7 @@ function ContractDebugPage() {
 
           <div style={{ marginBottom: "1rem" }}>
             <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
-              Entry Amount (ETH):
+              Entry Amount ({currencyConfig.symbol}):
             </label>
             <input
               type="number"
@@ -618,7 +633,7 @@ function ContractDebugPage() {
               🎯 How It Works
             </h4>
             <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "0.9rem", color: "#155e75" }}>
-              <li>Pay ETH to start quiz</li>
+              <li>Pay {currencyConfig.symbol} to start quiz</li>
               <li>Get 1000x tokens immediately</li>
               <li>Answer correctly for 20% bonus</li>
               <li>Keep initial tokens even if wrong!</li>
@@ -641,7 +656,7 @@ function ContractDebugPage() {
 
           <div style={{ marginBottom: "1rem" }}>
             <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
-              Amount (ETH):
+              Amount ({currencyConfig.symbol}):
             </label>
             <input
               type="number"
@@ -921,7 +936,7 @@ function ContractDebugPage() {
                 <strong>Expected Correct Answers:</strong> {(userSession as any).correctAnswers?.toString() || "N/A"}
               </div>
               <div style={{ marginBottom: "1rem" }}>
-                <strong>Amount Paid:</strong> {(userSession as any).amountPaid ? formatEther((userSession as any).amountPaid) : "0"} ETH
+                <strong>Amount Paid:</strong> {(userSession as any).amountPaid ? formatEther((userSession as any).amountPaid) : "0"} {currencyConfig.symbol}
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <strong>Initial Tokens:</strong> {(userSession as any).amountPaid ? formatEther((userSession as any).amountPaid * BigInt(1000)) : "0"} TK1

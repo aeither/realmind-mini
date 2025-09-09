@@ -4,26 +4,7 @@ import { toast } from 'sonner';
 import { useAccount, useDisconnect, useReadContract, useSwitchChain, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { getContractAddresses } from '../libs/constants';
 import { quizGameABI } from '../libs/quizGameABI';
-import { SUPPORTED_CHAINS } from '../libs/supportedChains';
-
-// Currency configuration for different chains
-const CURRENCY_CONFIG = {
-  8453: { // Base Mainnet
-    symbol: 'ETH',
-    multiplier: 1,
-    defaultAmounts: ['0.001', '0.01', '0.1']
-  },
-  42220: { // Celo Mainnet
-    symbol: 'CELO',
-    multiplier: 1,
-    defaultAmounts: ['0.001', '0.01', '0.1']
-  },
-  default: { // Fallback configuration
-    symbol: 'ETH',
-    multiplier: 1,
-    defaultAmounts: ['0.001', '0.01', '0.1']
-  }
-} as const;
+import { SUPPORTED_CHAINS, CURRENCY_CONFIG } from '../libs/supportedChains';
 
 // Available quiz configurations
 const QUIZ_CONFIGS = {
@@ -53,7 +34,7 @@ function QuizGameContract() {
   const { disconnect } = useDisconnect();
 
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(SUPPORTED_CHAINS[0].id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : null;
   
   // Get currency config for current chain
   const currencyConfig = chain ? (CURRENCY_CONFIG[chain.id as keyof typeof CURRENCY_CONFIG] || CURRENCY_CONFIG.default) : CURRENCY_CONFIG.default;
@@ -64,22 +45,22 @@ function QuizGameContract() {
 
   // Contract reads
   const { data: userSession } = useReadContract({
-    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
     abi: quizGameABI,
     functionName: 'getQuizSession',
     args: [address as `0x${string}`],
     query: {
-      enabled: !!address,
+      enabled: !!address && !!contractAddresses,
     },
   });
 
   const { data: hasActiveQuiz } = useReadContract({
-    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
     abi: quizGameABI,
     functionName: 'hasActiveQuiz',
     args: [address as `0x${string}`],
     query: {
-      enabled: !!address,
+      enabled: !!address && !!contractAddresses,
     },
   });
 
@@ -218,6 +199,7 @@ function QuizGameContract() {
             </Link>
             <button
               onClick={() => {
+                if (!contractAddresses) return;
                 completeQuiz({
                   address: contractAddresses.quizGameContractAddress as `0x${string}`,
                   abi: quizGameABI,

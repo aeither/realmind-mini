@@ -7,7 +7,6 @@ import { toast } from 'sonner'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
 import GlobalHeader from '../components/GlobalHeader'
-import { base } from 'viem/chains'
 
 interface Task {
   id: number
@@ -23,7 +22,7 @@ function DemoPage() {
   const [completedTasks, setCompletedTasks] = useState<number[]>([])
   const [autoPlay, setAutoPlay] = useState(false)
 
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id)
+  const contractAddresses = chain ? getContractAddresses(chain.id) : null
 
   // Contract writes for demo
   const { writeContract: startQuiz, isPending: isStartPending, data: startHash } = useWriteContract()
@@ -77,6 +76,7 @@ function DemoPage() {
     // Demo quiz expects 3 questions to be answered correctly
     const expectedCorrectAnswers = BigInt(3)
     
+    if (!contractAddresses) return;
     startQuiz({
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       abi: quizGameABI,
@@ -89,6 +89,7 @@ function DemoPage() {
   const handleCompleteQuiz = () => {
     if (!address) return
     
+    if (!contractAddresses) return;
     completeQuiz({
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       abi: quizGameABI,

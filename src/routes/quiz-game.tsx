@@ -6,7 +6,7 @@ import { parseEther } from 'viem'
 import { toast } from 'sonner'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { SUPPORTED_CHAINS } from '../libs/supportedChains'
+import { SUPPORTED_CHAINS, CURRENCY_CONFIG } from '../libs/supportedChains'
 import GlobalHeader from '../components/GlobalHeader'
 import { AIQuizGenerator } from '../libs/aiQuizGenerator'
 
@@ -108,7 +108,7 @@ function QuizGame() {
   const [quizStarted, setQuizStarted] = useState(false)
   const [questionResults, setQuestionResults] = useState<Array<{userAnswered: boolean, userCorrect: boolean, aiCorrect: boolean}>>([])
   const [justCompletedQuiz, setJustCompletedQuiz] = useState(false)
-  const FIXED_ENTRY_AMOUNT = '0.00005' // Fixed entry amount in ETH
+  const FIXED_ENTRY_AMOUNT = '0.00005' // Fixed entry amount
 
   // Function to restart the quiz in AI challenge mode
   const handleRestartQuiz = () => {
@@ -129,7 +129,10 @@ function QuizGame() {
     setQuestionResults([])
   }
 
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(SUPPORTED_CHAINS[0].id)
+  const contractAddresses = chain ? getContractAddresses(chain.id) : null
+  
+  // Get currency config for current chain
+  const currencyConfig = chain ? (CURRENCY_CONFIG[chain.id as keyof typeof CURRENCY_CONFIG] || CURRENCY_CONFIG.default) : CURRENCY_CONFIG.default
   
   // Handle AI-generated quizzes
   let quizConfig = null
@@ -174,12 +177,12 @@ function QuizGame() {
 
   // Contract reads
   const { data: userSession } = useReadContract({
-    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
     abi: quizGameABI,
     functionName: 'getQuizSession',
     args: [address as `0x${string}`],
     query: {
-      enabled: !!address,
+      enabled: !!address && !!contractAddresses,
       refetchInterval: 10000, // Refetch every 10 seconds instead of constantly
       staleTime: 5000, // Consider data fresh for 5 seconds
       retry: 1, // Reduce retry attempts
@@ -187,12 +190,12 @@ function QuizGame() {
   });
 
   const { data: hasActiveQuiz } = useReadContract({
-    address: contractAddresses.quizGameContractAddress as `0x${string}`,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
     abi: quizGameABI,
     functionName: 'hasActiveQuiz',
     args: [address as `0x${string}`],
     query: {
-      enabled: !!address,
+      enabled: !!address && !!contractAddresses,
       refetchInterval: 10000, // Refetch every 10 seconds instead of constantly
       staleTime: 5000, // Consider data fresh for 5 seconds
       retry: 1, // Reduce retry attempts
@@ -386,6 +389,7 @@ function QuizGame() {
       // Expected correct answers is the total number of questions
       const expectedCorrectAnswers = BigInt(quizConfig.questions.length)
       
+      if (!contractAddresses) return;
       startQuiz({
         address: contractAddresses.quizGameContractAddress as `0x${string}`,
         abi: quizGameABI,
@@ -477,6 +481,7 @@ function QuizGame() {
     // Pass the actual score (number of correct answers) to the contract
     const correctAnswerCount = BigInt(score)
     
+    if (!contractAddresses) return;
     completeQuiz({
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       abi: quizGameABI,
@@ -753,7 +758,7 @@ function QuizGame() {
                   }}>
                     <h3 style={{ color: "#14532d", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                       Base Tokens: {FIXED_ENTRY_AMOUNT} ETH × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} TK1
+                      Tokens: {FIXED_ENTRY_AMOUNT} {currencyConfig.symbol} × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} XP3
                     </p>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
                       AI Challenge Bonus: 50% extra for beating the bot!
@@ -796,7 +801,7 @@ function QuizGame() {
                   }}>
                     <h3 style={{ color: "#92400e", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                       Base Tokens: {FIXED_ENTRY_AMOUNT} ETH × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} TK1
+                       Base Tokens: {FIXED_ENTRY_AMOUNT} {currencyConfig.symbol} × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} TK1
                     </p>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
                       Tie Bonus: 25% extra for matching the AI!
@@ -859,7 +864,7 @@ function QuizGame() {
               }}>
                 <h3 style={{ color: "#14532d", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
                 <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                   Base Tokens: {FIXED_ENTRY_AMOUNT} ETH × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} TK1
+                   Base Tokens: {FIXED_ENTRY_AMOUNT} {currencyConfig.symbol} × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} TK1
                 </p>
                 <p style={{ color: "#374151", margin: "0.5rem 0" }}>
                   Bonus: {score === quizConfig.questions.length ? '20% additional tokens for all correct answers!' : 'Better luck next time!'}

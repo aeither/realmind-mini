@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useAccount } from 'wagmi';
 import { aiQuizGenerator } from '../libs/aiQuizGenerator';
 import { toast } from 'sonner';
 
@@ -31,6 +32,7 @@ const POPULAR_TOPICS = [
 
 export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps) {
   const navigate = useNavigate();
+  const { chain } = useAccount();
   const [isOpen, setIsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState<{
@@ -91,14 +93,18 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
               <h2 className="text-2xl font-bold text-foreground">AI Quiz Generator</h2>
             </div>
             <p className="text-muted-foreground mb-4">
-              Generate personalized quizzes on any topic using AI! Get questions tailored to your interests and skill level.
+              Generate personalized quizzes on any topic using AI! Earn XP per quiz + bonus for perfect scores.
             </p>
             <button
               onClick={() => setIsOpen(true)}
-              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white 
-                         rounded-xl font-bold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+              disabled={!chain}
+              className={`px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-lg ${
+                !chain 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 hover:shadow-xl'
+              }`}
             >
-              🎯 Create Custom Quiz
+              {!chain ? '🔗 Connect Wallet First' : '🎯 Create Custom Quiz'}
             </button>
           </div>
         </div>
@@ -181,9 +187,9 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
           <div className="pt-4">
             <button
               onClick={handleGenerateQuiz}
-              disabled={isGenerating || !formData.topic.trim()}
+              disabled={isGenerating || !formData.topic.trim() || !chain}
               className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
-                isGenerating || !formData.topic.trim()
+                isGenerating || !formData.topic.trim() || !chain
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 shadow-lg hover:shadow-xl'
               }`}

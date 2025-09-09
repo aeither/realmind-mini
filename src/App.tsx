@@ -7,7 +7,6 @@ import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { config } from './wagmi'
-import { base } from 'viem/chains'
 
 const router = createRouter({ routeTree })
 
@@ -42,7 +41,6 @@ function App() {
           })}
           modalSize="compact"
           showRecentTransactions={true}
-          initialChain={base}
           appInfo={{
             appName: 'Realmind',
           }}

@@ -85,9 +85,7 @@ export function getContractAddresses(chainId: number) {
   };
 }
 
-// Legacy exports for backward compatibility (defaults to Base mainnet)
-export const token1ContractAddress = CONTRACT_ADDRESSES[8453].token1ContractAddress;
-export const quizGameContractAddress = CONTRACT_ADDRESSES[8453].quizGameContractAddress;
+// Legacy exports removed - use getContractAddresses(chainId) instead
 
 // Demo configuration
 export const DEMO_CONFIG = {

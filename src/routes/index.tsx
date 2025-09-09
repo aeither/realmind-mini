@@ -2,9 +2,9 @@ import { sdk } from '@farcaster/miniapp-sdk'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { getContractAddresses } from '../libs/constants'
 import AIQuizGenerator from '../components/AIQuizGenerator'
-import { base } from 'viem/chains'
 interface Quiz {
   id: string;
   title: string;
@@ -50,7 +50,7 @@ function HomePage() {
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(base.id);
+  const contractAddresses = chain ? getContractAddresses(chain.id) : null;
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [isAppReady, setIsAppReady] = useState(false);
   const navigate = useNavigate();
@@ -189,6 +189,9 @@ function HomePage() {
   };
 
   const handleQuizSelect = (quizId: string) => {
+    if (!chain) {
+      return; // Don't allow quiz selection without wallet connection
+    }
     setSelectedQuiz(quizId);
     // Navigate to quiz using TanStack Router
     navigate({ to: '/quiz-game', search: { quiz: quizId } });
@@ -202,43 +205,101 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-2 py-1 sm:px-4 sm:py-3 md:p-8">
-        {/* Hero Section - Simplified Duolingo-like */}
+        {/* Hero Section - Clear User Goals */}
         <div className="text-center mb-3 sm:mb-6">
           <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold mb-1 sm:mb-3 text-foreground">
-            Learn by Playing
+            Welcome to Realmind! 🧠
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-3 sm:mb-6 max-w-2xl mx-auto px-1 sm:px-4">
-            Short, fun quizzes to build real crypto knowledge. Pick a topic and start earning points.
+            Learn blockchain daily, earn XP, and climb the leaderboard. Choose your learning path:
           </p>
+          
+          {/* Clear Action Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-lg p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl mb-2">🎯</div>
+              <h3 className="font-bold text-orange-700 text-sm sm:text-base mb-1">Daily Quiz</h3>
+              <p className="text-xs sm:text-sm text-orange-600">Complete today's quiz to earn XP and climb the leaderboard</p>
+            </div>
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl mb-2">🤖</div>
+              <h3 className="font-bold text-blue-700 text-sm sm:text-base mb-1">AI Custom Quiz</h3>
+              <p className="text-xs sm:text-sm text-blue-600">Generate personalized quizzes on any topic you want to learn</p>
+            </div>
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl mb-2">🏆</div>
+              <h3 className="font-bold text-green-700 text-sm sm:text-base mb-1">Leaderboard</h3>
+              <p className="text-xs sm:text-sm text-green-600">See your ranking and compete with other learners globally</p>
+            </div>
+          </div>
         </div>
 
-        {/* Leaderboard Section - Compact Mobile Design */}
+        {/* Wallet Connection Prompt */}
+        {!chain && (
+          <div className="mb-3 sm:mb-6 md:mb-8 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg shadow-lg p-4 sm:p-6 text-center">
+              <div className="text-4xl mb-3">🔗</div>
+              <h2 className="text-lg sm:text-xl font-semibold mb-2 text-blue-700">Connect Your Wallet</h2>
+              <p className="text-sm text-blue-600 mb-4">
+                Connect your wallet to start earning XP, taking quizzes, and climbing the leaderboard!
+              </p>
+              <div className="flex justify-center">
+                <ConnectButton
+                  accountStatus={{
+                    smallScreen: 'avatar',
+                    largeScreen: 'full',
+                  }}
+                  chainStatus={{
+                    smallScreen: 'icon',
+                    largeScreen: 'full',
+                  }}
+                  showBalance={{
+                    smallScreen: false,
+                    largeScreen: true,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* XP & Leaderboard System - Clear Explanation */}
         <div className="text-center mb-2 sm:mb-6 md:mb-8">
           <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-4 md:p-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-center mb-1 sm:mb-2 md:mb-3">
               <span className="text-lg sm:text-2xl md:text-3xl mr-1 sm:mr-2">🏆</span>
-              <h2 className="text-xs sm:text-lg md:text-xl font-bold text-foreground text-center">August Initiation Campaign</h2>
+              <h2 className="text-xs sm:text-lg md:text-xl font-bold text-foreground text-center">Earn XP & Climb Leaderboard</h2>
             </div>
             <div className="bg-white rounded-md sm:rounded-lg md:rounded-xl p-1 sm:p-2 md:p-3 mb-1 sm:mb-2 md:mb-3 border border-yellow-200">
               <p className="text-xs sm:text-sm md:text-lg font-bold text-primary mb-0.5 sm:mb-1">
-                Season3 Points
+                How XP Works
               </p>
               <p className="text-xs text-muted-foreground">
-                Earn points with every quiz
+                Daily Quiz: 100 XP • Custom Quiz: 50 XP • Perfect Score: +50% bonus
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 md:gap-3 justify-center items-center">
+              {contractAddresses ? (
+                <a
+                  href={chain?.id === 8453 
+                    ? `https://basescan.org/token/${contractAddresses.token1ContractAddress}#balances`
+                    : `https://celoscan.io/token/${contractAddresses.token1ContractAddress}#balances`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-white 
+                             rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base"
+                >
+                  🏅 View Leaderboard
+                </a>
+              ) : (
+                <div className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gray-300 text-gray-500 
+                               rounded-md sm:rounded-lg font-bold text-xs sm:text-sm md:text-base cursor-not-allowed">
+                  🏅 Connect Wallet
+                </div>
+              )}
               <a
-                href={`https://basescan.org/token/${contractAddresses.token1ContractAddress}#balances`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-white 
-                           rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base"
-              >
-                🏅 View Leaderboard
-              </a>
-              <a
-                href="https://x.com/DailyWiser_/status/1956651487800783034"
+                href="https://x.com/DailyWiser_"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-blue-500 text-white 
@@ -253,10 +314,11 @@ function HomePage() {
         {/* AI Quiz Generator Section */}
         <AIQuizGenerator className="mb-3 sm:mb-8 md:mb-12" />
 
-        {/* Daily Quiz Countdown */}
+        {/* Daily Quiz - Primary Action */}
         <div className="mb-3 sm:mb-8 md:mb-12 max-w-2xl mx-auto">
-          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-orange-600 text-center">⏰ Daily Quiz Countdown</h2>
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-lg shadow-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-orange-600 text-center">🎯 Today's Daily Quiz</h2>
+            <p className="text-sm text-orange-600 text-center mb-4">Complete this quiz to earn 100 XP and climb the leaderboard!</p>
             
             {countdown ? (
               <div className="text-center">
@@ -296,10 +358,14 @@ function HomePage() {
                 )}
                 <button
                   onClick={startDailyQuiz}
-                  className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
-                  disabled={loading}
+                  className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-lg transition-all duration-300 shadow-lg text-sm sm:text-base ${
+                    !chain 
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:shadow-xl'
+                  }`}
+                  disabled={loading || !chain}
                 >
-                  🎯 Start Daily Quiz
+                  {!chain ? '🔗 Connect Wallet First' : '🎯 Start Daily Quiz'}
                 </button>
               </div>
             ) : (
@@ -310,36 +376,46 @@ function HomePage() {
           </div>
         </div>
 
-        {/* Quiz Selection Cards */}
-        <div id="topics" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-3 sm:mb-8 md:mb-12">
-          {AVAILABLE_QUIZZES.map((quiz, index) => (
-            <QuizCard
-              key={quiz.id}
-              quiz={quiz}
-              isSelected={selectedQuiz === quiz.id}
-              onSelect={() => handleQuizSelect(quiz.id)}
-              delay={`${index * 200}ms`}
-            />
-          ))}
+        {/* Learning Topics - Alternative to Daily Quiz */}
+        <div className="mb-3 sm:mb-8 md:mb-12">
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">📚 Or Learn Specific Topics</h2>
+            <p className="text-sm text-muted-foreground">Choose from these curated learning paths (50 XP each)</p>
+          </div>
+          <div id="topics" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6">
+            {AVAILABLE_QUIZZES.map((quiz, index) => (
+              <QuizCard
+                key={quiz.id}
+                quiz={quiz}
+                isSelected={selectedQuiz === quiz.id}
+                onSelect={() => handleQuizSelect(quiz.id)}
+                delay={`${index * 200}ms`}
+                isDisabled={!chain}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function QuizCard({ quiz, isSelected, onSelect, delay }: {
+function QuizCard({ quiz, isSelected, onSelect, delay, isDisabled = false }: {
   quiz: Quiz;
   isSelected: boolean;
   onSelect: () => void;
   delay: string;
+  isDisabled?: boolean;
 }) {
   return (
     <div
-      onClick={onSelect}
-      className={`quiz-card rounded-xl sm:rounded-2xl p-2 sm:p-4 md:p-6 cursor-pointer transition-all duration-300 animate-bounce-in group
-                  ${isSelected 
-                    ? 'ring-2 ring-primary quiz-glow scale-105' 
-                    : 'hover:scale-105 hover:quiz-button-glow'
+      onClick={isDisabled ? undefined : onSelect}
+      className={`quiz-card rounded-xl sm:rounded-2xl p-2 sm:p-4 md:p-6 transition-all duration-300 animate-bounce-in group
+                  ${isDisabled 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : isSelected 
+                      ? 'ring-2 ring-primary quiz-glow scale-105 cursor-pointer' 
+                      : 'hover:scale-105 hover:quiz-button-glow cursor-pointer'
                   }`}
       style={{ animationDelay: delay }}
     >

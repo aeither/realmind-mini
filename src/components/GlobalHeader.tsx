@@ -19,26 +19,26 @@ function GlobalHeader({
   const { address, chain } = useAccount();
   
   // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : getContractAddresses(8453); // Default to Base Mainnet
+  const contractAddresses = chain ? getContractAddresses(chain.id) : null;
 
   // Get Token1 balance using read contract
   const { data: tokenBalance } = useReadContract({
-    address: contractAddresses.token1ContractAddress as `0x${string}`,
+    address: contractAddresses?.token1ContractAddress as `0x${string}`,
     abi: token1ABI,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
     query: {
-      enabled: !!address,
+      enabled: !!address && !!contractAddresses,
     },
   });
 
   // Get Token1 symbol
   const { data: tokenSymbol } = useReadContract({
-    address: contractAddresses.token1ContractAddress as `0x${string}`,
+    address: contractAddresses?.token1ContractAddress as `0x${string}`,
     abi: token1ABI,
     functionName: 'symbol',
     query: {
-      enabled: !!address,
+      enabled: !!address && !!contractAddresses,
     },
   });
   
