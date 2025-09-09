@@ -174,6 +174,13 @@ contract QuizGame is Ownable, ReentrancyGuard {
         token.mint(to, amount);
     }
 
+    // Owner-only function to transfer Token1 ownership to a new address
+    // This allows deploying a new QuizGame contract and transferring Token1 ownership to it
+    function transferTokenOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "New owner cannot be zero address");
+        token.transferOwnership(newOwner);
+    }
+
     // Withdraw ETH collected with reentrancy guard
     function withdraw() external onlyOwner nonReentrant {
         uint256 balance = address(this).balance;

@@ -28,6 +28,7 @@ function ContractDebugPage() {
   const [submittedAnswer, setSubmittedAnswer] = useState<number>(42);
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>('');
   const [newVaultAddress, setNewVaultAddress] = useState<string>('');
+  const [newTokenOwnerAddress, setNewTokenOwnerAddress] = useState<string>('');
 
   // Get contract addresses based on current chain
   const contractAddresses = chain ? getContractAddresses(chain.id) : null;
@@ -150,6 +151,14 @@ function ContractDebugPage() {
     reset: resetSetVaultAddress
   } = useWriteContract();
 
+  const { 
+    data: transferTokenOwnershipHash, 
+    isPending: isTransferTokenOwnershipPending,
+    writeContract: transferTokenOwnership,
+    error: transferTokenOwnershipError,
+    reset: resetTransferTokenOwnership
+  } = useWriteContract();
+
   // Wait for transaction confirmations
   const { isLoading: isStartConfirming, isSuccess: isStartConfirmed } = 
     useWaitForTransactionReceipt({ hash: startQuizHash });
@@ -171,6 +180,9 @@ function ContractDebugPage() {
 
   const { isLoading: isSetVaultAddressConfirming, isSuccess: isSetVaultAddressConfirmed } = 
     useWaitForTransactionReceipt({ hash: setVaultAddressHash });
+
+  const { isLoading: isTransferTokenOwnershipConfirming, isSuccess: isTransferTokenOwnershipConfirmed } = 
+    useWaitForTransactionReceipt({ hash: transferTokenOwnershipHash });
 
   // Check if current chain is supported
   const supportedChainIds = [8453]; // Base Mainnet only
@@ -270,6 +282,19 @@ function ContractDebugPage() {
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       functionName: 'setVaultAddress',
       args: [newVaultAddress as `0x${string}`],
+      chainId: chain?.id,
+    });
+  };
+
+  const handleTransferTokenOwnership = () => {
+    if (!isConnected || !newTokenOwnerAddress || !contractAddresses) return;
+    
+    resetTransferTokenOwnership();
+    transferTokenOwnership({
+      abi: quizGameABI,
+      address: contractAddresses.quizGameContractAddress as `0x${string}`,
+      functionName: 'transferTokenOwnership',
+      args: [newTokenOwnerAddress as `0x${string}`],
       chainId: chain?.id,
     });
   };
@@ -959,6 +984,56 @@ function ContractDebugPage() {
               {isSetVaultAddressPending ? "Confirming..." : isSetVaultAddressConfirming ? "Setting Vault..." : "🏦 Set Vault Address"}
             </button>
           </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
+              🪙 Token1 Ownership Transfer
+            </label>
+            <input
+              type="text"
+              placeholder="New Token1 owner address (0x...)"
+              value={newTokenOwnerAddress}
+              onChange={(e) => setNewTokenOwnerAddress(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "2px solid hsl(var(--border))",
+                fontSize: "1rem",
+                marginBottom: "0.5rem"
+              }}
+            />
+            
+            <button
+              onClick={handleTransferTokenOwnership}
+              disabled={isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming || !newTokenOwnerAddress}
+              style={{
+                backgroundColor: isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming || !newTokenOwnerAddress ? "#9ca3af" : "#10b981",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                padding: "0.75rem 1rem",
+                fontSize: "1rem",
+                cursor: isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming || !newTokenOwnerAddress ? "not-allowed" : "pointer",
+                width: "100%",
+                fontWeight: 700
+              }}
+            >
+              {isTransferTokenOwnershipPending ? "Confirming..." : isTransferTokenOwnershipConfirming ? "Transferring Token1..." : "🪙 Transfer Token1 Ownership"}
+            </button>
+            
+            <div style={{ 
+              background: "#fef3c7", 
+              border: "2px solid #f59e0b", 
+              borderRadius: "8px", 
+              padding: "0.75rem",
+              marginTop: "0.5rem"
+            }}>
+              <p style={{ margin: 0, fontSize: "0.8rem", color: "#92400e" }}>
+                <strong>⚠️ Use Case:</strong> Transfer Token1 ownership to a new QuizGame contract when deploying an updated version.
+              </p>
+            </div>
+          </div>
         </motion.div>
 
         {/* Token1 Contract Functions */}
@@ -1061,7 +1136,7 @@ function ContractDebugPage() {
       {(isStartPending || isStartConfirming || isCompletePending || isCompleteConfirming || 
         isWithdrawPending || isWithdrawConfirming || isMintTokenPending || isMintTokenConfirming ||
         isTransferOwnershipPending || isTransferOwnershipConfirming || isRenounceOwnershipPending || isRenounceOwnershipConfirming ||
-        isSetVaultAddressPending || isSetVaultAddressConfirming) && (
+        isSetVaultAddressPending || isSetVaultAddressConfirming || isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -1083,13 +1158,14 @@ function ContractDebugPage() {
              isMintTokenPending || isMintTokenConfirming ? "QuizGame: Minting tokens to Token1..." :
              isTransferOwnershipPending || isTransferOwnershipConfirming ? "QuizGame: Transferring ownership..." :
              isRenounceOwnershipPending || isRenounceOwnershipConfirming ? "QuizGame: Renouncing ownership..." :
-             isSetVaultAddressPending || isSetVaultAddressConfirming ? "QuizGame: Setting vault address..." : ""}
+             isSetVaultAddressPending || isSetVaultAddressConfirming ? "QuizGame: Setting vault address..." :
+             isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming ? "QuizGame: Transferring Token1 ownership..." : ""}
           </p>
         </div>
       )}
 
       {/* Error Messages */}
-      {(startError || completeError || withdrawError || mintTokenError || transferOwnershipError || renounceOwnershipError || setVaultAddressError) && (
+      {(startError || completeError || withdrawError || mintTokenError || transferOwnershipError || renounceOwnershipError || setVaultAddressError || transferTokenOwnershipError) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -1106,14 +1182,14 @@ function ContractDebugPage() {
           </p>
           <p style={{ margin: 0, color: "#991b1b", fontSize: "0.9rem" }}>
             {startError?.message || completeError?.message || withdrawError?.message || mintTokenError?.message || 
-             transferOwnershipError?.message || renounceOwnershipError?.message || setVaultAddressError?.message}
+             transferOwnershipError?.message || renounceOwnershipError?.message || setVaultAddressError?.message || transferTokenOwnershipError?.message}
           </p>
         </div>
       )}
 
       {/* Success Messages */}
       {(isStartConfirmed || isCompleteConfirmed || isWithdrawConfirmed || isMintTokenConfirmed || 
-        isTransferOwnershipConfirmed || isRenounceOwnershipConfirmed || isSetVaultAddressConfirmed) && (
+        isTransferOwnershipConfirmed || isRenounceOwnershipConfirmed || isSetVaultAddressConfirmed || isTransferTokenOwnershipConfirmed) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -1135,7 +1211,8 @@ function ContractDebugPage() {
              isMintTokenConfirmed ? "QuizGame: Tokens minted to Token1 successfully!" :
              isTransferOwnershipConfirmed ? "QuizGame: Ownership transferred successfully!" :
              isRenounceOwnershipConfirmed ? "QuizGame: Ownership renounced successfully!" :
-             isSetVaultAddressConfirmed ? "QuizGame: Vault address updated successfully!" : ""}
+             isSetVaultAddressConfirmed ? "QuizGame: Vault address updated successfully!" :
+             isTransferTokenOwnershipConfirmed ? "QuizGame: Token1 ownership transferred successfully!" : ""}
           </p>
         </div>
       )}
