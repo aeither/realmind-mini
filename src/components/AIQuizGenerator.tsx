@@ -93,7 +93,7 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
               <h2 className="text-2xl font-bold text-foreground">AI Quiz Generator</h2>
             </div>
             <p className="text-muted-foreground mb-4">
-              Generate personalized quizzes on any topic using AI! Earn XP per quiz + bonus for perfect scores.
+              Generate personalized quizzes on any topic using AI!
             </p>
             <button
               onClick={() => setIsOpen(true)}

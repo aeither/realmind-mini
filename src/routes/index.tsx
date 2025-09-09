@@ -318,7 +318,7 @@ function HomePage() {
         <div className="mb-3 sm:mb-8 md:mb-12 max-w-2xl mx-auto">
           <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-lg shadow-lg p-4 sm:p-6">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-orange-600 text-center">🎯 Today's Daily Quiz</h2>
-            <p className="text-sm text-orange-600 text-center mb-4">Complete this quiz to earn 100 XP and climb the leaderboard!</p>
+            <p className="text-sm text-orange-600 text-center mb-4">Complete to earn XP and climb the leaderboard!</p>
             
             {countdown ? (
               <div className="text-center">
