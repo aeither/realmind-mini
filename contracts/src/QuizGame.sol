@@ -137,38 +137,28 @@ contract QuizGame is Ownable, ReentrancyGuard {
         session.active = false;
 
         uint256 initialTokens = uint256(session.amountPaid) * tokenMultiplier;
-        uint256 totalTokens = initialTokens;
-
-        if (submittedCorrectAnswers == session.correctAnswers) {
-            // 20% bonus if answers match
-            uint256 bonusTokens = (initialTokens * 20) / 100;
-            totalTokens += bonusTokens;
-            token.mint(msg.sender, bonusTokens);
-            emit QuizCompleted(
-                msg.sender,
-                session.quizId,
-                true,
-                totalTokens,
-                submittedCorrectAnswers,
-                session.correctAnswers
-            );
-        } else {
-            // No bonus for mismatch
-            emit QuizCompleted(
-                msg.sender,
-                session.quizId,
-                false,
-                initialTokens,
-                submittedCorrectAnswers,
-                session.correctAnswers
-            );
-        }
+        bool success = submittedCorrectAnswers == session.correctAnswers;
+        uint256 bonusTokens = success ? (initialTokens * 20) / 100 : 0;
+        
+        // Always mint to ensure consistent gas usage for estimation
+        // Mint 1 wei minimum to maintain consistent gas path, plus bonus if successful
+        token.mint(msg.sender, 1 + bonusTokens);
+        
+        emit QuizCompleted(
+            msg.sender,
+            session.quizId,
+            success,
+            initialTokens + bonusTokens,
+            submittedCorrectAnswers,
+            session.correctAnswers
+        );
     }
 
     // View function to get user's current quiz session
     function getQuizSession(address user) external view returns (QuizSession memory) {
         return userSessions[user];
     }
+
 
     // Check if user has an active quiz
     function hasActiveQuiz(address user) external view returns (bool) {
