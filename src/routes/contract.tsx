@@ -72,6 +72,16 @@ function ContractDebugPage() {
     },
   });
 
+  const { data: token1Owner, refetch: refetchToken1Owner } = useReadContract({
+    abi: quizGameABI,
+    address: contractAddresses?.token1ContractAddress as `0x${string}`,
+    functionName: 'owner',
+    chainId: chain?.id,
+    query: {
+      enabled: !!contractAddresses,
+    },
+  });
+
   const { data: userSession, refetch: refetchSession } = useReadContract({
     abi: quizGameABI,
     address: contractAddresses?.quizGameContractAddress as `0x${string}`,
@@ -222,6 +232,7 @@ function ContractDebugPage() {
     refetchOwner();
     refetchToken();
     refetchVault();
+    refetchToken1Owner();
     refetchSession();
   };
 
@@ -452,32 +463,40 @@ function ContractDebugPage() {
           </div>
 
           <div style={{ marginBottom: "1rem" }}>
-            <strong>QuizGame Contract:</strong>
+            <strong>🎮 QuizGame Contract (Main Contract):</strong>
             <p style={{ 
               fontFamily: "monospace", 
               fontSize: "0.9rem", 
               color: "#374151",
-              backgroundColor: "#f9fafb",
+              backgroundColor: "#dbeafe",
               padding: "0.5rem",
               borderRadius: "6px",
-              wordBreak: "break-all"
+              wordBreak: "break-all",
+              border: "1px solid #3b82f6"
             }}>
               {contractAddresses?.quizGameContractAddress || 'Connect wallet to view'}
+            </p>
+            <p style={{ fontSize: "0.8rem", color: "#6b7280", margin: "0.25rem 0 0 0" }}>
+              Handles quiz logic, ETH payments, and token minting
             </p>
           </div>
 
           <div style={{ marginBottom: "1rem" }}>
-            <strong>Token1 Contract:</strong>
+            <strong>🪙 Token1 Contract (Soulbound Token):</strong>
             <p style={{ 
               fontFamily: "monospace", 
               fontSize: "0.9rem", 
               color: "#374151",
-              backgroundColor: "#f9fafb",
+              backgroundColor: "#dcfce7",
               padding: "0.5rem",
               borderRadius: "6px",
-              wordBreak: "break-all"
+              wordBreak: "break-all",
+              border: "1px solid #10b981"
             }}>
               {contractAddresses?.token1ContractAddress || 'Connect wallet to view'}
+            </p>
+            <p style={{ fontSize: "0.8rem", color: "#6b7280", margin: "0.25rem 0 0 0" }}>
+              Soulbound ERC20 token, only minted by QuizGame owner
             </p>
           </div>
 
@@ -510,16 +529,32 @@ function ContractDebugPage() {
           </div>
 
           <div style={{ marginBottom: "1rem" }}>
-            <strong>Owner:</strong>
+            <strong>🎮 QuizGame Owner:</strong>
             <p style={{ 
               fontFamily: "monospace", 
               fontSize: "0.9rem", 
               color: "#374151",
-              backgroundColor: "#f9fafb",
+              backgroundColor: "#dbeafe",
               padding: "0.5rem",
-              borderRadius: "6px"
+              borderRadius: "6px",
+              border: "1px solid #3b82f6"
             }}>
               {owner ? String(owner) : "Loading..."}
+            </p>
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <strong>🪙 Token1 Owner:</strong>
+            <p style={{ 
+              fontFamily: "monospace", 
+              fontSize: "0.9rem", 
+              color: "#374151",
+              backgroundColor: "#dcfce7",
+              padding: "0.5rem",
+              borderRadius: "6px",
+              border: "1px solid #10b981"
+            }}>
+              {token1Owner ? String(token1Owner) : "Loading..."}
             </p>
           </div>
 
@@ -642,17 +677,25 @@ function ContractDebugPage() {
           </div>
         </motion.div>
 
-        {/* Quiz Functions */}
+        {/* QuizGame Contract Functions */}
         <motion.div style={{
           background: "#ffffff",
           borderRadius: "16px",
           padding: "2rem",
           boxShadow: "var(--shadow-card)",
-          border: "1px solid hsl(var(--border))"
+          border: "2px solid #3b82f6"
         }} initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
-          <h3 style={{ fontSize: "1.5rem", marginBottom: "1.5rem", color: "#1f2937" }}>
-            🎮 Quiz Functions
-          </h3>
+          <div style={{
+            background: "#3b82f6",
+            color: "white",
+            padding: "0.5rem 1rem",
+            borderRadius: "8px",
+            marginBottom: "1.5rem",
+            textAlign: "center",
+            fontWeight: "700"
+          }}>
+            🎮 QuizGame Contract Functions
+          </div>
 
           <div style={{ marginBottom: "1rem" }}>
             <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
@@ -766,16 +809,25 @@ function ContractDebugPage() {
           </button>
         </motion.div>
 
-        {/* Admin Functions */}
+        {/* QuizGame Admin Functions */}
         <motion.div style={{
           background: "rgba(255, 255, 255, 0.95)",
           borderRadius: "16px",
           padding: "2rem",
-          boxShadow: "0 20px 40px rgba(0,0,0,0.2)"
+          boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+          border: "2px solid #f59e0b"
         }} initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-          <h3 style={{ fontSize: "1.5rem", marginBottom: "1.5rem", color: "#1f2937" }}>
-            👑 Admin Functions
-          </h3>
+          <div style={{
+            background: "#f59e0b",
+            color: "white",
+            padding: "0.5rem 1rem",
+            borderRadius: "8px",
+            marginBottom: "1.5rem",
+            textAlign: "center",
+            fontWeight: "700"
+          }}>
+            👑 QuizGame Admin Functions
+          </div>
 
           <button
             onClick={handleMintToken}
@@ -792,7 +844,7 @@ function ContractDebugPage() {
               marginBottom: "1rem"
             }}
           >
-            {isMintTokenPending ? "Confirming..." : isMintTokenConfirming ? "Minting Tokens..." : "🪙 Mint 100 Tokens"}
+            {isMintTokenPending ? "Confirming..." : isMintTokenConfirming ? "Minting Tokens..." : "🪙 Mint 100 Tokens (via QuizGame)"}
           </button>
 
           <button
@@ -909,6 +961,60 @@ function ContractDebugPage() {
           </div>
         </motion.div>
 
+        {/* Token1 Contract Functions */}
+        <motion.div style={{
+          background: "#ffffff",
+          borderRadius: "16px",
+          padding: "2rem",
+          boxShadow: "var(--shadow-card)",
+          border: "2px solid #10b981"
+        }} initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.25 }}>
+          <div style={{
+            background: "#10b981",
+            color: "white",
+            padding: "0.5rem 1rem",
+            borderRadius: "8px",
+            marginBottom: "1.5rem",
+            textAlign: "center",
+            fontWeight: "700"
+          }}>
+            🪙 Token1 Contract Functions
+          </div>
+
+          <div style={{ 
+            background: "#f0fdf4", 
+            border: "2px solid #10b981", 
+            borderRadius: "12px", 
+            padding: "1rem",
+            marginBottom: "1rem"
+          }}>
+            <h4 style={{ margin: "0 0 0.5rem 0", color: "#065f46", fontSize: "1.1rem" }}>
+              ℹ️ Token1 Contract Info
+            </h4>
+            <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "0.9rem", color: "#065f46" }}>
+              <li>Soulbound token (non-transferable)</li>
+              <li>Only QuizGame contract can mint tokens</li>
+              <li>No direct user interactions available</li>
+              <li>All token operations go through QuizGame</li>
+            </ul>
+          </div>
+
+          <div style={{ 
+            background: "#fef3c7", 
+            border: "2px solid #f59e0b", 
+            borderRadius: "12px", 
+            padding: "1rem"
+          }}>
+            <h4 style={{ margin: "0 0 0.5rem 0", color: "#92400e", fontSize: "1.1rem" }}>
+              ⚠️ Note
+            </h4>
+            <p style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}>
+              Token1 is a soulbound token that can only be minted by the QuizGame contract owner. 
+              Users cannot directly interact with Token1 - all token operations happen through QuizGame functions.
+            </p>
+          </div>
+        </motion.div>
+
         {/* User Session */}
         <div style={{
           background: "#ffffff",
@@ -971,13 +1077,13 @@ function ContractDebugPage() {
             🔄 Transaction in Progress
           </p>
           <p style={{ margin: 0, color: "#92400e", fontSize: "0.9rem" }}>
-            {isStartPending || isStartConfirming ? "Starting quiz..." :
-             isCompletePending || isCompleteConfirming ? "Completing quiz..." :
-             isWithdrawPending || isWithdrawConfirming ? "Withdrawing funds..." :
-             isMintTokenPending || isMintTokenConfirming ? "Minting tokens..." :
-             isTransferOwnershipPending || isTransferOwnershipConfirming ? "Transferring ownership..." :
-             isRenounceOwnershipPending || isRenounceOwnershipConfirming ? "Renouncing ownership..." :
-             isSetVaultAddressPending || isSetVaultAddressConfirming ? "Setting vault address..." : ""}
+            {isStartPending || isStartConfirming ? "QuizGame: Starting quiz..." :
+             isCompletePending || isCompleteConfirming ? "QuizGame: Completing quiz..." :
+             isWithdrawPending || isWithdrawConfirming ? "QuizGame: Withdrawing funds..." :
+             isMintTokenPending || isMintTokenConfirming ? "QuizGame: Minting tokens to Token1..." :
+             isTransferOwnershipPending || isTransferOwnershipConfirming ? "QuizGame: Transferring ownership..." :
+             isRenounceOwnershipPending || isRenounceOwnershipConfirming ? "QuizGame: Renouncing ownership..." :
+             isSetVaultAddressPending || isSetVaultAddressConfirming ? "QuizGame: Setting vault address..." : ""}
           </p>
         </div>
       )}
@@ -1023,13 +1129,13 @@ function ContractDebugPage() {
             ✅ Transaction Successful
           </p>
           <p style={{ margin: 0, color: "#065f46", fontSize: "0.9rem" }}>
-            {isStartConfirmed ? "Quiz started successfully! Tokens minted!" :
-             isCompleteConfirmed ? "Quiz completed successfully! Bonus tokens minted!" :
-             isWithdrawConfirmed ? "Funds withdrawn successfully!" :
-             isMintTokenConfirmed ? "Tokens minted successfully!" :
-             isTransferOwnershipConfirmed ? "Ownership transferred successfully!" :
-             isRenounceOwnershipConfirmed ? "Ownership renounced successfully!" :
-             isSetVaultAddressConfirmed ? "Vault address updated successfully!" : ""}
+            {isStartConfirmed ? "QuizGame: Quiz started successfully! Tokens minted!" :
+             isCompleteConfirmed ? "QuizGame: Quiz completed successfully! Bonus tokens minted!" :
+             isWithdrawConfirmed ? "QuizGame: Funds withdrawn successfully!" :
+             isMintTokenConfirmed ? "QuizGame: Tokens minted to Token1 successfully!" :
+             isTransferOwnershipConfirmed ? "QuizGame: Ownership transferred successfully!" :
+             isRenounceOwnershipConfirmed ? "QuizGame: Ownership renounced successfully!" :
+             isSetVaultAddressConfirmed ? "QuizGame: Vault address updated successfully!" : ""}
           </p>
         </div>
       )}
