@@ -10,8 +10,8 @@ const CONTRACT_ADDRESSES = {
     quizNFTContractAddress: "0x0000000000000000000000000000000000000003"
   },
   42220: {
-    token1ContractAddress: "0xa933a6Ad2b7DD4c57771A975F9e0E5afdE0e99dc",
-    quizGameContractAddress: "0xD9f245B50558686aF4D0Bf137a32D6fcEfba4054"
+    token1ContractAddress: "0xe05489dea86d85c32609410a1bF9C35a0f8fc2e7",
+    quizGameContractAddress: "0x367c011DC980E695EdE1e314af0a82C7E2b01e3B"
   }
 } as const;
 

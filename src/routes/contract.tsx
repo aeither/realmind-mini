@@ -29,6 +29,8 @@ function ContractDebugPage() {
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>('');
   const [newVaultAddress, setNewVaultAddress] = useState<string>('');
   const [newTokenOwnerAddress, setNewTokenOwnerAddress] = useState<string>('');
+  const [newTokenMultiplier, setNewTokenMultiplier] = useState<string>('');
+  const [newDefaultEntryPrice, setNewDefaultEntryPrice] = useState<string>('');
 
   // Get contract addresses based on current chain
   const contractAddresses = chain ? getContractAddresses(chain.id) : null;
@@ -77,6 +79,26 @@ function ContractDebugPage() {
     abi: quizGameABI,
     address: contractAddresses?.token1ContractAddress as `0x${string}`,
     functionName: 'owner',
+    chainId: chain?.id,
+    query: {
+      enabled: !!contractAddresses,
+    },
+  });
+
+  const { data: tokenMultiplier, refetch: refetchTokenMultiplier } = useReadContract({
+    abi: quizGameABI,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
+    functionName: 'tokenMultiplier',
+    chainId: chain?.id,
+    query: {
+      enabled: !!contractAddresses,
+    },
+  });
+
+  const { data: defaultEntryPrice, refetch: refetchDefaultEntryPrice } = useReadContract({
+    abi: quizGameABI,
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
+    functionName: 'defaultEntryPrice',
     chainId: chain?.id,
     query: {
       enabled: !!contractAddresses,
@@ -159,6 +181,22 @@ function ContractDebugPage() {
     reset: resetTransferTokenOwnership
   } = useWriteContract();
 
+  const { 
+    data: setTokenMultiplierHash, 
+    isPending: isSetTokenMultiplierPending,
+    writeContract: setTokenMultiplier,
+    error: setTokenMultiplierError,
+    reset: resetSetTokenMultiplier
+  } = useWriteContract();
+
+  const { 
+    data: setDefaultEntryPriceHash, 
+    isPending: isSetDefaultEntryPricePending,
+    writeContract: setDefaultEntryPrice,
+    error: setDefaultEntryPriceError,
+    reset: resetSetDefaultEntryPrice
+  } = useWriteContract();
+
   // Wait for transaction confirmations
   const { isLoading: isStartConfirming, isSuccess: isStartConfirmed } = 
     useWaitForTransactionReceipt({ hash: startQuizHash });
@@ -183,6 +221,12 @@ function ContractDebugPage() {
 
   const { isLoading: isTransferTokenOwnershipConfirming, isSuccess: isTransferTokenOwnershipConfirmed } = 
     useWaitForTransactionReceipt({ hash: transferTokenOwnershipHash });
+
+  const { isLoading: isSetTokenMultiplierConfirming, isSuccess: isSetTokenMultiplierConfirmed } = 
+    useWaitForTransactionReceipt({ hash: setTokenMultiplierHash });
+
+  const { isLoading: isSetDefaultEntryPriceConfirming, isSuccess: isSetDefaultEntryPriceConfirmed } = 
+    useWaitForTransactionReceipt({ hash: setDefaultEntryPriceHash });
 
   // Check if current chain is supported
   const supportedChainIds = [8453]; // Base Mainnet only
@@ -245,6 +289,8 @@ function ContractDebugPage() {
     refetchToken();
     refetchVault();
     refetchToken1Owner();
+    refetchTokenMultiplier();
+    refetchDefaultEntryPrice();
     refetchSession();
   };
 
@@ -299,16 +345,50 @@ function ContractDebugPage() {
     });
   };
 
+  const handleSetTokenMultiplier = () => {
+    if (!isConnected || !newTokenMultiplier || !contractAddresses) return;
+    
+    const multiplierValue = BigInt(newTokenMultiplier);
+    if (multiplierValue <= 0) return;
+    
+    resetSetTokenMultiplier();
+    setTokenMultiplier({
+      abi: quizGameABI,
+      address: contractAddresses.quizGameContractAddress as `0x${string}`,
+      functionName: 'setTokenMultiplier',
+      args: [multiplierValue],
+      chainId: chain?.id,
+    });
+  };
+
+  const handleSetDefaultEntryPrice = () => {
+    if (!isConnected || !newDefaultEntryPrice || !contractAddresses) return;
+    
+    const priceValue = parseEther(newDefaultEntryPrice);
+    if (priceValue <= 0) return;
+    
+    resetSetDefaultEntryPrice();
+    setDefaultEntryPrice({
+      abi: quizGameABI,
+      address: contractAddresses.quizGameContractAddress as `0x${string}`,
+      functionName: 'setDefaultEntryPrice',
+      args: [priceValue],
+      chainId: chain?.id,
+    });
+  };
+
   // Calculate token rewards
   const calculateTokenRewards = () => {
-    const initialTokens = selectedAmount * 1000; // 1000x multiplier
+    const currentMultiplier = tokenMultiplier ? Number(tokenMultiplier) : 1000;
+    const initialTokens = selectedAmount * currentMultiplier;
     const bonusTokens = initialTokens * 0.2; // 20% fixed bonus
     const totalWithBonus = initialTokens + bonusTokens;
     
     return {
       initialTokens,
       bonusTokens,
-      totalWithBonus
+      totalWithBonus,
+      currentMultiplier
     };
   };
 
@@ -611,6 +691,42 @@ function ContractDebugPage() {
             </p>
           </div>
 
+          <div style={{ marginBottom: "1rem" }}>
+            <strong>🪙 Token Multiplier:</strong>
+            <p style={{ 
+              fontFamily: "monospace", 
+              fontSize: "0.9rem", 
+              color: "#374151",
+              backgroundColor: "#fef3c7",
+              padding: "0.5rem",
+              borderRadius: "6px",
+              border: "1px solid #f59e0b"
+            }}>
+              {tokenMultiplier ? `${Number(tokenMultiplier)}x` : "Loading..."}
+            </p>
+            <p style={{ fontSize: "0.8rem", color: "#6b7280", margin: "0.25rem 0 0 0" }}>
+              ETH amount × multiplier = initial tokens minted
+            </p>
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <strong>💰 Default Entry Price:</strong>
+            <p style={{ 
+              fontFamily: "monospace", 
+              fontSize: "0.9rem", 
+              color: "#374151",
+              backgroundColor: "#f0f9ff",
+              padding: "0.5rem",
+              borderRadius: "6px",
+              border: "1px solid #0ea5e9"
+            }}>
+              {defaultEntryPrice ? `${formatEther(defaultEntryPrice)} ${currencyConfig.symbol}` : "Loading..."}
+            </p>
+            <p style={{ fontSize: "0.8rem", color: "#6b7280", margin: "0.25rem 0 0 0" }}>
+              Default price users pay to start a quiz
+            </p>
+          </div>
+
           <button
             onClick={handleRefetchAll}
             style={{
@@ -672,7 +788,7 @@ function ContractDebugPage() {
             </h4>
             <div style={{ fontSize: "0.9rem", color: "#0c4a6e" }}>
               <p style={{ margin: "0.25rem 0" }}>
-                <strong>Initial Tokens:</strong> {rewards.initialTokens.toFixed(2)} TK1 (1000x entry)
+                <strong>Initial Tokens:</strong> {rewards.initialTokens.toFixed(2)} TK1 ({rewards.currentMultiplier}x entry)
               </p>
               <p style={{ margin: "0.25rem 0" }}>
                 <strong>Bonus (if correct):</strong> {rewards.bonusTokens.toFixed(2)} TK1 (20% fixed)
@@ -694,7 +810,7 @@ function ContractDebugPage() {
             </h4>
             <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "0.9rem", color: "#155e75" }}>
               <li>Pay {currencyConfig.symbol} to start quiz</li>
-              <li>Get 1000x tokens immediately</li>
+              <li>Get {rewards.currentMultiplier}x tokens immediately</li>
               <li>Answer correctly for 20% bonus</li>
               <li>Keep initial tokens even if wrong!</li>
               <li>Starting new quiz auto-completes previous one</li>
@@ -1034,6 +1150,107 @@ function ContractDebugPage() {
               </p>
             </div>
           </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
+              🔢 Token Multiplier Management
+            </label>
+            <input
+              type="number"
+              placeholder="New token multiplier (e.g., 1000)"
+              value={newTokenMultiplier}
+              onChange={(e) => setNewTokenMultiplier(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "2px solid hsl(var(--border))",
+                fontSize: "1rem",
+                marginBottom: "0.5rem"
+              }}
+            />
+            
+            <button
+              onClick={handleSetTokenMultiplier}
+              disabled={isSetTokenMultiplierPending || isSetTokenMultiplierConfirming || !newTokenMultiplier}
+              style={{
+                backgroundColor: isSetTokenMultiplierPending || isSetTokenMultiplierConfirming || !newTokenMultiplier ? "#9ca3af" : "#8b5cf6",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                padding: "0.75rem 1rem",
+                fontSize: "1rem",
+                cursor: isSetTokenMultiplierPending || isSetTokenMultiplierConfirming || !newTokenMultiplier ? "not-allowed" : "pointer",
+                width: "100%",
+                fontWeight: 700
+              }}
+            >
+              {isSetTokenMultiplierPending ? "Confirming..." : isSetTokenMultiplierConfirming ? "Setting Multiplier..." : "🔢 Set Token Multiplier"}
+            </button>
+            
+            <div style={{ 
+              background: "#f0f9ff", 
+              border: "2px solid #0ea5e9", 
+              borderRadius: "8px", 
+              padding: "0.75rem",
+              marginTop: "0.5rem"
+            }}>
+              <p style={{ margin: 0, fontSize: "0.8rem", color: "#0c4a6e" }}>
+                <strong>ℹ️ Current Multiplier:</strong> {tokenMultiplier ? `${Number(tokenMultiplier)}x` : "Loading..."} - ETH amount × multiplier = initial tokens minted
+              </p>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
+              💰 Default Entry Price Management
+            </label>
+            <input
+              type="number"
+              step="0.00001"
+              placeholder="New default entry price (e.g., 0.00005)"
+              value={newDefaultEntryPrice}
+              onChange={(e) => setNewDefaultEntryPrice(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "2px solid hsl(var(--border))",
+                fontSize: "1rem",
+                marginBottom: "0.5rem"
+              }}
+            />
+            
+            <button
+              onClick={handleSetDefaultEntryPrice}
+              disabled={isSetDefaultEntryPricePending || isSetDefaultEntryPriceConfirming || !newDefaultEntryPrice}
+              style={{
+                backgroundColor: isSetDefaultEntryPricePending || isSetDefaultEntryPriceConfirming || !newDefaultEntryPrice ? "#9ca3af" : "#0ea5e9",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                padding: "0.75rem 1rem",
+                fontSize: "1rem",
+                cursor: isSetDefaultEntryPricePending || isSetDefaultEntryPriceConfirming || !newDefaultEntryPrice ? "not-allowed" : "pointer",
+                width: "100%",
+                fontWeight: 700
+              }}
+            >
+              {isSetDefaultEntryPricePending ? "Confirming..." : isSetDefaultEntryPriceConfirming ? "Setting Entry Price..." : "💰 Set Default Entry Price"}
+            </button>
+            
+            <div style={{ 
+              background: "#f0f9ff", 
+              border: "2px solid #0ea5e9", 
+              borderRadius: "8px", 
+              padding: "0.75rem",
+              marginTop: "0.5rem"
+            }}>
+              <p style={{ margin: 0, fontSize: "0.8rem", color: "#0c4a6e" }}>
+                <strong>ℹ️ Current Entry Price:</strong> {defaultEntryPrice ? `${formatEther(defaultEntryPrice)} ${currencyConfig.symbol}` : "Loading..."} - Default price users pay to start quizzes
+              </p>
+            </div>
+          </div>
         </motion.div>
 
         {/* Token1 Contract Functions */}
@@ -1136,7 +1353,8 @@ function ContractDebugPage() {
       {(isStartPending || isStartConfirming || isCompletePending || isCompleteConfirming || 
         isWithdrawPending || isWithdrawConfirming || isMintTokenPending || isMintTokenConfirming ||
         isTransferOwnershipPending || isTransferOwnershipConfirming || isRenounceOwnershipPending || isRenounceOwnershipConfirming ||
-        isSetVaultAddressPending || isSetVaultAddressConfirming || isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming) && (
+        isSetVaultAddressPending || isSetVaultAddressConfirming || isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming ||
+        isSetTokenMultiplierPending || isSetTokenMultiplierConfirming || isSetDefaultEntryPricePending || isSetDefaultEntryPriceConfirming) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -1159,13 +1377,15 @@ function ContractDebugPage() {
              isTransferOwnershipPending || isTransferOwnershipConfirming ? "QuizGame: Transferring ownership..." :
              isRenounceOwnershipPending || isRenounceOwnershipConfirming ? "QuizGame: Renouncing ownership..." :
              isSetVaultAddressPending || isSetVaultAddressConfirming ? "QuizGame: Setting vault address..." :
-             isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming ? "QuizGame: Transferring Token1 ownership..." : ""}
+             isTransferTokenOwnershipPending || isTransferTokenOwnershipConfirming ? "QuizGame: Transferring Token1 ownership..." :
+             isSetTokenMultiplierPending || isSetTokenMultiplierConfirming ? "QuizGame: Setting token multiplier..." :
+             isSetDefaultEntryPricePending || isSetDefaultEntryPriceConfirming ? "QuizGame: Setting default entry price..." : ""}
           </p>
         </div>
       )}
 
       {/* Error Messages */}
-      {(startError || completeError || withdrawError || mintTokenError || transferOwnershipError || renounceOwnershipError || setVaultAddressError || transferTokenOwnershipError) && (
+      {(startError || completeError || withdrawError || mintTokenError || transferOwnershipError || renounceOwnershipError || setVaultAddressError || transferTokenOwnershipError || setTokenMultiplierError || setDefaultEntryPriceError) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -1182,14 +1402,14 @@ function ContractDebugPage() {
           </p>
           <p style={{ margin: 0, color: "#991b1b", fontSize: "0.9rem" }}>
             {startError?.message || completeError?.message || withdrawError?.message || mintTokenError?.message || 
-             transferOwnershipError?.message || renounceOwnershipError?.message || setVaultAddressError?.message || transferTokenOwnershipError?.message}
+             transferOwnershipError?.message || renounceOwnershipError?.message || setVaultAddressError?.message || transferTokenOwnershipError?.message || setTokenMultiplierError?.message || setDefaultEntryPriceError?.message}
           </p>
         </div>
       )}
 
       {/* Success Messages */}
       {(isStartConfirmed || isCompleteConfirmed || isWithdrawConfirmed || isMintTokenConfirmed || 
-        isTransferOwnershipConfirmed || isRenounceOwnershipConfirmed || isSetVaultAddressConfirmed || isTransferTokenOwnershipConfirmed) && (
+        isTransferOwnershipConfirmed || isRenounceOwnershipConfirmed || isSetVaultAddressConfirmed || isTransferTokenOwnershipConfirmed || isSetTokenMultiplierConfirmed || isSetDefaultEntryPriceConfirmed) && (
         <div style={{
           position: "fixed",
           bottom: "2rem",
@@ -1212,7 +1432,9 @@ function ContractDebugPage() {
              isTransferOwnershipConfirmed ? "QuizGame: Ownership transferred successfully!" :
              isRenounceOwnershipConfirmed ? "QuizGame: Ownership renounced successfully!" :
              isSetVaultAddressConfirmed ? "QuizGame: Vault address updated successfully!" :
-             isTransferTokenOwnershipConfirmed ? "QuizGame: Token1 ownership transferred successfully!" : ""}
+             isTransferTokenOwnershipConfirmed ? "QuizGame: Token1 ownership transferred successfully!" :
+             isSetTokenMultiplierConfirmed ? "QuizGame: Token multiplier updated successfully!" :
+             isSetDefaultEntryPriceConfirmed ? "QuizGame: Default entry price updated successfully!" : ""}
           </p>
         </div>
       )}

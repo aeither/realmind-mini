@@ -267,7 +267,7 @@ function QuizGameContract() {
           <li>🎯 Choose a quiz topic below</li>
           <li>📝 Answer all questions in the quiz</li>
           <li>✅ Get all answers correct for bonus tokens (10-90%)</li>
-          <li>🪙 Receive Token1 tokens equal to your entry fee × 100</li>
+          <li>🪙 Receive XP points</li>
           <li>⏰ Complete within 1 hour of starting</li>
         </ul>
       </div>

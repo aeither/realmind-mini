@@ -30,6 +30,7 @@ contract QuizGame is Ownable, ReentrancyGuard {
     Token1 public token;
     address public vaultAddress;
     uint256 public tokenMultiplier = 1000; // Default 1000x ETH paid
+    uint256 public defaultEntryPrice = 0.00005 ether; // Default entry price in ETH
 
     // Mapping: user address => active quiz session (only one allowed at a time)
     mapping(address => QuizSession) public userSessions;
@@ -64,6 +65,8 @@ contract QuizGame is Ownable, ReentrancyGuard {
 
     event TokenMultiplierUpdated(uint256 oldMultiplier, uint256 newMultiplier);
 
+    event DefaultEntryPriceUpdated(uint256 oldPrice, uint256 newPrice);
+
     constructor(address tokenAddress) Ownable(msg.sender) {
         require(tokenAddress != address(0), "Token address cannot be zero");
         token = Token1(tokenAddress);
@@ -90,6 +93,13 @@ contract QuizGame is Ownable, ReentrancyGuard {
         uint256 oldMultiplier = tokenMultiplier;
         tokenMultiplier = newMultiplier;
         emit TokenMultiplierUpdated(oldMultiplier, newMultiplier);
+    }
+
+    function setDefaultEntryPrice(uint256 newPrice) external onlyOwner {
+        require(newPrice > 0, "Entry price must be greater than zero");
+        uint256 oldPrice = defaultEntryPrice;
+        defaultEntryPrice = newPrice;
+        emit DefaultEntryPriceUpdated(oldPrice, newPrice);
     }
 
     // On startQuiz, automatically complete any active quiz session with no bonus (fail)

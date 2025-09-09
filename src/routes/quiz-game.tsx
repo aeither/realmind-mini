@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi'
-import { parseEther } from 'viem'
+import { parseEther, formatEther } from 'viem'
 import { toast } from 'sonner'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
@@ -108,7 +108,6 @@ function QuizGame() {
   const [quizStarted, setQuizStarted] = useState(false)
   const [questionResults, setQuestionResults] = useState<Array<{userAnswered: boolean, userCorrect: boolean, aiCorrect: boolean}>>([])
   const [justCompletedQuiz, setJustCompletedQuiz] = useState(false)
-  const FIXED_ENTRY_AMOUNT = '0.00005' // Fixed entry amount
 
   // Function to restart the quiz in AI challenge mode
   const handleRestartQuiz = () => {
@@ -202,8 +201,23 @@ function QuizGame() {
     },
   });
 
+  const { data: defaultEntryPrice } = useReadContract({
+    address: contractAddresses?.quizGameContractAddress as `0x${string}`,
+    abi: quizGameABI,
+    functionName: 'defaultEntryPrice',
+    query: {
+      enabled: !!contractAddresses,
+      refetchInterval: 30000, // Refetch every 30 seconds
+      staleTime: 10000, // Consider data fresh for 10 seconds
+      retry: 1,
+    },
+  });
+
   // Extract quiz ID from user session
   const activeQuizId = userSession && typeof userSession === 'object' && 'quizId' in userSession ? (userSession as any).quizId : '';
+
+  // Get entry amount from contract or fallback to hardcoded value
+  const entryAmount = defaultEntryPrice ? formatEther(defaultEntryPrice) : '0.00005';
 
   // Contract writes
   const { writeContract: startQuiz, isPending: isStartPending, data: startHash } = useWriteContract()
@@ -381,7 +395,7 @@ function QuizGame() {
     }
     
     try {
-      const actualAmount = parseEther(FIXED_ENTRY_AMOUNT)
+      const actualAmount = parseEther(entryAmount)
       
       // For AI-generated quizzes, use a generic quiz ID for the contract
       const contractQuizId = quizId === 'ai-custom' ? 'ai-generated' : quizConfig.id
@@ -758,7 +772,7 @@ function QuizGame() {
                   }}>
                     <h3 style={{ color: "#14532d", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                      Tokens: {FIXED_ENTRY_AMOUNT} {currencyConfig.symbol} × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} XP3
+                      Tokens: {entryAmount} {currencyConfig.symbol} × 1000 = {parseFloat(entryAmount) * 1000} XP3
                     </p>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
                       AI Challenge Bonus: 50% extra for beating the bot!
@@ -801,10 +815,7 @@ function QuizGame() {
                   }}>
                     <h3 style={{ color: "#92400e", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
                     <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                       Base Tokens: {FIXED_ENTRY_AMOUNT} {currencyConfig.symbol} × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} TK1
-                    </p>
-                    <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                      Tie Bonus: 25% extra for matching the AI!
+                      Tie Bonus: 20% extra for matching the AI!
                     </p>
                   </div>
                   <button
@@ -863,9 +874,6 @@ function QuizGame() {
                 marginBottom: "2rem"
               }}>
                 <h3 style={{ color: "#14532d", marginBottom: "1rem", fontWeight: 800 }}>🪙 Your Rewards</h3>
-                <p style={{ color: "#374151", margin: "0.5rem 0" }}>
-                   Base Tokens: {FIXED_ENTRY_AMOUNT} {currencyConfig.symbol} × 1000 = {parseFloat(FIXED_ENTRY_AMOUNT) * 1000} TK1
-                </p>
                 <p style={{ color: "#374151", margin: "0.5rem 0" }}>
                   Bonus: {score === quizConfig.questions.length ? '20% additional tokens for all correct answers!' : 'Better luck next time!'}
                 </p>
@@ -1198,7 +1206,7 @@ function QuizGame() {
               ) : (
                 <>
                   <li>✅ Get all answers correct for bonus rewards (20%)</li>
-                  <li>🪙 Receive Token1 tokens equal to your entry fee × 1000</li>
+                  <li>🪙 🪙 Receive XP points</li>
                   <li>⏰ Complete the quiz to claim your rewards</li>
                 </>
               )}

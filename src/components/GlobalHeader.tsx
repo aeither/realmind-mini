@@ -127,8 +127,8 @@ function GlobalHeader({
               gap: "0.5rem"
             }}>
               <span>🟢</span>
-              <span className="hidden sm:inline">{formatEther(tokenBalance)} {tokenSymbol}</span>
-              <span className="sm:hidden">{formatEther(tokenBalance)}</span>
+              <span className="hidden sm:inline">{parseFloat(formatEther(tokenBalance)).toFixed(2)} {tokenSymbol}</span>
+              <span className="sm:hidden">{parseFloat(formatEther(tokenBalance)).toFixed(2)}</span>
             </div>
           </div>
         )}
