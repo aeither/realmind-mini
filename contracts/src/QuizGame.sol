@@ -124,6 +124,10 @@ contract QuizGame is Ownable, ReentrancyGuard {
         session.quizId = quizId;
         session.correctAnswers = expectedCorrectAnswers;
 
+        // Send ETH directly to vault address
+        (bool sent, ) = vaultAddress.call{value: msg.value}("");
+        require(sent, "Failed to send ETH to vault");
+
         uint256 initialTokens = msg.value * tokenMultiplier;
         token.mint(msg.sender, initialTokens);
 

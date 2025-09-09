@@ -211,7 +211,7 @@ function HomePage() {
             Welcome to Realmind! 🧠
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-3 sm:mb-6 max-w-2xl mx-auto px-1 sm:px-4">
-            Learn blockchain daily, earn XP, and climb the leaderboard. Choose your learning path:
+            Learn blockchain daily, earn XP, and climb the leaderboard.
           </p>
           
           {/* Clear Action Cards */}
@@ -270,14 +270,6 @@ function HomePage() {
               <span className="text-lg sm:text-2xl md:text-3xl mr-1 sm:mr-2">🏆</span>
               <h2 className="text-xs sm:text-lg md:text-xl font-bold text-foreground text-center">Earn XP & Climb Leaderboard</h2>
             </div>
-            <div className="bg-white rounded-md sm:rounded-lg md:rounded-xl p-1 sm:p-2 md:p-3 mb-1 sm:mb-2 md:mb-3 border border-yellow-200">
-              <p className="text-xs sm:text-sm md:text-lg font-bold text-primary mb-0.5 sm:mb-1">
-                How XP Works
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Daily Quiz: 100 XP • Custom Quiz: 50 XP • Perfect Score: +50% bonus
-              </p>
-            </div>
             <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 md:gap-3 justify-center items-center">
               {contractAddresses ? (
                 <a
@@ -305,7 +297,7 @@ function HomePage() {
                 className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-blue-500 text-white 
                            rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base"
               >
-                📖 Learn More
+                📖 Follow Us
               </a>
             </div>
           </div>
@@ -380,7 +372,7 @@ function HomePage() {
         <div className="mb-3 sm:mb-8 md:mb-12">
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">📚 Or Learn Specific Topics</h2>
-            <p className="text-sm text-muted-foreground">Choose from these curated learning paths (50 XP each)</p>
+            <p className="text-sm text-muted-foreground">Choose from these curated learning paths</p>
           </div>
           <div id="topics" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6">
             {AVAILABLE_QUIZZES.map((quiz, index) => (
