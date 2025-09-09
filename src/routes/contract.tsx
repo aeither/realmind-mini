@@ -31,6 +31,8 @@ function ContractDebugPage() {
   const [newTokenOwnerAddress, setNewTokenOwnerAddress] = useState<string>('');
   const [newTokenMultiplier, setNewTokenMultiplier] = useState<string>('');
   const [newDefaultEntryPrice, setNewDefaultEntryPrice] = useState<string>('');
+  const [mintTokenAmount, setMintTokenAmount] = useState<string>('100');
+  const [mintTokenAddress, setMintTokenAddress] = useState<string>('');
 
   // Get contract addresses based on current chain
   const contractAddresses = chain ? getContractAddresses(chain.id) : null;
@@ -272,14 +274,17 @@ function ContractDebugPage() {
   };
 
   const handleMintToken = () => {
-    if (!isConnected || !address || !contractAddresses) return;
+    if (!isConnected || !mintTokenAddress || !mintTokenAmount || !contractAddresses) return;
+    
+    const amount = parseEther(mintTokenAmount);
+    if (amount <= 0) return;
     
     resetMintToken();
     mintToken({
       abi: quizGameABI,
       address: contractAddresses.quizGameContractAddress as `0x${string}`,
       functionName: 'mintToken',
-      args: [address, parseEther("100")], // Mint 100 tokens
+      args: [mintTokenAddress as `0x${string}`, amount],
       chainId: chain?.id,
     });
   };
@@ -970,23 +975,86 @@ function ContractDebugPage() {
             👑 QuizGame Admin Functions
           </div>
 
-          <button
-            onClick={handleMintToken}
-            disabled={isMintTokenPending || isMintTokenConfirming}
-            style={{
-              backgroundColor: isMintTokenPending || isMintTokenConfirming ? "#9ca3af" : "#f59e0b",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.75rem 1rem",
-              fontSize: "1rem",
-              cursor: isMintTokenPending || isMintTokenConfirming ? "not-allowed" : "pointer",
-              width: "100%",
-              marginBottom: "1rem"
-            }}
-          >
-            {isMintTokenPending ? "Confirming..." : isMintTokenConfirming ? "Minting Tokens..." : "🪙 Mint 100 Tokens (via QuizGame)"}
-          </button>
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
+              🪙 Mint Token1 Tokens
+            </label>
+            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+              <input
+                type="text"
+                placeholder="Destination address (0x...)"
+                value={mintTokenAddress}
+                onChange={(e) => setMintTokenAddress(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "0.75rem 1rem",
+                  borderRadius: "8px",
+                  border: "2px solid hsl(var(--border))",
+                  fontSize: "1rem"
+                }}
+              />
+              <button
+                onClick={() => setMintTokenAddress(address || '')}
+                disabled={!address}
+                style={{
+                  backgroundColor: address ? "#3b82f6" : "#9ca3af",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "0.75rem 1rem",
+                  fontSize: "0.9rem",
+                  cursor: address ? "pointer" : "not-allowed",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap"
+                }}
+              >
+                Use My Address
+              </button>
+            </div>
+            <input
+              type="number"
+              step="0.001"
+              placeholder="Amount to mint (e.g., 100)"
+              value={mintTokenAmount}
+              onChange={(e) => setMintTokenAmount(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                borderRadius: "8px",
+                border: "2px solid hsl(var(--border))",
+                fontSize: "1rem",
+                marginBottom: "0.5rem"
+              }}
+            />
+            <button
+              onClick={handleMintToken}
+              disabled={isMintTokenPending || isMintTokenConfirming || !mintTokenAddress || !mintTokenAmount}
+              style={{
+                backgroundColor: isMintTokenPending || isMintTokenConfirming || !mintTokenAddress || !mintTokenAmount ? "#9ca3af" : "#f59e0b",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                padding: "0.75rem 1rem",
+                fontSize: "1rem",
+                cursor: isMintTokenPending || isMintTokenConfirming || !mintTokenAddress || !mintTokenAmount ? "not-allowed" : "pointer",
+                width: "100%",
+                fontWeight: 700
+              }}
+            >
+              {isMintTokenPending ? "Confirming..." : isMintTokenConfirming ? "Minting Tokens..." : "🪙 Mint Token1 Tokens"}
+            </button>
+            <div style={{ 
+              background: "#fef3c7", 
+              border: "2px solid #f59e0b", 
+              borderRadius: "8px", 
+              padding: "0.75rem",
+              marginTop: "0.5rem"
+            }}>
+              <p style={{ margin: 0, fontSize: "0.8rem", color: "#92400e" }}>
+                <strong>ℹ️ Note:</strong> Only the QuizGame contract owner can mint Token1 tokens. This function mints tokens directly to the specified address.
+              </p>
+            </div>
+          </div>
 
           <button
             onClick={handleWithdraw}
