@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { routeTree } from './routeTree.gen'
-import '@rainbow-me/rainbowkit/styles.css'
 import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit'
-import { WagmiProvider, cookieToInitialState } from 'wagmi'
+import '@rainbow-me/rainbowkit/styles.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 import { Toaster } from 'sonner'
+import { celo } from 'viem/chains'
+import { WagmiProvider, cookieToInitialState } from 'wagmi'
+import { routeTree } from './routeTree.gen'
 import { config } from './wagmi'
 
 const router = createRouter({ routeTree })
@@ -43,6 +44,7 @@ function App() {
             borderRadius: 'medium',
             fontStack: 'system',
           })}
+          initialChain={celo}
           modalSize="compact"
           showRecentTransactions={true}
           appInfo={{
