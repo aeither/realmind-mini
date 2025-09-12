@@ -3,7 +3,6 @@ import { RedisService } from './redis.js'
 export interface TokenHolder {
   address: string
   balance: string
-  rank: number
 }
 
 export interface LeaderboardResponse {
@@ -63,12 +62,6 @@ export class LeaderboardService {
       chainName: 'Celo',
       blockscoutApiUrl: 'https://celo.blockscout.com/api/v2',
       scanUrl: 'https://celoscan.io'
-    },
-    1: { // Ethereum Mainnet
-      chainId: 1,
-      chainName: 'Ethereum',
-      blockscoutApiUrl: 'https://eth.blockscout.com/api/v2',
-      scanUrl: 'https://etherscan.io'
     }
   }
 
@@ -137,23 +130,12 @@ export class LeaderboardService {
         }
       }
 
-      // Transform Blockscout data into our format and sort by balance (descending)
+      // Transform Blockscout data into our format (already sorted by Blockscout)
       const holders: TokenHolder[] = data.items
-        .map((item, index) => ({
-          address: item.address.hash,
-          balance: item.value,
-          rank: index + 1 // Will be re-ranked after sorting
-        }))
-        .sort((a, b) => {
-          // Sort by balance (descending) - handle big numbers as strings
-          const balanceA = BigInt(a.balance)
-          const balanceB = BigInt(b.balance)
-          return balanceA > balanceB ? -1 : balanceA < balanceB ? 1 : 0
-        })
         .slice(0, limit) // Limit results
-        .map((holder, index) => ({
-          ...holder,
-          rank: index + 1 // Re-rank after sorting and limiting
+        .map((item) => ({
+          address: item.address.hash,
+          balance: item.value
         }))
 
       const result: LeaderboardResponse = {

@@ -3,7 +3,6 @@
 export interface TokenHolder {
   address: string;
   balance: string;
-  rank: number;
 }
 
 export interface LeaderboardResponse {
@@ -40,12 +39,27 @@ export class LeaderboardService {
         `${this.backendUrl}/leaderboard?contract=${contractAddress}&chainId=${chainId}&limit=${limit}`
       );
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If response is not JSON, use the text as error message
+          errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
       }
       
+      const responseText = await response.text();
+      if (!responseText.trim()) {
+        throw new Error('Empty response from server');
+      }
+      
+      const data = JSON.parse(responseText);
       return data;
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
@@ -62,12 +76,27 @@ export class LeaderboardService {
   async getSupportedChains(): Promise<{ success: boolean; chains?: ChainConfig[]; error?: string }> {
     try {
       const response = await fetch(`${this.backendUrl}/leaderboard/chains`);
-      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
       }
       
+      const responseText = await response.text();
+      if (!responseText.trim()) {
+        throw new Error('Empty response from server');
+      }
+      
+      const data = JSON.parse(responseText);
       return data;
     } catch (error) {
       console.error('Error fetching supported chains:', error);
@@ -90,12 +119,26 @@ export class LeaderboardService {
         `${this.backendUrl}/leaderboard/scan-url?contract=${contractAddress}&chainId=${chainId}`
       );
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
       }
       
+      const responseText = await response.text();
+      if (!responseText.trim()) {
+        throw new Error('Empty response from server');
+      }
+      
+      const data = JSON.parse(responseText);
       return data;
     } catch (error) {
       console.error('Error fetching scan URL:', error);
