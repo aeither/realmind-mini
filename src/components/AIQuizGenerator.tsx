@@ -101,7 +101,7 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
               className={`px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-lg ${
                 !chain 
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 hover:shadow-xl'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 hover:shadow-xl cursor-pointer'
               }`}
             >
               {!chain ? '🔗 Connect Wallet First' : '🎯 Create Custom Quiz'}
@@ -191,7 +191,7 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
               className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
                 isGenerating || !formData.topic.trim() || !chain
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 shadow-lg hover:shadow-xl'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer'
               }`}
             >
               {isGenerating ? (

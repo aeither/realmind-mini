@@ -90,3 +90,51 @@ export interface BacklogResponse {
   error?: string
   message?: string
 }
+
+// Leaderboard types
+export interface TokenHolder {
+  address: string
+  balance: string
+  rank: number
+}
+
+export interface LeaderboardResponse {
+  success: boolean
+  holders?: TokenHolder[]
+  error?: string
+  totalHolders?: number
+}
+
+export interface ChainConfig {
+  chainId: number
+  chainName: string
+  blockscoutApiUrl: string
+  scanUrl: string
+}
+
+// Blockscout API response interfaces
+export interface BlockscoutAddress {
+  ens_domain_name: string | null
+  hash: string
+  implementations: any[]
+  is_contract: boolean
+  is_scam: boolean
+  is_verified: boolean
+  metadata: any
+  name: string | null
+  private_tags: any[]
+  proxy_type: string | null
+  public_tags: any[]
+  watchlist_names: any[]
+}
+
+export interface BlockscoutTokenHolder {
+  address: BlockscoutAddress
+  token_id: string | null
+  value: string
+}
+
+export interface BlockscoutResponse {
+  items: BlockscoutTokenHolder[]
+  next_page_params: any | null
+}

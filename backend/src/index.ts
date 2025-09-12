@@ -5,6 +5,7 @@ import { generateObject } from 'ai'
 import { z } from 'zod'
 import 'dotenv/config'
 import { QuizService } from './services/quiz.js'
+import { LeaderboardService } from './services/leaderboard.js'
 
 const app = new Hono()
 
@@ -32,7 +33,9 @@ app.get('/', (c) => {
       '/cron/daily-quiz',
       '/test/insert-quiz',
       '/health/gateway',
-      '/health/redis'
+      '/health/redis',
+      '/leaderboard',
+      '/leaderboard/chains'
     ]
   })
 })
@@ -167,6 +170,7 @@ Example format:
 
 // Initialize services
 const quizService = new QuizService()
+const leaderboardService = new LeaderboardService()
 
 // Daily Quiz Endpoint - Get the latest daily quiz
 app.get('/daily-quiz', async (c) => {
@@ -395,6 +399,151 @@ app.get('/health/redis', async (c) => {
       status: 'error',
       service: 'redis',
       error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, 500)
+  }
+})
+
+// Leaderboard Endpoints
+app.get('/leaderboard', async (c) => {
+  try {
+    const contractAddress = c.req.query('contract')
+    const chainIdParam = c.req.query('chainId')
+    const limitParam = c.req.query('limit')
+
+    if (!contractAddress) {
+      return c.json({
+        success: false,
+        error: 'Contract address is required'
+      }, 400)
+    }
+
+    if (!chainIdParam) {
+      return c.json({
+        success: false,
+        error: 'Chain ID is required'
+      }, 400)
+    }
+
+    const chainId = parseInt(chainIdParam)
+    const limit = limitParam ? parseInt(limitParam) : 50
+
+    if (isNaN(chainId)) {
+      return c.json({
+        success: false,
+        error: 'Invalid chain ID'
+      }, 400)
+    }
+
+    if (isNaN(limit) || limit <= 0 || limit > 1000) {
+      return c.json({
+        success: false,
+        error: 'Limit must be between 1 and 1000'
+      }, 400)
+    }
+
+    const result = await leaderboardService.getLeaderboard(contractAddress, chainId, limit)
+    
+    if (result.success) {
+      return c.json({
+        success: true,
+        holders: result.holders,
+        totalHolders: result.totalHolders,
+        chainId,
+        contractAddress,
+        timestamp: new Date().toISOString()
+      })
+    } else {
+      return c.json({
+        success: false,
+        error: result.error,
+        timestamp: new Date().toISOString()
+      }, 500)
+    }
+  } catch (error) {
+    console.error('Error in leaderboard endpoint:', error)
+    return c.json({
+      success: false,
+      error: 'Failed to fetch leaderboard',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, 500)
+  }
+})
+
+// Get supported chains
+app.get('/leaderboard/chains', async (c) => {
+  try {
+    const chains = leaderboardService.getSupportedChains()
+    
+    return c.json({
+      success: true,
+      chains,
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    console.error('Error in chains endpoint:', error)
+    return c.json({
+      success: false,
+      error: 'Failed to get supported chains',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, 500)
+  }
+})
+
+// Get scan URL for a contract on specific chain
+app.get('/leaderboard/scan-url', async (c) => {
+  try {
+    const contractAddress = c.req.query('contract')
+    const chainIdParam = c.req.query('chainId')
+
+    if (!contractAddress) {
+      return c.json({
+        success: false,
+        error: 'Contract address is required'
+      }, 400)
+    }
+
+    if (!chainIdParam) {
+      return c.json({
+        success: false,
+        error: 'Chain ID is required'
+      }, 400)
+    }
+
+    const chainId = parseInt(chainIdParam)
+    
+    if (isNaN(chainId)) {
+      return c.json({
+        success: false,
+        error: 'Invalid chain ID'
+      }, 400)
+    }
+
+    const scanUrl = leaderboardService.getScanUrl(contractAddress, chainId)
+    
+    if (scanUrl) {
+      return c.json({
+        success: true,
+        scanUrl,
+        chainId,
+        contractAddress,
+        timestamp: new Date().toISOString()
+      })
+    } else {
+      return c.json({
+        success: false,
+        error: 'Unsupported chain ID',
+        timestamp: new Date().toISOString()
+      }, 400)
+    }
+  } catch (error) {
+    console.error('Error in scan URL endpoint:', error)
+    return c.json({
+      success: false,
+      error: 'Failed to get scan URL',
+      details: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }, 500)
   }

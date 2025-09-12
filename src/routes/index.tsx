@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { getContractAddresses } from '../libs/constants'
 import AIQuizGenerator from '../components/AIQuizGenerator'
+import LeaderboardModal from '../components/LeaderboardModal'
 interface Quiz {
   id: string;
   title: string;
@@ -61,6 +62,7 @@ function HomePage() {
   const [currentQuizTitle, setCurrentQuizTitle] = useState<string>('');
   const [currentQuizDescription, setCurrentQuizDescription] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
   
   // Get backend URL from environment
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -234,79 +236,7 @@ function HomePage() {
           </div>
         </div>
 
-        {/* Wallet Connection Prompt */}
-        {!chain && (
-          <div className="mb-3 sm:mb-6 md:mb-8 max-w-2xl mx-auto">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg shadow-lg p-4 sm:p-6 text-center">
-              <div className="text-4xl mb-3">🔗</div>
-              <h2 className="text-lg sm:text-xl font-semibold mb-2 text-blue-700">Connect Your Wallet</h2>
-              <p className="text-sm text-blue-600 mb-4">
-                Connect your wallet to start earning XP, taking quizzes, and climbing the leaderboard!
-              </p>
-              <div className="flex justify-center">
-                <ConnectButton
-                  accountStatus={{
-                    smallScreen: 'avatar',
-                    largeScreen: 'full',
-                  }}
-                  chainStatus={{
-                    smallScreen: 'icon',
-                    largeScreen: 'full',
-                  }}
-                  showBalance={{
-                    smallScreen: false,
-                    largeScreen: true,
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* XP & Leaderboard System - Clear Explanation */}
-        <div className="text-center mb-2 sm:mb-6 md:mb-8">
-          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-4 md:p-6 max-w-4xl mx-auto">
-            <div className="flex items-center justify-center mb-1 sm:mb-2 md:mb-3">
-              <span className="text-lg sm:text-2xl md:text-3xl mr-1 sm:mr-2">🏆</span>
-              <h2 className="text-xs sm:text-lg md:text-xl font-bold text-foreground text-center">Earn XP & Climb Leaderboard</h2>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 md:gap-3 justify-center items-center">
-              {contractAddresses ? (
-                <a
-                  href={chain?.id === 8453 
-                    ? `https://basescan.org/token/${contractAddresses.token1ContractAddress}#balances`
-                    : `https://celoscan.io/token/${contractAddresses.token1ContractAddress}#balances`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-white 
-                             rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base"
-                >
-                  🏅 View Leaderboard
-                </a>
-              ) : (
-                <div className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gray-300 text-gray-500 
-                               rounded-md sm:rounded-lg font-bold text-xs sm:text-sm md:text-base cursor-not-allowed">
-                  🏅 Connect Wallet
-                </div>
-              )}
-              <a
-                href="https://x.com/DailyWiser_"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-blue-500 text-white 
-                           rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base"
-              >
-                📖 Follow Us
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Quiz Generator Section */}
-        <AIQuizGenerator className="mb-3 sm:mb-8 md:mb-12" />
-
-        {/* Daily Quiz - Primary Action */}
+        {/* Daily Quiz - Primary Action - MOVED TO TOP */}
         <div className="mb-3 sm:mb-8 md:mb-12 max-w-2xl mx-auto">
           <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-lg shadow-lg p-4 sm:p-6">
             <h2 className="text-lg sm:text-xl font-semibold mb-4 text-orange-600 text-center">🎯 Today's Daily Quiz</h2>
@@ -353,7 +283,7 @@ function HomePage() {
                   className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-lg transition-all duration-300 shadow-lg text-sm sm:text-base ${
                     !chain 
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:shadow-xl'
+                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:shadow-xl cursor-pointer'
                   }`}
                   disabled={loading || !chain}
                 >
@@ -367,6 +297,73 @@ function HomePage() {
             )}
           </div>
         </div>
+
+        {/* Wallet Connection Prompt */}
+        {!chain && (
+          <div className="mb-3 sm:mb-6 md:mb-8 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg shadow-lg p-4 sm:p-6 text-center">
+              <div className="text-4xl mb-3">🔗</div>
+              <h2 className="text-lg sm:text-xl font-semibold mb-2 text-blue-700">Connect Your Wallet</h2>
+              <p className="text-sm text-blue-600 mb-4">
+                Connect your wallet to start earning XP, taking quizzes, and climbing the leaderboard!
+              </p>
+              <div className="flex justify-center">
+                <ConnectButton
+                  accountStatus={{
+                    smallScreen: 'avatar',
+                    largeScreen: 'full',
+                  }}
+                  chainStatus={{
+                    smallScreen: 'icon',
+                    largeScreen: 'full',
+                  }}
+                  showBalance={{
+                    smallScreen: false,
+                    largeScreen: true,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* XP & Leaderboard System - Clear Explanation */}
+        <div className="text-center mb-2 sm:mb-6 md:mb-8">
+          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-4 md:p-6 max-w-4xl mx-auto">
+            <div className="flex items-center justify-center mb-1 sm:mb-2 md:mb-3">
+              <span className="text-lg sm:text-2xl md:text-3xl mr-1 sm:mr-2">🏆</span>
+              <h2 className="text-xs sm:text-lg md:text-xl font-bold text-foreground text-center">Earn XP & Climb Leaderboard</h2>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 md:gap-3 justify-center items-center">
+              {contractAddresses ? (
+                <button
+                  onClick={() => setIsLeaderboardModalOpen(true)}
+                  className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-white 
+                             rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base cursor-pointer"
+                >
+                  🏅 View Leaderboard
+                </button>
+              ) : (
+                <div className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gray-300 text-gray-500 
+                               rounded-md sm:rounded-lg font-bold text-xs sm:text-sm md:text-base cursor-not-allowed">
+                  🏅 Connect Wallet
+                </div>
+              )}
+              <a
+                href="https://x.com/DailyWiser_"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-blue-500 text-white 
+                           rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base cursor-pointer"
+              >
+                📖 Follow Us
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Quiz Generator Section */}
+        <AIQuizGenerator className="mb-3 sm:mb-8 md:mb-12" />
 
         {/* Learning Topics - Alternative to Daily Quiz */}
         <div className="mb-3 sm:mb-8 md:mb-12">
@@ -388,6 +385,12 @@ function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Leaderboard Modal */}
+      <LeaderboardModal
+        isOpen={isLeaderboardModalOpen}
+        onClose={() => setIsLeaderboardModalOpen(false)}
+      />
     </div>
   );
 }
