@@ -30,7 +30,7 @@ const REWARDS_CONFIG = {
     totalReward: 60,
     currency: "CELO",
     symbol: "🟡",
-    maxWinners: 150,
+    maxWinners: 50,
     seasonEndDate: "2025-10-15" // Celo season ends October 15, 2025
   }
 } as const;

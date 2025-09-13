@@ -324,8 +324,58 @@ function LeaderboardPage() {
             borderRadius: "8px",
             border: "1px solid #e5e7eb"
           }}>
-            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📋</div>
-            <p style={{ color: "#6b7280", fontSize: "1rem" }}>No token holders found</p>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>
+              {!address ? "🎮" : "📋"}
+            </div>
+            {!address ? (
+              <>
+                <h3 style={{ color: "#111827", fontSize: "1.25rem", fontWeight: "600", marginBottom: "1rem" }}>
+                  Join the Competition!
+                </h3>
+                <p style={{ color: "#6b7280", fontSize: "1rem", marginBottom: "2rem", lineHeight: "1.5" }}>
+                  Connect your wallet and start playing quizzes to earn XP and climb the leaderboard. 
+                  Be among the first players to secure your spot in the winner's circle!
+                </p>
+                <button
+                  onClick={() => navigate({ to: '/' })}
+                  style={{
+                    background: "linear-gradient(135deg, #58CC02, #46a001)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "12px",
+                    padding: "1rem 2rem",
+                    fontSize: "1rem",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 12px rgba(88, 204, 2, 0.3)",
+                    transition: "all 0.2s ease",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-2px)"
+                    e.currentTarget.style.boxShadow = "0 6px 16px rgba(88, 204, 2, 0.4)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)"
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(88, 204, 2, 0.3)"
+                  }}
+                >
+                  🚀 Get Started
+                </button>
+              </>
+            ) : (
+              <>
+                <p style={{ color: "#6b7280", fontSize: "1rem", marginBottom: "1rem" }}>
+                  No players on the leaderboard yet
+                </p>
+                <p style={{ color: "#9ca3af", fontSize: "0.9rem", lineHeight: "1.5" }}>
+                  Be the first to earn XP by playing quizzes!<br />
+                  Your progress will appear here once you start playing.
+                </p>
+              </>
+            )}
           </div>
         ) : (
           <>
