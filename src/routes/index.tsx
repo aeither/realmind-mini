@@ -2,7 +2,7 @@ import { sdk } from '@farcaster/miniapp-sdk'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import Header from '../components/Header'
 import BottomNavigation from '../components/BottomNavigation'
 
 interface Quiz {
@@ -248,37 +248,13 @@ function HomePage() {
   return (
     <div style={{ 
       minHeight: "100vh", 
-      paddingTop: "80px", 
       paddingBottom: "80px", // Space for bottom nav
       background: "#f9fafb"
     }}>
-      {/* Header */}
-      <div style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        background: "#ffffff",
-        borderBottom: "1px solid #e5e7eb",
-        padding: "1rem 1rem",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        zIndex: 1000
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <h1 style={{ color: "#111827", fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>
-            🍋 Realmind
-          </h1>
-        </div>
-        
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <ConnectButton />
-        </div>
-      </div>
+      <Header title="Realmind" icon="🍋" />
 
       {/* Main Content */}
-      <div style={{ padding: "1rem", maxWidth: "1200px", margin: "0 auto" }}>
+      <div style={{ paddingTop: "80px", padding: "1rem", maxWidth: "1200px", margin: "0 auto" }}>
         {/* Welcome Section - More Compact */}
         <div style={{
           textAlign: "center",

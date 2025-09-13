@@ -15,6 +15,26 @@ const CONTRACT_ADDRESSES = {
   }
 } as const;
 
+// Rewards configuration by chain ID
+const REWARDS_CONFIG = {
+  // Base (Mainnet)
+  8453: {
+    dailyQuizReward: "10 XP",
+    quizCompletionReward: "5 XP",
+    leaderboardBonus: "2x Multiplier",
+    currency: "BASE",
+    symbol: "⭐"
+  },
+  // Celo
+  42220: {
+    dailyQuizReward: "15 XP",
+    quizCompletionReward: "7 XP", 
+    leaderboardBonus: "1.5x Multiplier",
+    currency: "CELO",
+    symbol: "🟡"
+  }
+} as const;
+
 // Token1 ABI for balance checking
 export const token1ABI = [
   {
@@ -82,6 +102,17 @@ export function getContractAddresses(chainId: number) {
   return CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES] || {
     token1ContractAddress: "0x0000000000000000000000000000000000000000",
     quizGameContractAddress: "0x0000000000000000000000000000000000000000"
+  };
+}
+
+// Function to get rewards configuration by chain ID
+export function getRewardsConfig(chainId: number) {
+  return REWARDS_CONFIG[chainId as keyof typeof REWARDS_CONFIG] || {
+    dailyQuizReward: "5 XP",
+    quizCompletionReward: "3 XP",
+    leaderboardBonus: "1x Multiplier",
+    currency: "UNKNOWN",
+    symbol: "❓"
   };
 }
 
