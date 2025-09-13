@@ -104,6 +104,7 @@ function QuizGame() {
   const [lastUserAnswerCorrect, setLastUserAnswerCorrect] = useState<boolean | null>(null)
   const [lastAiAnswerCorrect, setLastAiAnswerCorrect] = useState<boolean | null>(null)
   const [showAnswerFeedback, setShowAnswerFeedback] = useState(false)
+  const [isCompletingAiSession, setIsCompletingAiSession] = useState(false)
 
   // Function to restart the quiz in AI challenge mode
   const handleRestartQuiz = () => {
@@ -237,15 +238,18 @@ function QuizGame() {
 
   useEffect(() => {
     if (isCompleteSuccess) {
-      toast.success('Rewards claimed! Check your wallet 🎁')
+      if (isCompletingAiSession) {
+        toast.success('AI session completed successfully!')
+        setIsCompletingAiSession(false) // Reset the flag
+      } else {
+        toast.success('Rewards claimed! Check your wallet 🎁')
+      }
       setJustCompletedQuiz(true) // Mark that user just completed a quiz
       
-      // Navigate to home page after successful claim
-      setTimeout(() => {
-        navigate({ to: '/' })
-      }, 2000) // Wait 2 seconds to show the success message
+      // Navigate to home page immediately after successful claim
+      navigate({ to: '/' })
     }
-  }, [isCompleteSuccess, navigate])
+  }, [isCompleteSuccess, navigate, isCompletingAiSession])
 
   // Reset the justCompletedQuiz flag after 10 seconds to prevent permanent bypass
   useEffect(() => {
@@ -483,9 +487,6 @@ function QuizGame() {
   }
 
   // Check if user has an active quiz session but for a different quiz
-  // Special case: Allow web3-basics to load when user has an ai-generated session (completes the AI session)
-  const shouldBypassBlockingScreen = activeQuizId === 'ai-generated' && quizId === 'web3-basics'
-  
   // Don't show blocking screen if user just completed a quiz (prevents showing after claiming rewards)
   const shouldSkipDueToCompletion = justCompletedQuiz
   
@@ -495,9 +496,27 @@ function QuizGame() {
   // Don't show blocking screen during active gameplay (user is already playing a quiz)
   const shouldSkipDuringGameplay = quizStarted || quizCompleted || isStartSuccess
   
-  if (hasActiveQuiz && activeQuizId && activeQuizId !== quizId && !shouldBypassBlockingScreen && !shouldSkipDueToCompletion && !shouldSkipDuringTransaction && !shouldSkipDuringGameplay) {
+  // Handle direct completion of AI-generated quiz session
+  const handleCompleteAiSession = () => {
+    if (!address || !contractAddresses) return
+    
+    // Set flag to keep showing AI session screen
+    setIsCompletingAiSession(true)
+    
+    // Complete with 0 score (no reward)
+    const correctAnswerCount = BigInt(0)
+    
+    completeQuiz({
+      address: contractAddresses.quizGameContractAddress as `0x${string}`,
+      abi: quizGameABI,
+      functionName: 'completeQuiz',
+      args: [correctAnswerCount],
+    })
+  }
+  
+  if ((hasActiveQuiz && activeQuizId && activeQuizId !== quizId && !shouldSkipDueToCompletion && !shouldSkipDuringTransaction && !shouldSkipDuringGameplay) || isCompletingAiSession) {
     // Special handling for AI-generated quiz sessions
-    if (activeQuizId === 'ai-generated') {
+    if (activeQuizId === 'ai-generated' || isCompletingAiSession) {
       // Show the AI session recovery screen
       return (
         <motion.div style={{}} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -506,26 +525,25 @@ function QuizGame() {
             <h2 style={{ color: "#111827", marginBottom: "1rem" }}>AI Quiz Session Found</h2>
             <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
               You have an active AI-generated quiz session, but the original quiz data cannot be recovered. 
-              Complete it with the Web3 Basics quiz to earn your rewards.
+              Complete it now without rewards to start fresh.
             </p>
             <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
               <button 
-                onClick={() => {
-                  toast.info('Completing your AI session with Web3 Basics quiz...')
-                  navigate({ to: '/quiz-game', search: { quiz: 'web3-basics' } })
-                }}
+                onClick={handleCompleteAiSession}
+                disabled={isCompleteTransactionPending}
                 style={{
-                  backgroundColor: "#58CC02",
+                  backgroundColor: isCompleteTransactionPending ? "#9ca3af" : "#58CC02",
                   color: "#ffffff",
                   border: "none",
                   borderRadius: "8px",
                   padding: "0.75rem 1.5rem",
                   fontSize: "1rem",
                   fontWeight: 700,
-                  cursor: "pointer"
+                  cursor: isCompleteTransactionPending ? "not-allowed" : "pointer",
+                  opacity: isCompleteTransactionPending ? 0.6 : 1
                 }}
               >
-                Complete with Web3 Quiz
+                {isCompleteTransactionPending ? (isCompletePending ? "Confirm in wallet..." : "Completing...") : "Complete Session"}
               </button>
               <button 
                 onClick={() => navigate({ to: '/' })}
@@ -626,38 +644,23 @@ function QuizGame() {
                   <p style={{ color: "#ef4444", marginBottom: "2rem", fontSize: "1.1rem", fontWeight: 600 }}>
                     No bonus XP - you need to beat the AI to earn extra rewards!
                   </p>
-                  <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-                    <button
-                      onClick={handleRestartQuiz}
-                      style={{
-                        backgroundColor: "#ef4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "12px",
-                        padding: "1rem 2rem",
-                        fontSize: "1.1rem",
-                        fontWeight: 700,
-                        cursor: "pointer"
-                      }}
-                    >
-                      🔄 Restart Quiz
-                    </button>
-                    <button
-                      onClick={() => navigate({ to: '/' })}
-                      style={{
-                        backgroundColor: "#6b7280",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "12px",
-                        padding: "1rem 2rem",
-                        fontSize: "1.1rem",
-                        fontWeight: 700,
-                        cursor: "pointer"
-                      }}
-                    >
-                      🏠 Back to Home
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleCompleteQuiz}
+                    disabled={isCompleteTransactionPending}
+                    style={{
+                      backgroundColor: isCompleteTransactionPending ? "#9ca3af" : "#58CC02",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "12px",
+                      padding: "1rem 2rem",
+                      fontSize: "1.1rem",
+                      fontWeight: 700,
+                      cursor: isCompleteTransactionPending ? "not-allowed" : "pointer",
+                      opacity: isCompleteTransactionPending ? 0.6 : 1
+                    }}
+                  >
+                    {isCompleteTransactionPending ? (isCompletePending ? "Confirm in wallet..." : "Completing...") : "✅ Complete Quiz Anyway"}
+                  </button>
                 </>
               )}
               

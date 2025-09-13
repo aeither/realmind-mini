@@ -70,7 +70,7 @@ export class LeaderboardService {
   }
 
   /**
-   * Get token holders for a specific contract and chain using Blockscout API
+   * Get token holders for a specific contract and chain using Blockscout API with pagination
    */
   async getTokenHolders(
     contractAddress: string, 
@@ -104,39 +104,75 @@ export class LeaderboardService {
         return typeof cachedResult === 'string' ? JSON.parse(cachedResult) : cachedResult
       }
 
-      // Build Blockscout API URL
-      const apiUrl = `${chainConfig.blockscoutApiUrl}/tokens/${contractAddress}/holders`
-
-      console.log(`🔍 Fetching token holders from ${chainConfig.chainName} Blockscout for contract: ${contractAddress}`)
-      console.log(`📡 API URL: ${apiUrl}`)
+      console.log(`🔍 Fetching up to ${limit} token holders from ${chainConfig.chainName} Blockscout for contract: ${contractAddress}`)
       
-      const response = await fetch(apiUrl, {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Realmind-Leaderboard/1.0'
+      // Fetch all pages until we reach the limit or no more data
+      const allHolders: TokenHolder[] = []
+      let nextPageParams: any = null
+      let pageCount = 0
+      const maxPages = Math.ceil(limit / 50) // Blockscout returns max 50 per page
+
+      do {
+        pageCount++
+        
+        // Build API URL with pagination params
+        let apiUrl = `${chainConfig.blockscoutApiUrl}/tokens/${contractAddress}/holders`
+        if (nextPageParams) {
+          const params = new URLSearchParams()
+          Object.entries(nextPageParams).forEach(([key, value]) => {
+            params.append(key, String(value))
+          })
+          apiUrl += `?${params.toString()}`
         }
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Blockscout API request failed: ${response.status} ${response.statusText}`)
-      }
 
-      const data: BlockscoutResponse = await response.json()
-
-      if (!data.items || !Array.isArray(data.items)) {
-        return {
-          success: false,
-          error: 'Invalid response format from Blockscout API'
+        console.log(`📡 Fetching page ${pageCount}/${maxPages}: ${apiUrl}`)
+        
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Realmind-Leaderboard/1.0'
+          }
+        })
+        
+        if (!response.ok) {
+          throw new Error(`Blockscout API request failed: ${response.status} ${response.statusText}`)
         }
-      }
 
-      // Transform Blockscout data into our format (already sorted by Blockscout)
-      const holders: TokenHolder[] = data.items
-        .slice(0, limit) // Limit results
-        .map((item) => ({
+        const data: BlockscoutResponse = await response.json()
+
+        if (!data.items || !Array.isArray(data.items)) {
+          console.log('No more items or invalid response format')
+          break
+        }
+
+        // Add holders from this page
+        const pageHolders: TokenHolder[] = data.items.map((item) => ({
           address: item.address.hash,
           balance: item.value
         }))
+
+        allHolders.push(...pageHolders)
+        console.log(`📄 Page ${pageCount}: Added ${pageHolders.length} holders (total: ${allHolders.length})`)
+
+        // Check if we've reached our limit
+        if (allHolders.length >= limit) {
+          console.log(`🎯 Reached limit of ${limit} holders`)
+          break
+        }
+
+        // Set up for next page
+        nextPageParams = data.next_page_params
+        
+        // Safety check to prevent infinite loops
+        if (pageCount >= maxPages) {
+          console.log(`⚠️ Reached max pages (${maxPages}), stopping pagination`)
+          break
+        }
+
+      } while (nextPageParams && Object.keys(nextPageParams).length > 0)
+
+      // Limit the final result
+      const holders = allHolders.slice(0, limit)
 
       const result: LeaderboardResponse = {
         success: true,
@@ -155,7 +191,7 @@ export class LeaderboardService {
         console.log('Failed to cache result, continuing without cache')
       }
 
-      console.log(`✅ Fetched ${holders.length} token holders from ${chainConfig.chainName} Blockscout`)
+      console.log(`✅ Fetched ${holders.length} token holders from ${chainConfig.chainName} Blockscout across ${pageCount} pages`)
       return result
 
     } catch (error) {

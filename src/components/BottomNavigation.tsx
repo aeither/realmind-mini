@@ -51,20 +51,46 @@ export default function BottomNavigation() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: '0.25rem',
-            padding: '0.25rem',
-            background: 'transparent',
+            padding: '0.75rem 0.5rem',
+            background: isActive(item.path) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
             border: 'none',
+            borderRadius: '16px',
             cursor: 'pointer',
-            color: isActive(item.path) ? '#58CC02' : '#6b7280',
-            transition: 'color 0.2s ease',
-            minWidth: '60px'
+            color: isActive(item.path) ? '#3b82f6' : '#6b7280',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            width: '70px',
+            height: '60px',
+            position: 'relative',
+            transform: isActive(item.path) ? 'translateY(-2px)' : 'translateY(0)'
+          }}
+          onMouseEnter={(e) => {
+            if (!isActive(item.path)) {
+              e.currentTarget.style.background = 'rgba(107, 114, 128, 0.1)'
+              e.currentTarget.style.transform = 'translateY(-1px)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isActive(item.path)) {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }
           }}
         >
-          <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
           <span style={{ 
-            fontSize: '0.7rem', 
-            fontWeight: isActive(item.path) ? '600' : '400' 
+            fontSize: '1.5rem',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: isActive(item.path) ? 'scale(1.1)' : 'scale(1)'
+          }}>
+            {item.icon}
+          </span>
+          <span style={{ 
+            fontSize: '0.65rem', 
+            fontWeight: isActive(item.path) ? '600' : '500',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            textAlign: 'center',
+            lineHeight: '1.2'
           }}>
             {item.label}
           </span>

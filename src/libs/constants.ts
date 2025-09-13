@@ -27,7 +27,7 @@ const REWARDS_CONFIG = {
   },
   // Celo
   42220: {
-    totalReward: 250,
+    totalReward: 60,
     currency: "CELO",
     symbol: "🟡",
     maxWinners: 150,
