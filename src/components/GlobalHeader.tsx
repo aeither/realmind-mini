@@ -43,18 +43,15 @@ function GlobalHeader({
   });
   
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+    <header
       style={{
         position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         zIndex: 1000,
-        background: "rgba(255, 255, 255, 0.8)",
-        backdropFilter: "blur(10px)",
+        background: "rgba(255, 255, 255, 0.6)",
+        backdropFilter: "blur(20px)",
         borderBottom: "1px solid hsl(var(--border))",
         padding: "0.75rem clamp(0.5rem, 3vw, 2rem)",
         display: "flex",
@@ -103,7 +100,7 @@ function GlobalHeader({
             gap: "0.5rem"
           }}
         >
-          <span className="hidden sm:inline">Realmind</span>
+          Realmind
         </Link>
         </motion.div>
       </div>
@@ -151,7 +148,7 @@ function GlobalHeader({
           />
         </motion.div>
       </motion.div>
-    </motion.header>
+    </header>
   );
 }
 

@@ -21,7 +21,7 @@ const REWARDS_CONFIG = {
   8453: {
     totalReward: 1500,
     currency: "YUZU",
-    symbol: "⭐"
+    symbol: "🍊"
   },
   // Celo
   42220: {

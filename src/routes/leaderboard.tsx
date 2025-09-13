@@ -163,7 +163,6 @@ function LeaderboardPage() {
           <>
             {/* Leaderboard Table */}
             <div style={{ 
-              overflowX: "auto",
               background: "#ffffff",
               borderRadius: "8px",
               border: "1px solid #e5e7eb",
@@ -172,10 +171,10 @@ function LeaderboardPage() {
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: "#f9fafb" }}>
-                    <th style={{ textAlign: "left", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>Rank</th>
-                    <th style={{ textAlign: "left", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>Address</th>
-                    <th style={{ textAlign: "right", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>XP</th>
-                    <th style={{ textAlign: "center", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>Reward</th>
+                    <th style={{ textAlign: "left", padding: "0.5rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem", width: "80px" }}>Rank</th>
+                    <th style={{ textAlign: "left", padding: "0.5rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>Address</th>
+                    <th style={{ textAlign: "right", padding: "0.5rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem", width: "100px" }}>XP</th>
+                    <th style={{ textAlign: "center", padding: "0.5rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem", width: "120px" }}>Reward</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -192,48 +191,53 @@ function LeaderboardPage() {
                     
                     return (
                       <tr key={holder.address} style={{ borderTop: "1px solid #e5e7eb" }}>
-                        <td style={{ padding: "0.75rem" }}>
+                        <td style={{ padding: "0.5rem" }}>
                           <div style={{ display: "flex", alignItems: "center" }}>
                             {rank <= 3 && (
-                              <span style={{ marginRight: "0.5rem", fontSize: "1rem" }}>
+                              <span style={{ marginRight: "0.25rem", fontSize: "0.9rem" }}>
                                 {rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}
                               </span>
                             )}
                             <span style={{ 
                               fontWeight: "600",
                               color: rank <= 3 ? "#58CC02" : "#111827",
-                              fontSize: "0.9rem"
+                              fontSize: "0.85rem"
                             }}>
                               #{rank}
                             </span>
                           </div>
                         </td>
-                        <td style={{ padding: "0.75rem" }}>
+                        <td style={{ padding: "0.5rem" }}>
                           <code style={{
                             background: "#f9fafb",
-                            padding: "0.25rem 0.5rem",
+                            padding: "0.2rem 0.4rem",
                             borderRadius: "4px",
-                            fontSize: "0.75rem",
-                            fontFamily: "monospace"
+                            fontSize: "0.7rem",
+                            fontFamily: "monospace",
+                            display: "block",
+                            maxWidth: "100%",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis"
                           }}>
                             {leaderboardService.truncateAddress(holder.address)}
                           </code>
                         </td>
-                        <td style={{ padding: "0.75rem", textAlign: "right" }}>
-                          <span style={{ fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>
+                        <td style={{ padding: "0.5rem", textAlign: "right" }}>
+                          <span style={{ fontWeight: "600", color: "#111827", fontSize: "0.8rem" }}>
                             {leaderboardService.formatBalance(holder.balance)} XP
                           </span>
                         </td>
-                        <td style={{ padding: "0.75rem", textAlign: "center" }}>
+                        <td style={{ padding: "0.5rem", textAlign: "center" }}>
                           <span style={{
                             background: rank <= 3 ? "#58CC02" : "#f3f4f6",
                             color: rank <= 3 ? "white" : "#374151",
-                            padding: "0.25rem 0.5rem",
+                            padding: "0.2rem 0.4rem",
                             borderRadius: "4px",
-                            fontSize: "0.75rem",
-                            fontWeight: "600"
+                            fontSize: "0.7rem",
+                            fontWeight: "600",
+                            display: "inline-block"
                           }}>
-{getRewardForRank(rank)} {rewardsConfig?.currency || "TOKENS"}
+                            {rewardsConfig?.symbol || "💰"} {getRewardForRank(rank)}
                           </span>
                         </td>
                       </tr>
