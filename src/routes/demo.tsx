@@ -176,7 +176,7 @@ function DemoPage() {
   ]
 
   return (
-    <div style={{ paddingTop: '80px' }}>
+    <div style={{ paddingTop: '70px' }}>
       <GlobalHeader />
       <div className="max-w-4xl mx-auto p-8">
         {/* Header */}

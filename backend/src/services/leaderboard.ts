@@ -75,7 +75,7 @@ export class LeaderboardService {
   async getTokenHolders(
     contractAddress: string, 
     chainId: number,
-    limit: number = 50
+    limit: number = 1000
   ): Promise<LeaderboardResponse> {
     try {
       const chainConfig = this.chains[chainId]
@@ -173,7 +173,7 @@ export class LeaderboardService {
   async getLeaderboard(
     contractAddress: string,
     chainId: number,
-    limit: number = 50
+    limit: number = 1000
   ): Promise<LeaderboardResponse> {
     // With Blockscout API, we can get holders directly sorted by balance
     return this.getTokenHolders(contractAddress, chainId, limit)

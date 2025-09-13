@@ -22,14 +22,16 @@ const REWARDS_CONFIG = {
     totalReward: 600000,
     currency: "YUZU",
     symbol: "🍊",
-    maxWinners: 200
+    maxWinners: 200,
+    seasonEndDate: undefined // No deadline for Base
   },
   // Celo
   42220: {
     totalReward: 250,
     currency: "CELO",
     symbol: "🟡",
-    maxWinners: 150
+    maxWinners: 150,
+    seasonEndDate: "2025-10-15" // Celo season ends October 15, 2025
   }
 } as const;
 
@@ -109,7 +111,8 @@ export function getRewardsConfig(chainId: number) {
     totalReward: 1000,
     currency: "UNKNOWN",
     symbol: "❓",
-    maxWinners: 200
+    maxWinners: 200,
+    seasonEndDate: undefined
   };
 }
 

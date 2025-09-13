@@ -28,7 +28,7 @@ function LeaderboardPage() {
       const result = await leaderboardService.getLeaderboard(
         contractAddresses.token1ContractAddress,
         chain.id,
-        rewardsConfig?.maxWinners
+        rewardsConfig?.maxWinners || 200
       )
 
       if (result.success && result.holders) {
@@ -44,14 +44,18 @@ function LeaderboardPage() {
     }
   }
 
-  // Calculate days remaining until October 15, 2025
+  // Calculate days remaining based on chain's season end date
   useEffect(() => {
-    const seasonEndDate = new Date('2025-10-15')
-    const today = new Date()
-    const timeDiff = seasonEndDate.getTime() - today.getTime()
-    const days = Math.ceil(timeDiff / (1000 * 3600 * 24))
-    setDaysRemaining(Math.max(0, days))
-  }, [])
+    if (rewardsConfig?.seasonEndDate) {
+      const seasonEndDate = new Date(rewardsConfig.seasonEndDate)
+      const today = new Date()
+      const timeDiff = seasonEndDate.getTime() - today.getTime()
+      const days = Math.ceil(timeDiff / (1000 * 3600 * 24))
+      setDaysRemaining(Math.max(0, days))
+    } else {
+      setDaysRemaining(0) // No season end date
+    }
+  }, [rewardsConfig])
 
   useEffect(() => {
     if (chain && contractAddresses) {
@@ -65,19 +69,16 @@ function LeaderboardPage() {
     <div style={{ 
       minHeight: '100vh', 
       paddingBottom: '80px', // Space for bottom nav
-      background: '#f9fafb',
-      overflow: 'hidden' // Prevent unnecessary scrolling
+      background: '#f9fafb'
     }}>
       <GlobalHeader />
 
       {/* Main Content */}
       <div style={{ 
-        paddingTop: "60px", // Reduced from 80px to match actual header height
+        paddingTop: "70px", // Proper spacing for header
         padding: "1rem", 
         maxWidth: "1200px", 
-        margin: "0 auto",
-        height: 'calc(100vh - 60px - 80px)', // Full height minus header and bottom nav
-        overflow: 'auto' // Allow scrolling only within content area
+        margin: "0 auto"
       }}>
         {/* Header Section - Steve Jobs Inspired */}
         <div style={{ marginBottom: "2rem", textAlign: "center" }}>
@@ -93,16 +94,18 @@ function LeaderboardPage() {
             Top Performers
           </h1>
           
-          {/* Subtitle */}
-          <p style={{ 
-            color: "#666666", 
-            fontSize: "1rem", 
-            fontWeight: "400",
-            marginBottom: "2rem",
-            letterSpacing: "0.01em"
-          }}>
-            Season ends in {daysRemaining} days
-          </p>
+          {/* Subtitle - only show if there's a season end date */}
+          {rewardsConfig?.seasonEndDate && (
+            <p style={{ 
+              color: "#666666", 
+              fontSize: "1rem", 
+              fontWeight: "400",
+              marginBottom: "2rem",
+              letterSpacing: "0.01em"
+            }}>
+              Season ends in {daysRemaining} days
+            </p>
+          )}
           
           {/* Minimal Stats Grid */}
           <div style={{
@@ -357,6 +360,26 @@ function LeaderboardPage() {
             <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.8rem", color: "#6b7280" }}>
               <p>Rewards distributed proportionally by XP share among top {rewardsConfig?.maxWinners || 200} holders</p>
               <p>Data updates every 5 minutes</p>
+              {chain?.blockExplorers?.default && contractAddresses && (
+                <p style={{ marginTop: "0.5rem" }}>
+                  <a 
+                    href={`${chain.blockExplorers.default.url}/token/${contractAddresses.token1ContractAddress}?tab=holders`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ 
+                      color: "#9ca3af", 
+                      textDecoration: "none", 
+                      fontSize: "0.7rem",
+                      opacity: 0.7,
+                      transition: "opacity 0.2s"
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+                  >
+                    View on {chain.blockExplorers.default.name} ↗
+                  </a>
+                </p>
+              )}
             </div>
           </>
         )}

@@ -249,19 +249,16 @@ function HomePage() {
     <div style={{ 
       minHeight: "100vh", 
       paddingBottom: "80px", // Space for bottom nav
-      background: "#f9fafb",
-      overflow: "hidden" // Prevent unnecessary scrolling
+      background: "#f9fafb"
     }}>
       <GlobalHeader />
 
       {/* Main Content */}
       <div style={{ 
-        paddingTop: "60px", // Reduced from 80px to match actual header height
+        paddingTop: "70px", // Proper spacing for header
         padding: "1rem", 
         maxWidth: "1200px", 
-        margin: "0 auto",
-        height: "calc(100vh - 60px - 80px)", // Full height minus header and bottom nav
-        overflow: "auto" // Allow scrolling only within content area
+        margin: "0 auto"
       }}>
         {/* Welcome Section - More Compact */}
         <div style={{

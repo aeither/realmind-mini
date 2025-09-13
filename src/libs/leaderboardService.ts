@@ -32,7 +32,7 @@ export class LeaderboardService {
   async getLeaderboard(
     contractAddress: string,
     chainId: number,
-    limit: number = 50
+    limit: number = 1000
   ): Promise<LeaderboardResponse> {
     try {
       const response = await fetch(

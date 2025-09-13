@@ -101,6 +101,9 @@ function QuizGame() {
   const [gameResult, setGameResult] = useState<'user_wins' | 'ai_wins' | 'tie' | null>(null)
   const [quizStarted, setQuizStarted] = useState(false)
   const [justCompletedQuiz, setJustCompletedQuiz] = useState(false)
+  const [lastUserAnswerCorrect, setLastUserAnswerCorrect] = useState<boolean | null>(null)
+  const [lastAiAnswerCorrect, setLastAiAnswerCorrect] = useState<boolean | null>(null)
+  const [showAnswerFeedback, setShowAnswerFeedback] = useState(false)
 
   // Function to restart the quiz in AI challenge mode
   const handleRestartQuiz = () => {
@@ -299,65 +302,64 @@ function QuizGame() {
     setUserAnswers(newAnswers)
 
     // Check if user got it right
-    const userCorrect = answer === quizConfig.questions[currentQuestionIndex].options[quizConfig.questions[currentQuestionIndex].correct]
+    const currentQuestion = quizConfig.questions[currentQuestionIndex]
+    const userCorrect = answer === currentQuestion.options[currentQuestion.correct]
+    setLastUserAnswerCorrect(userCorrect)
+    
     if (userCorrect) {
       setScore(prev => prev + 1)
     }
 
+    let aiCorrect = false
     if (isAiChallengeMode) {
       // AI also answers the question (50% chance of being correct)
-      const currentQuestion = quizConfig.questions[currentQuestionIndex]
       const aiAnswer = getAiAnswer(currentQuestion)
       const newAiAnswers = [...aiAnswers]
       newAiAnswers[currentQuestionIndex] = aiAnswer
       setAiAnswers(newAiAnswers)
       
       // Check if AI got it right
-      const aiCorrect = aiAnswer === currentQuestion.options[currentQuestion.correct]
+      aiCorrect = aiAnswer === currentQuestion.options[currentQuestion.correct]
+      setLastAiAnswerCorrect(aiCorrect)
+      
       if (aiCorrect) {
         setAiScore(prev => prev + 1)
       }
     }
 
-    if (currentQuestionIndex < quizConfig.questions.length - 1) {
-      // Move to next question
-      setCurrentQuestionIndex(currentQuestionIndex + 1)
-    } else {
-      // Quiz completed
-      if (isAiChallengeMode) {
-        // Calculate final scores and determine winner
-        const finalUserScore = newAnswers.reduce((score, ans, index) => {
-          const isCorrect = ans === quizConfig.questions[index].options[quizConfig.questions[index].correct]
-          return score + (isCorrect ? 1 : 0)
-        }, 0)
-        
-        // Calculate AI score from stored answers
-        const finalAiScore = [...aiAnswers, getAiAnswer(quizConfig.questions[currentQuestionIndex])].reduce((score, ans, index) => {
-          const isCorrect = ans === quizConfig.questions[index].options[quizConfig.questions[index].correct]
-          return score + (isCorrect ? 1 : 0)
-        }, 0)
-        
-        setScore(finalUserScore)
-        setAiScore(finalAiScore)
-        
-        if (finalUserScore > finalAiScore) {
-          setGameResult('user_wins')
-        } else if (finalAiScore > finalUserScore) {
-          setGameResult('ai_wins')
-        } else {
-          setGameResult('tie')
-        }
+    // Show feedback for 2 seconds
+    setShowAnswerFeedback(true)
+    setTimeout(() => {
+      setShowAnswerFeedback(false)
+      setLastUserAnswerCorrect(null)
+      setLastAiAnswerCorrect(null)
+      
+      if (currentQuestionIndex < quizConfig.questions.length - 1) {
+        // Move to next question
+        setCurrentQuestionIndex(currentQuestionIndex + 1)
       } else {
-        // Regular quiz mode - calculate final score
-        const finalScore = newAnswers.reduce((score, ans, index) => {
-          const isCorrect = ans === quizConfig.questions[index].options[quizConfig.questions[index].correct]
-          return score + (isCorrect ? 1 : 0)
-        }, 0)
-        
-        setScore(finalScore)
+        // Quiz completed - use the already tracked scores
+        if (isAiChallengeMode) {
+          const finalUserScore = score + (userCorrect ? 1 : 0)
+          const finalAiScore = aiScore + (aiCorrect ? 1 : 0)
+          
+          setScore(finalUserScore)
+          setAiScore(finalAiScore)
+          
+          if (finalUserScore > finalAiScore) {
+            setGameResult('user_wins')
+          } else if (finalAiScore > finalUserScore) {
+            setGameResult('ai_wins')
+          } else {
+            setGameResult('tie')
+          }
+        } else {
+          // Regular quiz mode - use tracked score
+          setScore(score + (userCorrect ? 1 : 0))
+        }
+        setQuizCompleted(true)
       }
-      setQuizCompleted(true)
-    }
+    }, 2000)
   }
 
   // Handle complete quiz on blockchain
@@ -839,11 +841,21 @@ function QuizGame() {
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: 600 }}>YOU</div>
                 <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#22c55e" }}>{score}</div>
+                {showAnswerFeedback && lastUserAnswerCorrect !== null && (
+                  <div style={{ fontSize: "0.7rem", marginTop: "0.25rem", fontWeight: 600, color: lastUserAnswerCorrect ? "#22c55e" : "#ef4444" }}>
+                    {lastUserAnswerCorrect ? "✓ Correct!" : "✗ Wrong"}
+                  </div>
+                )}
               </div>
               <div style={{ fontSize: "1.2rem", color: "#6b7280", fontWeight: 600 }}>VS</div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: 600 }}>AI BOT</div>
                 <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#ef4444" }}>{aiScore}</div>
+                {showAnswerFeedback && lastAiAnswerCorrect !== null && (
+                  <div style={{ fontSize: "0.7rem", marginTop: "0.25rem", fontWeight: 600, color: lastAiAnswerCorrect ? "#22c55e" : "#ef4444" }}>
+                    {lastAiAnswerCorrect ? "✓ Correct!" : "✗ Wrong"}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -877,36 +889,72 @@ function QuizGame() {
               {currentQuestion.question}
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {currentQuestion.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleQuizAnswer(option)}
-                  style={{
-                    backgroundColor: "#ffffff",
-                    border: "2px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    padding: "clamp(0.75rem, 3vw, 1rem)",
-                    fontSize: "clamp(0.9rem, 3.5vw, 1rem)",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    textAlign: "left",
-                    color: "#111827",
-                    lineHeight: "1.4",
-                    minHeight: "clamp(3rem, 12vw, 4rem)"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "hsl(var(--quiz-selected))"
-                    e.currentTarget.style.borderColor = "hsl(var(--primary))"
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#ffffff"
-                    e.currentTarget.style.borderColor = "hsl(var(--border))"
-                  }}
-                >
-                  {option}
-                </button>
-              ))}
+              {currentQuestion.options.map((option, index) => {
+                const isCorrectAnswer = index === currentQuestion.correct
+                const showCorrectAnswer = showAnswerFeedback && lastUserAnswerCorrect !== null
+                
+                return (
+                  <button
+                    key={index}
+                    onClick={() => !showAnswerFeedback && handleQuizAnswer(option)}
+                    disabled={showAnswerFeedback}
+                    style={{
+                      backgroundColor: showCorrectAnswer && isCorrectAnswer ? "#dcfce7" : "#ffffff",
+                      border: `2px solid ${showCorrectAnswer && isCorrectAnswer ? "#22c55e" : "hsl(var(--border))"}`,
+                      borderRadius: "8px",
+                      padding: "clamp(0.75rem, 3vw, 1rem)",
+                      fontSize: "clamp(0.9rem, 3.5vw, 1rem)",
+                      cursor: showAnswerFeedback ? "not-allowed" : "pointer",
+                      transition: "all 0.3s ease",
+                      textAlign: "left",
+                      color: "#111827",
+                      lineHeight: "1.4",
+                      minHeight: "clamp(3rem, 12vw, 4rem)",
+                      opacity: showAnswerFeedback ? 0.8 : 1,
+                      position: "relative"
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!showAnswerFeedback) {
+                        e.currentTarget.style.backgroundColor = "hsl(var(--quiz-selected))"
+                        e.currentTarget.style.borderColor = "hsl(var(--primary))"
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!showAnswerFeedback) {
+                        e.currentTarget.style.backgroundColor = "#ffffff"
+                        e.currentTarget.style.borderColor = "hsl(var(--border))"
+                      } else if (isCorrectAnswer) {
+                        e.currentTarget.style.backgroundColor = "#dcfce7"
+                        e.currentTarget.style.borderColor = "#22c55e"
+                      }
+                    }}
+                  >
+                    {option}
+                    {showCorrectAnswer && isCorrectAnswer && (
+                      <span style={{
+                        position: "absolute",
+                        right: "1rem",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#22c55e",
+                        fontWeight: "bold"
+                      }}>✓</span>
+                    )}
+                  </button>
+                )
+              })}
             </div>
+            
+            {showAnswerFeedback && (
+              <div style={{
+                marginTop: "1rem",
+                textAlign: "center",
+                color: "#6b7280",
+                fontSize: "0.9rem"
+              }}>
+                Next question in {Math.ceil(2)}s...
+              </div>
+            )}
           </div>
         </div>
       </div>
