@@ -6,6 +6,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { getContractAddresses } from '../libs/constants'
 import AIQuizGenerator from '../components/AIQuizGenerator'
 import LeaderboardModal from '../components/LeaderboardModal'
+
 interface Quiz {
   id: string;
   title: string;
@@ -45,6 +46,60 @@ const AVAILABLE_QUIZZES: Quiz[] = [
     category: "DeFi"
   }
 ];
+
+function SplashScreen() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "calc(100vh - 80px)",
+        background: "hsl(var(--background))",
+        color: "hsl(var(--foreground))",
+        fontFamily: "system-ui, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "2.25rem",
+          fontWeight: 800,
+          marginBottom: "1rem",
+          textAlign: "center",
+        }}
+      >
+        🍋 Realmind
+      </div>
+      <div
+        style={{
+          fontSize: "1.2rem",
+          marginBottom: "2rem",
+          opacity: 0.9,
+          textAlign: "center",
+        }}
+      >
+        Interactive Learning Experience
+      </div>
+      <div
+        style={{
+          width: "40px",
+          height: "40px",
+          border: "3px solid rgba(16,24,40,0.1)",
+          borderTop: "3px solid hsl(var(--primary))",
+          borderRadius: "50%",
+          animation: "spin 1s linear infinite",
+        }}
+      />
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 function HomePage() {
   const { chain } = useAccount();
@@ -190,259 +245,186 @@ function HomePage() {
     }
   };
 
-  const handleQuizSelect = (quizId: string) => {
-    if (!chain) {
-      return; // Don't allow quiz selection without wallet connection
-    }
-    setSelectedQuiz(quizId);
-    // Navigate to quiz using TanStack Router
-    navigate({ to: '/quiz-game', search: { quiz: quizId } });
-  };
-
-  // Show nothing while loading - Farcaster shows splash screen
+  // Show loading screen while SDK initializes
   if (!isAppReady) {
-    return null;
+    return <SplashScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-2 py-1 sm:px-4 sm:py-3 md:p-8">
-        {/* Hero Section - Clear User Goals */}
-        <div className="text-center mb-3 sm:mb-6">
-          <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold mb-1 sm:mb-3 text-foreground">
-            Welcome to Realmind! 🧠
+    <div style={{ minHeight: "100vh", paddingTop: "80px" }}>
+      {/* Header */}
+      <div style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        background: "#ffffff",
+        borderBottom: "1px solid #e5e7eb",
+        padding: "1rem 2rem",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        zIndex: 1000
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <h1 style={{ color: "#111827", fontSize: "1.5rem", fontWeight: "bold", margin: 0 }}>
+            🍋 Realmind
           </h1>
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-3 sm:mb-6 max-w-2xl mx-auto px-1 sm:px-4">
-            Learn blockchain daily, earn XP, and climb the leaderboard.
+        </div>
+        
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <ConnectButton />
+          {chain && (
+            <button
+              onClick={() => setIsLeaderboardModalOpen(true)}
+              style={{
+                background: "#f3f4f6",
+                color: "#374151",
+                border: "1px solid #d1d5db",
+                borderRadius: "8px",
+                padding: "0.5rem 1rem",
+                cursor: "pointer",
+                fontSize: "0.9rem"
+              }}
+            >
+              🏆 Leaderboard
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
+        {/* Welcome Section */}
+        <div style={{
+          textAlign: "center",
+          marginBottom: "3rem"
+        }}>
+          <h2 style={{ fontSize: "2.5rem", marginBottom: "1rem", fontWeight: "bold", color: "#111827" }}>
+            Interactive Learning Experience
+          </h2>
+          <p style={{ fontSize: "1.2rem", color: "#6b7280", maxWidth: "600px", margin: "0 auto" }}>
+            Test your knowledge, earn rewards, and compete with others in our gamified learning platform
           </p>
-          
-          {/* Clear Action Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6 max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-lg p-3 sm:p-4">
-              <div className="text-2xl sm:text-3xl mb-2">🎯</div>
-              <h3 className="font-bold text-orange-700 text-sm sm:text-base mb-1">Daily Quiz</h3>
-              <p className="text-xs sm:text-sm text-orange-600">Complete today's quiz to earn XP and climb the leaderboard</p>
-            </div>
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-3 sm:p-4">
-              <div className="text-2xl sm:text-3xl mb-2">🤖</div>
-              <h3 className="font-bold text-blue-700 text-sm sm:text-base mb-1">AI Custom Quiz</h3>
-              <p className="text-xs sm:text-sm text-blue-600">Generate personalized quizzes on any topic you want to learn</p>
-            </div>
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-3 sm:p-4">
-              <div className="text-2xl sm:text-3xl mb-2">🏆</div>
-              <h3 className="font-bold text-green-700 text-sm sm:text-base mb-1">Leaderboard</h3>
-              <p className="text-xs sm:text-sm text-green-600">See your ranking and compete with other learners globally</p>
-            </div>
-          </div>
         </div>
 
-        {/* Daily Quiz - Primary Action - MOVED TO TOP */}
-        <div className="mb-3 sm:mb-8 md:mb-12 max-w-2xl mx-auto">
-          <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-lg shadow-lg p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-orange-600 text-center">🎯 Today's Daily Quiz</h2>
-            <p className="text-sm text-orange-600 text-center mb-4">Complete to earn XP and climb the leaderboard!</p>
-            
-            {countdown ? (
-              <div className="text-center">
-                <div className="flex justify-center space-x-2 sm:space-x-4 mb-4">
-                  <div className="bg-orange-100 rounded-lg p-2 sm:p-3 min-w-12 sm:min-w-16">
-                    <div className="text-lg sm:text-2xl font-bold text-orange-600">{countdown.hours.toString().padStart(2, '0')}</div>
-                    <div className="text-xs text-orange-500">Hours</div>
-                  </div>
-                  <div className="bg-orange-100 rounded-lg p-2 sm:p-3 min-w-12 sm:min-w-16">
-                    <div className="text-lg sm:text-2xl font-bold text-orange-600">{countdown.minutes.toString().padStart(2, '0')}</div>
-                    <div className="text-xs text-orange-500">Minutes</div>
-                  </div>
-                  <div className="bg-orange-100 rounded-lg p-2 sm:p-3 min-w-12 sm:min-w-16">
-                    <div className="text-lg sm:text-2xl font-bold text-orange-600">{countdown.seconds.toString().padStart(2, '0')}</div>
-                    <div className="text-xs text-orange-500">Seconds</div>
-                  </div>
-                </div>
-                
-                {/* Quiz Title and Description */}
-                {currentQuizTitle && (
-                  <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 sm:p-4 mb-4 border border-orange-200">
-                    <h3 className="text-base sm:text-lg font-semibold text-orange-700 mb-2">
-                      {currentQuizTitle}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      {currentQuizDescription.length > 100 
-                        ? `${currentQuizDescription.substring(0, 100)}...` 
-                        : currentQuizDescription}
-                    </p>
-                  </div>
-                )}
-                
-                {quizCreatedAt && (
-                  <div className="text-xs text-gray-500 mb-3">
-                    Current quiz created: {new Date(quizCreatedAt).toLocaleString()}
-                  </div>
-                )}
-                <button
-                  onClick={startDailyQuiz}
-                  className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-lg transition-all duration-300 shadow-lg text-sm sm:text-base ${
-                    !chain 
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:shadow-xl cursor-pointer'
-                  }`}
-                  disabled={loading || !chain}
-                >
-                  {!chain ? '🔗 Connect Wallet First' : '🎯 Start Daily Quiz'}
-                </button>
-              </div>
-            ) : (
-              <div className="text-center">
-                <p className="text-gray-500">Loading countdown...</p>
+        {/* Daily Quiz Section */}
+        <div style={{
+          background: "#f9fafb",
+          borderRadius: "16px",
+          padding: "2rem",
+          marginBottom: "2rem",
+          border: "1px solid #e5e7eb"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <h3 style={{ color: "#111827", fontSize: "1.5rem", margin: 0 }}>🎯 Daily Quiz</h3>
+            {countdown && (
+              <div style={{ color: "#6b7280", fontSize: "1.1rem", fontWeight: "bold" }}>
+                Next quiz in: {countdown.hours.toString().padStart(2, '0')}:{countdown.minutes.toString().padStart(2, '0')}:{countdown.seconds.toString().padStart(2, '0')}
               </div>
             )}
           </div>
+          
+          <p style={{ color: "#6b7280", marginBottom: "1.5rem" }}>
+            {currentQuizDescription || "Complete today's quiz to earn points and climb the leaderboard!"}
+          </p>
+          
+          <button
+            onClick={startDailyQuiz}
+            disabled={loading}
+            style={{
+              background: "#58CC02",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "1rem 2rem",
+              fontSize: "1.1rem",
+              fontWeight: "bold",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.7 : 1,
+              transition: "all 0.3s ease"
+            }}
+          >
+            {loading ? "Loading..." : "🚀 Start Daily Quiz"}
+          </button>
         </div>
 
-        {/* Wallet Connection Prompt */}
-        {!chain && (
-          <div className="mb-3 sm:mb-6 md:mb-8 max-w-2xl mx-auto">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg shadow-lg p-4 sm:p-6 text-center">
-              <div className="text-4xl mb-3">🔗</div>
-              <h2 className="text-lg sm:text-xl font-semibold mb-2 text-blue-700">Connect Your Wallet</h2>
-              <p className="text-sm text-blue-600 mb-4">
-                Connect your wallet to start earning XP, taking quizzes, and climbing the leaderboard!
-              </p>
-              <div className="flex justify-center">
-                <ConnectButton
-                  accountStatus={{
-                    smallScreen: 'avatar',
-                    largeScreen: 'full',
-                  }}
-                  chainStatus={{
-                    smallScreen: 'icon',
-                    largeScreen: 'full',
-                  }}
-                  showBalance={{
-                    smallScreen: false,
-                    largeScreen: true,
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* XP & Leaderboard System - Clear Explanation */}
-        <div className="text-center mb-2 sm:mb-6 md:mb-8">
-          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-4 md:p-6 max-w-4xl mx-auto">
-            <div className="flex items-center justify-center mb-1 sm:mb-2 md:mb-3">
-              <span className="text-lg sm:text-2xl md:text-3xl mr-1 sm:mr-2">🏆</span>
-              <h2 className="text-xs sm:text-lg md:text-xl font-bold text-foreground text-center">Earn XP & Climb Leaderboard</h2>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 md:gap-3 justify-center items-center">
-              {contractAddresses ? (
-                <button
-                  onClick={() => setIsLeaderboardModalOpen(true)}
-                  className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-white 
-                             rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base cursor-pointer"
-                >
-                  🏅 View Leaderboard
-                </button>
-              ) : (
-                <div className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-gray-300 text-gray-500 
-                               rounded-md sm:rounded-lg font-bold text-xs sm:text-sm md:text-base cursor-not-allowed">
-                  🏅 Connect Wallet
-                </div>
-              )}
-              <a
-                href="https://x.com/DailyWiser_"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-blue-500 text-white 
-                           rounded-md sm:rounded-lg font-bold hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg text-xs sm:text-sm md:text-base cursor-pointer"
-              >
-                📖 Follow Us
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Quiz Generator Section */}
-        <AIQuizGenerator className="mb-3 sm:mb-8 md:mb-12" />
-
-        {/* Learning Topics - Alternative to Daily Quiz */}
-        <div className="mb-3 sm:mb-8 md:mb-12">
-          <div className="text-center mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">📚 Or Learn Specific Topics</h2>
-            <p className="text-sm text-muted-foreground">Choose from these curated learning paths</p>
-          </div>
-          <div id="topics" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6">
-            {AVAILABLE_QUIZZES.map((quiz, index) => (
-              <QuizCard
+        {/* Available Quizzes */}
+        <div style={{ marginBottom: "2rem" }}>
+          <h3 style={{ color: "#111827", fontSize: "1.5rem", marginBottom: "1.5rem" }}>📚 Available Quizzes</h3>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: "1.5rem"
+          }}>
+            {AVAILABLE_QUIZZES.map((quiz) => (
+              <div
                 key={quiz.id}
-                quiz={quiz}
-                isSelected={selectedQuiz === quiz.id}
-                onSelect={() => handleQuizSelect(quiz.id)}
-                delay={`${index * 200}ms`}
-                isDisabled={!chain}
-              />
+                style={{
+                  background: "#ffffff",
+                  borderRadius: "12px",
+                  padding: "1.5rem",
+                  border: "1px solid #e5e7eb",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)"
+                }}
+                onClick={() => navigate({ to: '/quiz-game', search: { quiz: quiz.id } })}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.1)";
+                }}
+              >
+                <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{quiz.icon}</div>
+                <h4 style={{ color: "#111827", fontSize: "1.2rem", marginBottom: "0.5rem" }}>{quiz.title}</h4>
+                <p style={{ color: "#6b7280", marginBottom: "1rem", fontSize: "0.9rem" }}>
+                  {quiz.description}
+                </p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "#6b7280", fontSize: "0.8rem" }}>
+                    {quiz.questions} questions • {quiz.estimatedTime}
+                  </span>
+                  <span style={{
+                    background: "#f3f4f6",
+                    color: "#374151",
+                    padding: "0.25rem 0.5rem",
+                    borderRadius: "6px",
+                    fontSize: "0.7rem"
+                  }}>
+                    {quiz.category}
+                  </span>
+                </div>
+              </div>
             ))}
           </div>
+        </div>
+
+        {/* AI Quiz Generator */}
+        <div style={{
+          background: "#f9fafb",
+          borderRadius: "16px",
+          padding: "2rem",
+          border: "1px solid #e5e7eb"
+        }}>
+          <h3 style={{ color: "#111827", fontSize: "1.5rem", marginBottom: "1rem" }}>🤖 AI Quiz Generator</h3>
+          <p style={{ color: "#6b7280", marginBottom: "1.5rem" }}>
+            Create custom quizzes on any topic using AI
+          </p>
+          <AIQuizGenerator />
         </div>
       </div>
 
       {/* Leaderboard Modal */}
-      <LeaderboardModal
-        isOpen={isLeaderboardModalOpen}
-        onClose={() => setIsLeaderboardModalOpen(false)}
-      />
-    </div>
-  );
-}
-
-function QuizCard({ quiz, isSelected, onSelect, delay, isDisabled = false }: {
-  quiz: Quiz;
-  isSelected: boolean;
-  onSelect: () => void;
-  delay: string;
-  isDisabled?: boolean;
-}) {
-  return (
-    <div
-      onClick={isDisabled ? undefined : onSelect}
-      className={`quiz-card rounded-xl sm:rounded-2xl p-2 sm:p-4 md:p-6 transition-all duration-300 animate-bounce-in group
-                  ${isDisabled 
-                    ? 'opacity-50 cursor-not-allowed' 
-                    : isSelected 
-                      ? 'ring-2 ring-primary quiz-glow scale-105 cursor-pointer' 
-                      : 'hover:scale-105 hover:quiz-button-glow cursor-pointer'
-                  }`}
-      style={{ animationDelay: delay }}
-    >
-      <div className="flex items-center mb-1 sm:mb-3 md:mb-4">
-        <div className="text-lg sm:text-2xl md:text-4xl mr-1 sm:mr-3 md:mr-4 group-hover:animate-celebrate">
-          {quiz.icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm sm:text-lg md:text-xl font-bold text-primary mb-1 truncate">
-            {quiz.title}
-          </h3>
-          <div className={`inline-block px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium
-                          ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
-            {quiz.category}
-          </div>
-        </div>
-      </div>
-      
-      <p className="text-muted-foreground mb-1 sm:mb-3 md:mb-4 leading-relaxed text-xs sm:text-sm line-clamp-2">
-        {quiz.description}
-      </p>
-      
-      <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
-        <span className="flex items-center">
-          <span className="mr-0.5 sm:mr-1">📝</span>
-          {quiz.questions} questions
-        </span>
-        <span className="flex items-center">
-          <span className="mr-0.5 sm:mr-1">⏱️</span>
-          {quiz.estimatedTime}
-        </span>
-      </div>
+      {isLeaderboardModalOpen && (
+        <LeaderboardModal
+          isOpen={isLeaderboardModalOpen}
+          onClose={() => setIsLeaderboardModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
