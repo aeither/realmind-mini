@@ -9,13 +9,13 @@ export const SUPPORTED_CHAIN_IDS = SUPPORTED_CHAINS.map(chain => chain.id);
 
 // Currency configuration for different chains
 export const CURRENCY_CONFIG = {
-  8453: { // Base (Mainnet)
-    symbol: 'ETH',
+  42220: { // Celo (Mainnet)
+    symbol: 'CELO',
     multiplier: 1,
     defaultAmounts: ['0.001', '0.01', '0.1']
   },
-  42220: { // Celo (Mainnet)
-    symbol: 'CELO',
+  8453: { // Base (Mainnet)
+    symbol: 'ETH',
     multiplier: 1,
     defaultAmounts: ['0.001', '0.01', '0.1']
   },

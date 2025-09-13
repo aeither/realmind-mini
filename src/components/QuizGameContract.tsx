@@ -29,7 +29,7 @@ const QUIZ_CONFIGS = {
 } as const;
 
 function QuizGameContract() {
-  const { address, chain } = useAccount();
+  const { address, chain, isConnected } = useAccount();
   const { switchChain } = useSwitchChain();
   const { disconnect } = useDisconnect();
 
@@ -96,6 +96,38 @@ function QuizGameContract() {
   }, [isCompleteSuccess]);
 
 
+
+  // Check if user is connected first
+  if (!isConnected) {
+    return (
+      <div style={{
+        maxWidth: "800px",
+        margin: "0 auto",
+        padding: "2rem",
+        textAlign: "center"
+      }}>
+        <h2 style={{ color: "#111827", marginBottom: "1rem" }}>Connect Your Wallet</h2>
+        <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
+          Please connect your wallet to play the quiz game.
+        </p>
+        <button 
+          onClick={() => window.location.href = '/'}
+          style={{
+            backgroundColor: "#58CC02",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "8px",
+            padding: "0.75rem 1.5rem",
+            fontSize: "1rem",
+            fontWeight: 700,
+            cursor: "pointer"
+          }}
+        >
+          Go to Home
+        </button>
+      </div>
+    );
+  }
 
   // Check if user is on a supported chain
   const isCorrectChain = chain ? SUPPORTED_CHAINS.some(supportedChain => supportedChain.id === chain.id) : false;

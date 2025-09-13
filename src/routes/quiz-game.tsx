@@ -89,7 +89,7 @@ const QUIZ_CONFIGS = {
 function QuizGame() {
   const navigate = useNavigate()
   const { quiz: quizId, mode, data } = useSearch({ from: '/quiz-game' }) as QuizSearchParams
-  const { address, chain } = useAccount()
+  const { address, chain, isConnected } = useAccount()
   const { switchChain } = useSwitchChain()
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -504,6 +504,41 @@ function QuizGame() {
     })
   }
   
+  // Check if user is connected first
+  if (!isConnected) {
+    return (
+      <motion.div style={{ paddingTop: '80px' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <GlobalHeader />
+        <div style={{
+          maxWidth: "600px",
+          margin: "0 auto",
+          padding: "2rem",
+          textAlign: "center"
+        }}>
+          <h2 style={{ color: "#111827", marginBottom: "1rem" }}>Connect Your Wallet</h2>
+          <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
+            Please connect your wallet to play this quiz.
+          </p>
+          <button 
+            onClick={() => navigate({ to: '/' })}
+            style={{
+              backgroundColor: "#58CC02",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "8px",
+              padding: "0.75rem 1.5rem",
+              fontSize: "1rem",
+              fontWeight: 700,
+              cursor: "pointer"
+            }}
+          >
+            Go to Home
+          </button>
+        </div>
+      </motion.div>
+    )
+  }
+
   // Check if user is on a supported chain
   const isCorrectChain = chain ? SUPPORTED_CHAINS.some(supportedChain => supportedChain.id === chain.id) : false
 
