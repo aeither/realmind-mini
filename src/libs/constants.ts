@@ -19,17 +19,13 @@ const CONTRACT_ADDRESSES = {
 const REWARDS_CONFIG = {
   // Base (Mainnet)
   8453: {
-    dailyQuizReward: "10 XP",
-    quizCompletionReward: "5 XP",
-    leaderboardBonus: "2x Multiplier",
-    currency: "BASE",
+    totalReward: 1500,
+    currency: "YUZU",
     symbol: "⭐"
   },
   // Celo
   42220: {
-    dailyQuizReward: "15 XP",
-    quizCompletionReward: "7 XP", 
-    leaderboardBonus: "1.5x Multiplier",
+    totalReward: 2000,
     currency: "CELO",
     symbol: "🟡"
   }
@@ -108,9 +104,7 @@ export function getContractAddresses(chainId: number) {
 // Function to get rewards configuration by chain ID
 export function getRewardsConfig(chainId: number) {
   return REWARDS_CONFIG[chainId as keyof typeof REWARDS_CONFIG] || {
-    dailyQuizReward: "5 XP",
-    quizCompletionReward: "3 XP",
-    leaderboardBonus: "1x Multiplier",
+    totalReward: 1000,
     currency: "UNKNOWN",
     symbol: "❓"
   };

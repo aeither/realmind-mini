@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useAccount } from 'wagmi'
 import { useState, useEffect } from 'react'
-import Header from '../components/Header'
+import GlobalHeader from '../components/GlobalHeader'
 import BottomNavigation from '../components/BottomNavigation'
 import { leaderboardService, type TokenHolder } from '../libs/leaderboardService'
 import { getContractAddresses, getRewardsConfig } from '../libs/constants'
@@ -57,7 +57,7 @@ function LeaderboardPage() {
       paddingBottom: '80px', // Space for bottom nav
       background: '#f9fafb'
     }}>
-      <Header title="Leaderboard" icon="🏆" />
+      <GlobalHeader />
 
       {/* Main Content */}
       <div style={{ paddingTop: "80px", padding: "1rem", maxWidth: "1200px", margin: "0 auto" }}>
@@ -80,8 +80,8 @@ function LeaderboardPage() {
           }}>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "2rem", flexWrap: "wrap" }}>
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827" }}>{totalHolders}</div>
-                <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>Total Shown</div>
+                <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827" }}>{rewardsConfig?.totalReward || 1000}</div>
+                <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>Total Rewards</div>
               </div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827" }}>{chainName}</div>
@@ -89,8 +89,8 @@ function LeaderboardPage() {
               </div>
               {rewardsConfig && (
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827" }}>{rewardsConfig.symbol}</div>
-                  <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>{rewardsConfig.currency}</div>
+                  <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827" }}>{rewardsConfig.currency}</div>
+                  <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>Currency</div>
                 </div>
               )}
             </div>
@@ -174,7 +174,7 @@ function LeaderboardPage() {
                   <tr style={{ background: "#f9fafb" }}>
                     <th style={{ textAlign: "left", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>Rank</th>
                     <th style={{ textAlign: "left", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>Address</th>
-                    <th style={{ textAlign: "right", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>XP Balance</th>
+                    <th style={{ textAlign: "right", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>XP</th>
                     <th style={{ textAlign: "center", padding: "0.75rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>Reward</th>
                   </tr>
                 </thead>
@@ -182,10 +182,12 @@ function LeaderboardPage() {
                   {holders.map((holder, index) => {
                     const rank = index + 1
                     const getRewardForRank = (rank: number) => {
-                      if (rank === 1) return rewardsConfig?.dailyQuizReward || "10 XP"
-                      if (rank <= 3) return rewardsConfig?.quizCompletionReward || "5 XP"
-                      if (rank <= 10) return "3 XP"
-                      return "1 XP"
+                      const totalReward = rewardsConfig?.totalReward || 1000
+                      if (rank === 1) return Math.floor(totalReward * 0.3) // 30% for 1st place
+                      if (rank === 2) return Math.floor(totalReward * 0.2) // 20% for 2nd place
+                      if (rank === 3) return Math.floor(totalReward * 0.15) // 15% for 3rd place
+                      if (rank <= 10) return Math.floor(totalReward * 0.05) // 5% for top 10
+                      return Math.floor(totalReward * 0.01) // 1% for others
                     }
                     
                     return (
@@ -231,7 +233,7 @@ function LeaderboardPage() {
                             fontSize: "0.75rem",
                             fontWeight: "600"
                           }}>
-                            {rewardsConfig?.symbol} {getRewardForRank(rank)}
+{getRewardForRank(rank)} {rewardsConfig?.currency || "TOKENS"}
                           </span>
                         </td>
                       </tr>

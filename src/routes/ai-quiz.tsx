@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import Header from '../components/Header'
+import GlobalHeader from '../components/GlobalHeader'
 import AIQuizGenerator from '../components/AIQuizGenerator'
 import BottomNavigation from '../components/BottomNavigation'
 
@@ -10,7 +10,7 @@ function AIQuizPage() {
       paddingBottom: '80px', // Space for bottom nav
       background: '#f9fafb'
     }}>
-      <Header title="AI Quiz Generator" icon="🤖" />
+      <GlobalHeader />
 
       {/* Main Content */}
       <div style={{ paddingTop: "80px", padding: "1rem", maxWidth: "1200px", margin: "0 auto" }}>
@@ -24,8 +24,10 @@ function AIQuizPage() {
           </p>
         </div>
         
-        {/* AI Quiz Generator Component */}
-        <AIQuizGenerator />
+        {/* AI Quiz Generator Component with proper spacing */}
+        <div style={{ padding: "0 0.5rem" }}>
+          <AIQuizGenerator />
+        </div>
       </div>
 
       {/* Bottom Navigation */}

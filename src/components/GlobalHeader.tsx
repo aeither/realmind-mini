@@ -63,7 +63,7 @@ function GlobalHeader({
         boxShadow: "0 2px 10px rgba(16, 24, 40, 0.06)"
       }}
     >
-      {/* Left side - Logo and Back button */}
+      {/* Left side - Realmind text and Back button */}
       <div style={{ display: "flex", alignItems: "center", gap: "clamp(0.5rem, 4vw, 2rem)" }}>
         {showBackButton && (
           <Link
@@ -103,7 +103,7 @@ function GlobalHeader({
             gap: "0.5rem"
           }}
         >
-          🍋 <span className="hidden sm:inline">Realmind</span>
+          <span className="hidden sm:inline">Realmind</span>
         </Link>
         </motion.div>
       </div>
@@ -137,16 +137,16 @@ function GlobalHeader({
         <motion.div whileHover={{ scale: 1.02 }}>
           <ConnectButton
             accountStatus={{
-              smallScreen: 'avatar',
-              largeScreen: 'full',
+              smallScreen: 'address',
+              largeScreen: 'address',
             }}
             chainStatus={{
               smallScreen: 'icon',
-              largeScreen: 'full',
+              largeScreen: 'name',
             }}
             showBalance={{
               smallScreen: false,
-              largeScreen: true,
+              largeScreen: false,
             }}
           />
         </motion.div>

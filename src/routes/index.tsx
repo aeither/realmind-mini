@@ -2,7 +2,7 @@ import { sdk } from '@farcaster/miniapp-sdk'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
-import Header from '../components/Header'
+import GlobalHeader from '../components/GlobalHeader'
 import BottomNavigation from '../components/BottomNavigation'
 
 interface Quiz {
@@ -251,7 +251,7 @@ function HomePage() {
       paddingBottom: "80px", // Space for bottom nav
       background: "#f9fafb"
     }}>
-      <Header title="Realmind" icon="🍋" />
+      <GlobalHeader />
 
       {/* Main Content */}
       <div style={{ paddingTop: "80px", padding: "1rem", maxWidth: "1200px", margin: "0 auto" }}>
