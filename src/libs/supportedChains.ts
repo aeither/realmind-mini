@@ -1,11 +1,26 @@
 import { base, celo } from "viem/chains";
 
-// Export all supported chains as a reusable array
-// Celo is first to ensure it's the default chain
-export const SUPPORTED_CHAINS = [celo, base] as const;
+// Get the supported chain ID from environment variable
+const SUPPORTED_CHAIN_ID = parseInt(import.meta.env.VITE_SUPPORTED_CHAIN_ID || '42220');
 
-// Export chain IDs for easy checking
-export const SUPPORTED_CHAIN_IDS = SUPPORTED_CHAINS.map(chain => chain.id);
+// Map chain ID to chain object
+const getChainFromId = (chainId: number) => {
+  switch (chainId) {
+    case 42220:
+      return celo;
+    case 8453:
+      return base;
+    default:
+      return celo; // Default to Celo if invalid chain ID
+  }
+};
+
+// Export only the supported chain for this deployment
+export const SUPPORTED_CHAIN = getChainFromId(SUPPORTED_CHAIN_ID);
+export const SUPPORTED_CHAINS = [SUPPORTED_CHAIN] as const;
+
+// Export chain ID for easy checking
+export const SUPPORTED_CHAIN_IDS = [SUPPORTED_CHAIN_ID];
 
 // Currency configuration for different chains
 export const CURRENCY_CONFIG = {

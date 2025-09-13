@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { useAccount, useDisconnect, useReadContract, useSwitchChain, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { getContractAddresses } from '../libs/constants';
 import { quizGameABI } from '../libs/quizGameABI';
-import { SUPPORTED_CHAINS, CURRENCY_CONFIG } from '../libs/supportedChains';
+import { SUPPORTED_CHAIN, SUPPORTED_CHAINS, CURRENCY_CONFIG } from '../libs/supportedChains';
 
 // Available quiz configurations
 const QUIZ_CONFIGS = {
@@ -143,28 +143,25 @@ function QuizGameContract() {
       }}>
         <h2 style={{ color: "#111827", marginBottom: "1rem" }}>Wrong Network</h2>
         <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
-          Please switch to a supported network to play the quiz game.
+          Please switch to {SUPPORTED_CHAIN.name} to play the quiz game.
         </p>
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2rem" }}>
-          {SUPPORTED_CHAINS.map((supportedChain) => (
-            <button 
-              key={supportedChain.id}
-              onClick={() => switchChain({ chainId: supportedChain.id })}
-              style={{
-                backgroundColor: "#58CC02",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "8px",
-                padding: "0.75rem 1.5rem",
-                fontSize: "0.9rem",
-                fontWeight: 700,
-                cursor: "pointer",
-                transition: "all 0.3s ease"
-              }}
-            >
-              Switch to {supportedChain.name}
-            </button>
-          ))}
+          <button 
+            onClick={() => switchChain({ chainId: SUPPORTED_CHAIN.id })}
+            style={{
+              backgroundColor: "#58CC02",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "8px",
+              padding: "0.75rem 1.5rem",
+              fontSize: "0.9rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.3s ease"
+            }}
+          >
+            Switch to {SUPPORTED_CHAIN.name}
+          </button>
         </div>
         <button 
           onClick={() => disconnect()}

@@ -21,13 +21,15 @@ const REWARDS_CONFIG = {
   8453: {
     totalReward: 1500,
     currency: "YUZU",
-    symbol: "🍊"
+    symbol: "🍊",
+    maxWinners: 200
   },
   // Celo
   42220: {
     totalReward: 2000,
     currency: "CELO",
-    symbol: "🟡"
+    symbol: "🟡",
+    maxWinners: 200
   }
 } as const;
 
@@ -106,7 +108,8 @@ export function getRewardsConfig(chainId: number) {
   return REWARDS_CONFIG[chainId as keyof typeof REWARDS_CONFIG] || {
     totalReward: 1000,
     currency: "UNKNOWN",
-    symbol: "❓"
+    symbol: "❓",
+    maxWinners: 200
   };
 }
 

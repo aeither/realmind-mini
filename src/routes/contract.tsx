@@ -14,7 +14,7 @@ import {
 import { formatEther, parseEther } from 'viem'
 import { quizGameABI } from '../libs/quizGameABI'
 import { getContractAddresses } from '../libs/constants'
-import { CURRENCY_CONFIG } from '../libs/supportedChains'
+import { CURRENCY_CONFIG, SUPPORTED_CHAIN_IDS } from '../libs/supportedChains'
 
 function ContractDebugPage() {
   const { address, isConnected, chain } = useAccount();
@@ -230,9 +230,9 @@ function ContractDebugPage() {
   const { isLoading: isSetDefaultEntryPriceConfirming, isSuccess: isSetDefaultEntryPriceConfirmed } = 
     useWaitForTransactionReceipt({ hash: setDefaultEntryPriceHash });
 
-  // Check if current chain is supported
-  const supportedChainIds = [8453]; // Base Mainnet only
-  const isCorrectChain = chain ? supportedChainIds.includes(chain.id) : false;
+  // Check if current chain is supported  
+  const supportedChainId = SUPPORTED_CHAIN_IDS[0];
+  const isCorrectChain = chain ? chain.id === supportedChainId : false;
 
   const handleStartQuiz = () => {
     if (!isConnected || !contractAddresses) return;
