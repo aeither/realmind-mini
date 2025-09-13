@@ -114,24 +114,24 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
 
   return (
     <div className={`${className}`}>
-      <div className="bg-white border-2 border-purple-300 rounded-2xl p-6 max-w-4xl mx-auto shadow-lg">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-4xl mx-auto shadow-sm">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
             <span className="text-3xl mr-3">🤖</span>
-            <h2 className="text-2xl font-bold text-foreground">Create AI Quiz</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Create AI Quiz</h2>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="text-gray-400 hover:text-gray-600 text-2xl transition-colors duration-200 p-1 rounded-full hover:bg-gray-100"
           >
             ✕
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Topic Input */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
               Quiz Topic
             </label>
             <input
@@ -139,19 +139,20 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
               value={formData.topic}
               onChange={(e) => setFormData(prev => ({ ...prev, topic: e.target.value }))}
               placeholder="Enter any topic (e.g., 'Bitcoin for beginners', 'Advanced DeFi strategies')"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all duration-200"
             />
             
             {/* Popular Topics */}
-            <div className="mt-3">
-              <p className="text-xs text-gray-600 mb-2">Popular topics:</p>
+            <div className="mt-4">
+              <p className="text-sm text-gray-600 mb-3 font-medium">Popular topics:</p>
               <div className="flex flex-wrap gap-2">
                 {POPULAR_TOPICS.map((topic) => (
                   <button
                     key={topic}
                     onClick={() => handleTopicSelect(topic)}
-                    className="px-3 py-1 bg-gray-100 hover:bg-purple-100 text-xs rounded-full 
-                               border border-gray-200 hover:border-purple-300 transition-colors"
+                    className="px-3 py-2 bg-gray-50 hover:bg-purple-50 text-sm rounded-lg 
+                               border border-gray-200 hover:border-purple-300 transition-all duration-200
+                               hover:shadow-sm"
                   >
                     {topic}
                   </button>
@@ -162,7 +163,7 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
 
           {/* Difficulty Selection */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
               Difficulty Level
             </label>
             <div className="grid grid-cols-3 gap-3">
@@ -170,37 +171,42 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
                 <button
                   key={option.value}
                   onClick={() => setFormData(prev => ({ ...prev, difficulty: option.value }))}
-                  className={`p-3 rounded-lg border-2 transition-all ${
+                  className={`p-4 rounded-xl border-2 transition-all duration-200 min-h-[80px] flex flex-col items-center justify-center ${
                     formData.difficulty === option.value
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-200 hover:border-purple-300'
+                      ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-700 shadow-md'
+                      : 'border-gray-200 hover:border-purple-300 hover:bg-gray-50'
                   }`}
                 >
-                  <div className="text-2xl mb-1">{option.icon}</div>
-                  <div className="font-semibold text-sm">{option.label}</div>
+                  <div className="text-2xl mb-2">{option.icon}</div>
+                  <div className="font-semibold text-xs text-center leading-tight">
+                    {option.label}
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Generate Button */}
-          <div className="pt-4">
+          <div className="pt-6">
             <button
               onClick={handleGenerateQuiz}
               disabled={isGenerating || !formData.topic.trim() || !chain}
-              className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
+              className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-300 ${
                 isGenerating || !formData.topic.trim() || !chain
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer'
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl cursor-pointer transform hover:scale-[1.02]'
               }`}
             >
               {isGenerating ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3"></div>
                   Generating Quiz...
                 </div>
               ) : (
-                <>🚀 Generate AI Quiz</>
+                <div className="flex items-center justify-center">
+                  <span className="mr-2">🚀</span>
+                  Generate AI Quiz
+                </div>
               )}
             </button>
           </div>

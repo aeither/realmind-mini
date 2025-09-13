@@ -19,17 +19,17 @@ const CONTRACT_ADDRESSES = {
 const REWARDS_CONFIG = {
   // Base (Mainnet)
   8453: {
-    totalReward: 1500,
+    totalReward: 600000,
     currency: "YUZU",
     symbol: "🍊",
     maxWinners: 200
   },
   // Celo
   42220: {
-    totalReward: 2000,
+    totalReward: 250,
     currency: "CELO",
     symbol: "🟡",
-    maxWinners: 200
+    maxWinners: 150
   }
 } as const;
 

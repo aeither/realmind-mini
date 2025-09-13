@@ -249,12 +249,20 @@ function HomePage() {
     <div style={{ 
       minHeight: "100vh", 
       paddingBottom: "80px", // Space for bottom nav
-      background: "#f9fafb"
+      background: "#f9fafb",
+      overflow: "hidden" // Prevent unnecessary scrolling
     }}>
       <GlobalHeader />
 
       {/* Main Content */}
-      <div style={{ paddingTop: "80px", padding: "1rem", maxWidth: "1200px", margin: "0 auto" }}>
+      <div style={{ 
+        paddingTop: "60px", // Reduced from 80px to match actual header height
+        padding: "1rem", 
+        maxWidth: "1200px", 
+        margin: "0 auto",
+        height: "calc(100vh - 60px - 80px)", // Full height minus header and bottom nav
+        overflow: "auto" // Allow scrolling only within content area
+      }}>
         {/* Welcome Section - More Compact */}
         <div style={{
           textAlign: "center",
@@ -308,6 +316,39 @@ function HomePage() {
             }}
           >
             {loading ? "Loading..." : "🚀 Start Daily Quiz"}
+          </button>
+        </div>
+
+        {/* AI Quiz Section */}
+        <div style={{
+          background: "#ffffff",
+          borderRadius: "12px",
+          padding: "1.5rem",
+          marginBottom: "1.5rem",
+          border: "1px solid #e5e7eb",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)"
+        }}>
+          <h3 style={{ color: "#111827", fontSize: "1.2rem", marginBottom: "0.5rem" }}>🤖 AI Quiz</h3>
+          <p style={{ color: "#6b7280", marginBottom: "1rem", fontSize: "0.9rem" }}>
+            Generate personalized quizzes on any topic
+          </p>
+          
+          <button
+            onClick={() => navigate({ to: '/ai-quiz' })}
+            style={{
+              background: "#3b82f6",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              padding: "0.75rem 1.5rem",
+              fontSize: "1rem",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              width: "100%"
+            }}
+          >
+            🧠 Generate AI Quiz
           </button>
         </div>
 

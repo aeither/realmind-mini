@@ -8,12 +8,20 @@ function AIQuizPage() {
     <div style={{ 
       minHeight: '100vh', 
       paddingBottom: '80px', // Space for bottom nav
-      background: '#f9fafb'
+      background: '#f9fafb',
+      overflow: 'hidden' // Prevent unnecessary scrolling
     }}>
       <GlobalHeader />
 
       {/* Main Content */}
-      <div style={{ paddingTop: "80px", padding: "1rem", maxWidth: "1200px", margin: "0 auto" }}>
+      <div style={{ 
+        paddingTop: "60px", // Reduced from 80px to match actual header height
+        padding: "1rem", 
+        maxWidth: "1200px", 
+        margin: "0 auto",
+        height: 'calc(100vh - 60px - 80px)', // Full height minus header and bottom nav
+        overflow: 'auto' // Allow scrolling only within content area
+      }}>
         {/* Header Section */}
         <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
           <h2 style={{ color: "#111827", fontSize: "1.4rem", marginBottom: "0.5rem" }}>
