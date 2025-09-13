@@ -26,16 +26,6 @@ function LandingPage() {
             </Link>
 
             <Link
-              to="/farcaster"
-              className="px-8 py-4 bg-secondary text-secondary-foreground border-2 border-primary/50 rounded-2xl 
-                         text-lg font-semibold hover:bg-primary hover:text-primary-foreground hover:scale-105 
-                         transition-all duration-300 animate-bounce-in"
-              style={{ animationDelay: '400ms' }}
-            >
-              🚀 Farcaster App
-            </Link>
-
-            <Link
               to="/contract"
               className="px-6 py-3 bg-muted text-muted-foreground border border-border rounded-xl 
                          text-base font-medium hover:bg-secondary hover:text-foreground hover:scale-105 
