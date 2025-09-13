@@ -3,9 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { getContractAddresses } from '../libs/constants'
-import AIQuizGenerator from '../components/AIQuizGenerator'
-import LeaderboardModal from '../components/LeaderboardModal'
+import BottomNavigation from '../components/BottomNavigation'
 
 interface Quiz {
   id: string;
@@ -105,8 +103,6 @@ function HomePage() {
   const { chain } = useAccount();
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   
-  // Get contract addresses based on current chain
-  const contractAddresses = chain ? getContractAddresses(chain.id) : null;
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [isAppReady, setIsAppReady] = useState(false);
   const navigate = useNavigate();
@@ -117,7 +113,6 @@ function HomePage() {
   const [currentQuizTitle, setCurrentQuizTitle] = useState<string>('');
   const [currentQuizDescription, setCurrentQuizDescription] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
   
   // Get backend URL from environment
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -251,7 +246,12 @@ function HomePage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", paddingTop: "80px" }}>
+    <div style={{ 
+      minHeight: "100vh", 
+      paddingTop: "80px", 
+      paddingBottom: "80px", // Space for bottom nav
+      background: "#f9fafb"
+    }}>
       {/* Header */}
       <div style={{
         position: "fixed",
@@ -260,73 +260,58 @@ function HomePage() {
         right: 0,
         background: "#ffffff",
         borderBottom: "1px solid #e5e7eb",
-        padding: "1rem 2rem",
+        padding: "1rem 1rem",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         zIndex: 1000
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <h1 style={{ color: "#111827", fontSize: "1.5rem", fontWeight: "bold", margin: 0 }}>
+          <h1 style={{ color: "#111827", fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>
             🍋 Realmind
           </h1>
         </div>
         
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <ConnectButton />
-          {chain && (
-            <button
-              onClick={() => setIsLeaderboardModalOpen(true)}
-              style={{
-                background: "#f3f4f6",
-                color: "#374151",
-                border: "1px solid #d1d5db",
-                borderRadius: "8px",
-                padding: "0.5rem 1rem",
-                cursor: "pointer",
-                fontSize: "0.9rem"
-              }}
-            >
-              🏆 Leaderboard
-            </button>
-          )}
         </div>
       </div>
 
       {/* Main Content */}
-      <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Welcome Section */}
+      <div style={{ padding: "1rem", maxWidth: "1200px", margin: "0 auto" }}>
+        {/* Welcome Section - More Compact */}
         <div style={{
           textAlign: "center",
-          marginBottom: "3rem"
+          marginBottom: "2rem"
         }}>
-          <h2 style={{ fontSize: "2.5rem", marginBottom: "1rem", fontWeight: "bold", color: "#111827" }}>
-            Interactive Learning Experience
+          <h2 style={{ fontSize: "1.8rem", marginBottom: "0.5rem", fontWeight: "bold", color: "#111827" }}>
+            Interactive Learning
           </h2>
-          <p style={{ fontSize: "1.2rem", color: "#6b7280", maxWidth: "600px", margin: "0 auto" }}>
-            Test your knowledge, earn rewards, and compete with others in our gamified learning platform
+          <p style={{ fontSize: "1rem", color: "#6b7280", maxWidth: "400px", margin: "0 auto" }}>
+            Test your knowledge and earn rewards
           </p>
         </div>
 
-        {/* Daily Quiz Section */}
+        {/* Daily Quiz Section - More Compact */}
         <div style={{
-          background: "#f9fafb",
-          borderRadius: "16px",
-          padding: "2rem",
-          marginBottom: "2rem",
-          border: "1px solid #e5e7eb"
+          background: "#ffffff",
+          borderRadius: "12px",
+          padding: "1.5rem",
+          marginBottom: "1.5rem",
+          border: "1px solid #e5e7eb",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)"
         }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-            <h3 style={{ color: "#111827", fontSize: "1.5rem", margin: 0 }}>🎯 Daily Quiz</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
+            <h3 style={{ color: "#111827", fontSize: "1.2rem", margin: 0 }}>🎯 Daily Quiz</h3>
             {countdown && (
-              <div style={{ color: "#6b7280", fontSize: "1.1rem", fontWeight: "bold" }}>
-                Next quiz in: {countdown.hours.toString().padStart(2, '0')}:{countdown.minutes.toString().padStart(2, '0')}:{countdown.seconds.toString().padStart(2, '0')}
+              <div style={{ color: "#6b7280", fontSize: "0.9rem", fontWeight: "bold" }}>
+                Next: {countdown.hours.toString().padStart(2, '0')}:{countdown.minutes.toString().padStart(2, '0')}:{countdown.seconds.toString().padStart(2, '0')}
               </div>
             )}
           </div>
           
-          <p style={{ color: "#6b7280", marginBottom: "1.5rem" }}>
-            {currentQuizDescription || "Complete today's quiz to earn points and climb the leaderboard!"}
+          <p style={{ color: "#6b7280", marginBottom: "1rem", fontSize: "0.9rem" }}>
+            {currentQuizDescription || "Complete today's quiz to earn points!"}
           </p>
           
           <button
@@ -336,34 +321,35 @@ function HomePage() {
               background: "#58CC02",
               color: "white",
               border: "none",
-              borderRadius: "12px",
-              padding: "1rem 2rem",
-              fontSize: "1.1rem",
+              borderRadius: "8px",
+              padding: "0.75rem 1.5rem",
+              fontSize: "1rem",
               fontWeight: "bold",
               cursor: loading ? "not-allowed" : "pointer",
               opacity: loading ? 0.7 : 1,
-              transition: "all 0.3s ease"
+              transition: "all 0.3s ease",
+              width: "100%"
             }}
           >
             {loading ? "Loading..." : "🚀 Start Daily Quiz"}
           </button>
         </div>
 
-        {/* Available Quizzes */}
-        <div style={{ marginBottom: "2rem" }}>
-          <h3 style={{ color: "#111827", fontSize: "1.5rem", marginBottom: "1.5rem" }}>📚 Available Quizzes</h3>
+        {/* Available Quizzes - More Compact */}
+        <div style={{ marginBottom: "1.5rem" }}>
+          <h3 style={{ color: "#111827", fontSize: "1.2rem", marginBottom: "1rem" }}>📚 Available Quizzes</h3>
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: "1.5rem"
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "1rem"
           }}>
             {AVAILABLE_QUIZZES.map((quiz) => (
               <div
                 key={quiz.id}
                 style={{
                   background: "#ffffff",
-                  borderRadius: "12px",
-                  padding: "1.5rem",
+                  borderRadius: "8px",
+                  padding: "1rem",
                   border: "1px solid #e5e7eb",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
@@ -371,7 +357,7 @@ function HomePage() {
                 }}
                 onClick={() => navigate({ to: '/quiz-game', search: { quiz: quiz.id } })}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
                   e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
                 }}
                 onMouseLeave={(e) => {
@@ -379,21 +365,21 @@ function HomePage() {
                   e.currentTarget.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.1)";
                 }}
               >
-                <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{quiz.icon}</div>
-                <h4 style={{ color: "#111827", fontSize: "1.2rem", marginBottom: "0.5rem" }}>{quiz.title}</h4>
-                <p style={{ color: "#6b7280", marginBottom: "1rem", fontSize: "0.9rem" }}>
+                <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>{quiz.icon}</div>
+                <h4 style={{ color: "#111827", fontSize: "1rem", marginBottom: "0.25rem" }}>{quiz.title}</h4>
+                <p style={{ color: "#6b7280", marginBottom: "0.75rem", fontSize: "0.8rem", lineHeight: "1.4" }}>
                   {quiz.description}
                 </p>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ color: "#6b7280", fontSize: "0.8rem" }}>
+                  <span style={{ color: "#6b7280", fontSize: "0.7rem" }}>
                     {quiz.questions} questions • {quiz.estimatedTime}
                   </span>
                   <span style={{
                     background: "#f3f4f6",
                     color: "#374151",
-                    padding: "0.25rem 0.5rem",
-                    borderRadius: "6px",
-                    fontSize: "0.7rem"
+                    padding: "0.2rem 0.4rem",
+                    borderRadius: "4px",
+                    fontSize: "0.6rem"
                   }}>
                     {quiz.category}
                   </span>
@@ -402,29 +388,10 @@ function HomePage() {
             ))}
           </div>
         </div>
-
-        {/* AI Quiz Generator */}
-        <div style={{
-          background: "#f9fafb",
-          borderRadius: "16px",
-          padding: "2rem",
-          border: "1px solid #e5e7eb"
-        }}>
-          <h3 style={{ color: "#111827", fontSize: "1.5rem", marginBottom: "1rem" }}>🤖 AI Quiz Generator</h3>
-          <p style={{ color: "#6b7280", marginBottom: "1.5rem" }}>
-            Create custom quizzes on any topic using AI
-          </p>
-          <AIQuizGenerator />
-        </div>
       </div>
 
-      {/* Leaderboard Modal */}
-      {isLeaderboardModalOpen && (
-        <LeaderboardModal
-          isOpen={isLeaderboardModalOpen}
-          onClose={() => setIsLeaderboardModalOpen(false)}
-        />
-      )}
+      {/* Bottom Navigation */}
+      <BottomNavigation />
     </div>
   );
 }

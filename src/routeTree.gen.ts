@@ -10,15 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuizGameRouteImport } from './routes/quiz-game'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ContractRouteImport } from './routes/contract'
 import { Route as BackendDemoRouteImport } from './routes/backend-demo'
+import { Route as AiQuizRouteImport } from './routes/ai-quiz'
 import { Route as IndexRouteImport } from './routes/index'
 
 const QuizGameRoute = QuizGameRouteImport.update({
   id: '/quiz-game',
   path: '/quiz-game',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LandingRoute = LandingRouteImport.update({
@@ -41,6 +48,11 @@ const BackendDemoRoute = BackendDemoRouteImport.update({
   path: '/backend-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AiQuizRoute = AiQuizRouteImport.update({
+  id: '/ai-quiz',
+  path: '/ai-quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -49,56 +61,76 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-quiz': typeof AiQuizRoute
   '/backend-demo': typeof BackendDemoRoute
   '/contract': typeof ContractRoute
   '/demo': typeof DemoRoute
   '/landing': typeof LandingRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/quiz-game': typeof QuizGameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-quiz': typeof AiQuizRoute
   '/backend-demo': typeof BackendDemoRoute
   '/contract': typeof ContractRoute
   '/demo': typeof DemoRoute
   '/landing': typeof LandingRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/quiz-game': typeof QuizGameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-quiz': typeof AiQuizRoute
   '/backend-demo': typeof BackendDemoRoute
   '/contract': typeof ContractRoute
   '/demo': typeof DemoRoute
   '/landing': typeof LandingRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/quiz-game': typeof QuizGameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-quiz'
     | '/backend-demo'
     | '/contract'
     | '/demo'
     | '/landing'
+    | '/leaderboard'
     | '/quiz-game'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/backend-demo' | '/contract' | '/demo' | '/landing' | '/quiz-game'
+  to:
+    | '/'
+    | '/ai-quiz'
+    | '/backend-demo'
+    | '/contract'
+    | '/demo'
+    | '/landing'
+    | '/leaderboard'
+    | '/quiz-game'
   id:
     | '__root__'
     | '/'
+    | '/ai-quiz'
     | '/backend-demo'
     | '/contract'
     | '/demo'
     | '/landing'
+    | '/leaderboard'
     | '/quiz-game'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiQuizRoute: typeof AiQuizRoute
   BackendDemoRoute: typeof BackendDemoRoute
   ContractRoute: typeof ContractRoute
   DemoRoute: typeof DemoRoute
   LandingRoute: typeof LandingRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   QuizGameRoute: typeof QuizGameRoute
 }
 
@@ -109,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/quiz-game'
       fullPath: '/quiz-game'
       preLoaderRoute: typeof QuizGameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/landing': {
@@ -139,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackendDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ai-quiz': {
+      id: '/ai-quiz'
+      path: '/ai-quiz'
+      fullPath: '/ai-quiz'
+      preLoaderRoute: typeof AiQuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -151,10 +197,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiQuizRoute: AiQuizRoute,
   BackendDemoRoute: BackendDemoRoute,
   ContractRoute: ContractRoute,
   DemoRoute: DemoRoute,
   LandingRoute: LandingRoute,
+  LeaderboardRoute: LeaderboardRoute,
   QuizGameRoute: QuizGameRoute,
 }
 export const routeTree = rootRouteImport
