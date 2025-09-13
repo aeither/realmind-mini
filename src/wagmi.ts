@@ -10,6 +10,8 @@ const config = getDefaultConfig({
   storage: createStorage({
     storage: cookieStorage,
   }),
+  // Ensure proper chain persistence
+  multiInjectedProviderDiscovery: true,
 });
 
 export { config };

@@ -1,6 +1,7 @@
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useEffect, useState } from "react";
-import { useAccount, useConnect } from "wagmi";
+import { useAccount, useConnect, useSwitchChain } from "wagmi";
+import { SUPPORTED_CHAINS } from "../libs/supportedChains";
 
 function FarcasterApp() {
   const [isLoading, setIsLoading] = useState(true);
@@ -99,8 +100,9 @@ function SplashScreen() {
 }
 
 function ConnectMenu() {
-  const { isConnected, address } = useAccount();
+  const { isConnected, address, chain } = useAccount();
   const { connect, connectors } = useConnect();
+  const { switchChain } = useSwitchChain();
 
   if (isConnected) {
     return (
@@ -116,11 +118,35 @@ function ConnectMenu() {
         fontSize: "0.85rem",
         color: "#374151",
         boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-        maxWidth: "250px",
+        maxWidth: "280px",
         wordBreak: "break-all"
       }}>
         <div style={{ fontWeight: "600", marginBottom: "0.25rem" }}>💳 Connected</div>
-        <div>{address?.substring(0, 6)}...{address?.substring(address.length - 4)}</div>
+        <div style={{ marginBottom: "0.5rem" }}>{address?.substring(0, 6)}...{address?.substring(address.length - 4)}</div>
+        <div style={{ marginBottom: "0.5rem", fontSize: "0.8rem", color: "#6b7280" }}>
+          Network: {chain?.name || 'Unknown'}
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {SUPPORTED_CHAINS.map((supportedChain) => (
+            <button
+              key={supportedChain.id}
+              onClick={() => switchChain({ chainId: supportedChain.id })}
+              style={{
+                backgroundColor: chain?.id === supportedChain.id ? "#58CC02" : "#f3f4f6",
+                color: chain?.id === supportedChain.id ? "#ffffff" : "#374151",
+                border: "none",
+                borderRadius: "6px",
+                padding: "0.25rem 0.5rem",
+                fontSize: "0.7rem",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              {supportedChain.name}
+            </button>
+          ))}
+        </div>
       </div>
     );
   }

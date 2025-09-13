@@ -8,6 +8,7 @@ import { celo } from 'viem/chains'
 import { WagmiProvider, cookieToInitialState } from 'wagmi'
 import { routeTree } from './routeTree.gen'
 import { config } from './wagmi'
+import { useChainPersistence } from './hooks/useChainPersistence'
 
 const router = createRouter({ routeTree })
 
@@ -18,6 +19,21 @@ declare module '@tanstack/react-router' {
 }
 
 const queryClient = new QueryClient()
+
+// Component to handle chain persistence inside the WagmiProvider
+function ChainPersistenceHandler() {
+  const { setPreferredChain } = useChainPersistence();
+  
+  // Initialize with Celo preference if none exists
+  useEffect(() => {
+    const savedPreference = localStorage.getItem('realmind-preferred-chain');
+    if (!savedPreference) {
+      setPreferredChain(celo.id);
+    }
+  }, [setPreferredChain]);
+  
+  return null;
+}
 
 function App() {
   const [mounted, setMounted] = useState(false)
@@ -51,6 +67,7 @@ function App() {
             appName: 'Realmind',
           }}
         >
+          <ChainPersistenceHandler />
           <RouterProvider router={router} />
           <Toaster 
             theme="light"

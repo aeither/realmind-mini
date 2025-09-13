@@ -1,7 +1,8 @@
 import { base, celo } from "viem/chains";
 
 // Export all supported chains as a reusable array
-export const SUPPORTED_CHAINS = [celo,base] as const;
+// Celo is first to ensure it's the default chain
+export const SUPPORTED_CHAINS = [celo, base] as const;
 
 // Export chain IDs for easy checking
 export const SUPPORTED_CHAIN_IDS = SUPPORTED_CHAINS.map(chain => chain.id);
