@@ -37,7 +37,7 @@ export default function BottomNavigation() {
       backdropFilter: 'blur(20px)',
       borderTop: '1px solid #e5e7eb',
       padding: '0.25rem 0',
-      paddingBottom: `calc(0.25rem + env(safe-area-inset-bottom, 0px))`,
+      paddingBottom: `calc(1rem + env(safe-area-inset-bottom, 0px))`,
       zIndex: 1000,
       display: 'flex',
       justifyContent: 'space-around',
