@@ -50,7 +50,7 @@ function GlobalHeader({
         left: 0,
         right: 0,
         zIndex: 1000,
-        background: "rgba(255, 255, 255, 0.6)",
+        background: "rgba(255, 255, 255, 0.25)",
         backdropFilter: "blur(20px)",
         borderBottom: "1px solid hsl(var(--border))",
         padding: "0.75rem clamp(0.5rem, 3vw, 2rem)",

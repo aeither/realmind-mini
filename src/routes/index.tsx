@@ -1,9 +1,10 @@
 import { sdk } from '@farcaster/miniapp-sdk'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useSwitchChain } from 'wagmi'
 import GlobalHeader from '../components/GlobalHeader'
 import BottomNavigation from '../components/BottomNavigation'
+import { SUPPORTED_CHAIN_IDS } from '../libs/supportedChains'
 
 interface Quiz {
   id: string;
@@ -100,11 +101,13 @@ function SplashScreen() {
 }
 
 function HomePage() {
-  const { chain } = useAccount();
+  const { chain, isConnected } = useAccount();
+  const { switchChain } = useSwitchChain();
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [isAppReady, setIsAppReady] = useState(false);
+  const [hasAttemptedChainSwitch, setHasAttemptedChainSwitch] = useState(false);
   const navigate = useNavigate();
 
   // Countdown timer state
@@ -190,6 +193,35 @@ function HomePage() {
   useEffect(() => {
     fetchQuizInfo();
   }, []);
+
+  // Auto-switch to supported chain if user is connected but on wrong chain
+  useEffect(() => {
+    const attemptChainSwitch = async () => {
+      // Only attempt once to avoid loops
+      if (hasAttemptedChainSwitch) return;
+      
+      // Only if user is connected
+      if (!isConnected) return;
+      
+      // Only if user is on wrong chain
+      const currentChainId = chain?.id;
+      const supportedChainId = SUPPORTED_CHAIN_IDS[0]; // Get the main supported chain
+      
+      if (currentChainId && currentChainId !== supportedChainId) {
+        try {
+          console.log(`Auto-switching from chain ${currentChainId} to supported chain ${supportedChainId}`);
+          setHasAttemptedChainSwitch(true); // Set this before switching to avoid loops
+          
+          await switchChain({ chainId: supportedChainId as 42220 | 8453 });
+        } catch (error) {
+          console.error('Failed to auto-switch chain:', error);
+          // Don't reset hasAttemptedChainSwitch on error to avoid retry loops
+        }
+      }
+    };
+
+    attemptChainSwitch();
+  }, [isConnected, chain?.id, switchChain, hasAttemptedChainSwitch]);
 
   // Start Daily Quiz function
   const startDailyQuiz = async () => {

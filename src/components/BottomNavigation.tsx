@@ -33,7 +33,7 @@ export default function BottomNavigation() {
       bottom: 0,
       left: 0,
       right: 0,
-      background: 'rgba(255, 255, 255, 0.4)',
+      background: 'rgba(255, 255, 255, 0.2)',
       backdropFilter: 'blur(20px)',
       borderTop: '1px solid #e5e7eb',
       padding: '0.25rem 0',
