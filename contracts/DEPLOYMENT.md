@@ -1,3 +1,17 @@
+## 🚀 Deployment Commands (EDU Chain)
+
+### EDU Chain - Chain ID: 41923
+
+```bash
+source .env && rm -rf cache out && forge build && forge script --chain 41923 script/QuizGame.s.sol:QuizGameScript --rpc-url https://rpc.edu-chain.raas.gelato.cloud --broadcast -vvvv --private-key ${PRIVATE_KEY} --gas-estimate-multiplier 200 --legacy
+```
+
+**Note**: EDU Chain requires legacy transactions and higher gas estimates due to network-specific gas behavior.
+
+**✅ Successfully Deployed Contracts on EDU Chain:**
+- **Token1 (XP Points)**: `0x57AED70DA2c288E4a79D2ca797ED9B276db47793`
+- **QuizGame**: `0x5A65590851b40939830cB5Ced3dEe8A0051cEDb7`
+
 ## 🚀 Deployment Commands (Base Mainnet)
 
 ### Base Mainnet - Chain ID: 8453
@@ -21,6 +35,16 @@ source .env && rm -rf cache out && forge build && forge script --chain 42220 scr
 ```bash
 source .env && rm -rf cache out && forge build && forge script --chain 42220 script/QuizGame.s.sol:QuizGameScript --rpc-url https://forno.celo.org --broadcast -vvvv --private-key ${PRIVATE_KEY} --slow --batch-size 1
 ```
+
+## 🌐 EDU Chain Network Details
+
+| Parameter | Value |
+|-----------|-------|
+| **Network Name** | EDU Chain |
+| **Chain ID** | 41923 |
+| **RPC Endpoint** | https://rpc.edu-chain.raas.gelato.cloud |
+| **Currency Symbol** | ETH |
+| **Block Explorer URL** | https://educhain.blockscout.com |
 
 ## 🌐 Base Mainnet Network Details
 

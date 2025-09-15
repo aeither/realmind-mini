@@ -12,6 +12,11 @@ const CONTRACT_ADDRESSES = {
   42220: {
     token1ContractAddress: "0xe05489dea86d85c32609410a1bF9C35a0f8fc2e7",
     quizGameContractAddress: "0x367c011DC980E695EdE1e314af0a82C7E2b01e3B"
+  },
+  // EDU Chain
+  41923: {
+    token1ContractAddress: "0x57AED70DA2c288E4a79D2ca797ED9B276db47793",
+    quizGameContractAddress: "0x5A65590851b40939830cB5Ced3dEe8A0051cEDb7"
   }
 } as const;
 
@@ -32,6 +37,14 @@ const REWARDS_CONFIG = {
     symbol: "🟡",
     maxWinners: 50,
     seasonEndDate: "2025-10-15" // Celo season ends October 15, 2025
+  },
+  // EDU Chain
+  41923: {
+    totalReward: 10000,
+    currency: "XP3",
+    symbol: "🎓",
+    maxWinners: 100,
+    seasonEndDate: undefined // No deadline for EDU Chain
   }
 } as const;
 
