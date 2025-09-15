@@ -4,6 +4,7 @@ const CONTRACT_ADDRESSES = {
   8453: {
     token1ContractAddress: "0xF3c3D545f3dD2A654dF2F54BcF98421CE2e3f121",
     quizGameContractAddress: "0x25D79A35F6323D0d3EE617549Cc507ED6B9639Cb",
+    seasonRewardContractAddress: "0x47358AF939cdB5B2b79a1AEE7d9E02760b2b73b2",
     // New demo contracts (placeholder addresses - update after deployment)
     quizDuelContractAddress: "0x0000000000000000000000000000000000000001",
     guildSystemContractAddress: "0x0000000000000000000000000000000000000002",
@@ -114,7 +115,8 @@ export const token1ABI = [
 export function getContractAddresses(chainId: number) {
   return CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES] || {
     token1ContractAddress: "0x0000000000000000000000000000000000000000",
-    quizGameContractAddress: "0x0000000000000000000000000000000000000000"
+    quizGameContractAddress: "0x0000000000000000000000000000000000000000",
+    seasonRewardContractAddress: "0x0000000000000000000000000000000000000000"
   };
 }
 
