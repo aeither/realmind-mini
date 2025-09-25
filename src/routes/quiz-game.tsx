@@ -280,8 +280,9 @@ function QuizGame() {
       // For AI-generated quizzes, use a generic quiz ID for the contract
       const contractQuizId = quizId === 'ai-custom' ? 'ai-generated' : quizConfig.id
       
-      // Expected correct answers is the total number of questions
-      const expectedCorrectAnswers = BigInt(quizConfig.questions.length)
+      // For AI challenge mode: expectedCorrectAnswers should be 1 (representing "winning")
+      // For normal mode: expectedCorrectAnswers is the total number of questions
+      const expectedCorrectAnswers = BigInt(isAiChallengeMode ? 1 : quizConfig.questions.length)
       
       if (!contractAddresses) return;
       startQuiz({
@@ -370,8 +371,15 @@ function QuizGame() {
   const handleCompleteQuiz = () => {
     if (!address || !quizConfig) return
     
-    // Pass the actual score (number of correct answers) to the contract
-    const correctAnswerCount = BigInt(score)
+    let correctAnswerCount: bigint
+    
+    if (isAiChallengeMode) {
+      // For AI challenge mode: 1 if user wins, 0 if user loses or ties
+      correctAnswerCount = BigInt(gameResult === 'user_wins' ? 1 : 0)
+    } else {
+      // For normal mode: pass the actual score (number of correct answers)
+      correctAnswerCount = BigInt(score)
+    }
     
     if (!contractAddresses) return;
     completeQuiz({
