@@ -41,9 +41,9 @@ const REWARDS_CONFIG = {
   },
   // EDU Chain
   41923: {
-    totalReward: 10000,
-    currency: "XP3",
-    symbol: "🎓",
+    totalReward: 1000000,
+    currency: "YUZU",
+    symbol: "🍊",
     maxWinners: 100,
     seasonEndDate: undefined // No deadline for EDU Chain
   }
