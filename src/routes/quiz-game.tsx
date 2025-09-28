@@ -1029,7 +1029,7 @@ function QuizGame() {
           }}>
             <div style={{ fontSize: "0.9rem", color: "#666666", marginBottom: "1rem" }}>
               {playMode === 'free' 
-                ? 'Free Practice Mode - Minimal cost (~1 wei), no XP rewards'
+                ? 'Free Practice Mode - Minimal cost (~1 wei) and XP'
                 : 'Play → Earn XP → Climb Leaderboard → Win Rewards'
               }
             </div>
