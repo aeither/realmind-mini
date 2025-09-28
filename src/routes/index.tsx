@@ -350,7 +350,7 @@ function HomePage() {
           
           <div style={{ fontSize: "0.75rem", color: "#9ca3af", maxWidth: "300px", margin: "0 auto" }}>
             {playMode === 'free' 
-              ? 'Play quizzes with minimal cost (~1 wei) but no XP rewards' 
+              ? 'Play quizzes with minimal cost (~1 wei) and XP' 
               : 'Pay entry fee to earn XP and climb leaderboards'
             }
           </div>
