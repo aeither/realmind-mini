@@ -44,7 +44,7 @@ const REWARDS_CONFIG = {
     totalReward: 1000000,
     currency: "YUZU",
     symbol: "🍊",
-    maxWinners: 100,
+    maxWinners: 200,
     seasonEndDate: undefined // No deadline for EDU Chain
   }
 } as const;
