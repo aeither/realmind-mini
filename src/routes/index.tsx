@@ -117,8 +117,21 @@ function HomePage() {
   const [currentQuizDescription, setCurrentQuizDescription] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   
+  // Mode preference state - default to 'reward' (current behavior)
+  const [playMode, setPlayMode] = useState<'free' | 'reward'>(() => {
+    const saved = localStorage.getItem('realmind-play-mode')
+    return (saved as 'free' | 'reward') || 'reward'
+  })
+  
   // Get backend URL from environment
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  // Function to toggle play mode
+  const togglePlayMode = () => {
+    const newMode = playMode === 'free' ? 'reward' : 'free'
+    setPlayMode(newMode)
+    localStorage.setItem('realmind-play-mode', newMode)
+  }
 
   useEffect(() => {
     const initializeFarcasterSDK = async () => {
@@ -260,8 +273,10 @@ function HomePage() {
         const encodedQuiz = utf8ToBase64(JSON.stringify(quizConfig));
         const quizUrl = `/quiz-game?quiz=ai-custom&data=${encodedQuiz}`;
         
-        // Navigate to quiz
-        navigate({ to: quizUrl });
+        // Navigate to quiz with play mode
+        const separator = quizUrl.includes('?') ? '&' : '?'
+        const finalUrl = `${quizUrl}${separator}playMode=${playMode}`
+        navigate({ to: finalUrl });
       } else {
         console.error('No daily quiz available');
       }
@@ -300,9 +315,45 @@ function HomePage() {
           <h2 style={{ fontSize: "1.8rem", marginBottom: "0.5rem", fontWeight: "bold", color: "#111827" }}>
             Interactive Learning
           </h2>
-          <p style={{ fontSize: "1rem", color: "#6b7280", maxWidth: "400px", margin: "0 auto" }}>
+          <p style={{ fontSize: "1rem", color: "#6b7280", maxWidth: "400px", margin: "0 auto", marginBottom: "1rem" }}>
             Test your knowledge and earn rewards
           </p>
+          
+          {/* Play Mode Toggle */}
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "1rem",
+            marginBottom: "0.5rem"
+          }}>
+            <span style={{ fontSize: "0.9rem", color: "#6b7280", fontWeight: "500" }}>
+              {playMode === 'free' ? '🎮 Free Play' : '🏆 Reward Mode'}
+            </span>
+            <button
+              onClick={togglePlayMode}
+              style={{
+                background: playMode === 'reward' ? "#22c55e" : "#e5e7eb",
+                border: "none",
+                borderRadius: "20px",
+                padding: "0.25rem 0.75rem",
+                fontSize: "0.8rem",
+                color: playMode === 'reward' ? "white" : "#6b7280",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                fontWeight: "600"
+              }}
+            >
+              {playMode === 'free' ? 'Enable Rewards' : 'Free Play'}
+            </button>
+          </div>
+          
+          <div style={{ fontSize: "0.75rem", color: "#9ca3af", maxWidth: "300px", margin: "0 auto" }}>
+            {playMode === 'free' 
+              ? 'Play quizzes with minimal cost (~1 wei) but no XP rewards' 
+              : 'Pay entry fee to earn XP and climb leaderboards'
+            }
+          </div>
         </div>
 
         {/* Daily Quiz Section - More Compact */}
@@ -363,7 +414,7 @@ function HomePage() {
           </p>
           
           <button
-            onClick={() => navigate({ to: '/ai-quiz' })}
+            onClick={() => navigate({ to: `/ai-quiz?playMode=${playMode}` })}
             style={{
               background: "#3b82f6",
               color: "white",
@@ -401,7 +452,7 @@ function HomePage() {
                   transition: "all 0.3s ease",
                   boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)"
                 }}
-                onClick={() => navigate({ to: '/quiz-game', search: { quiz: quiz.id } })}
+                onClick={() => navigate({ to: '/quiz-game', search: { quiz: quiz.id, playMode } })}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-2px)";
                   e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";

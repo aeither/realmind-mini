@@ -14,6 +14,7 @@ interface QuizSearchParams {
   quiz?: string
   mode?: string
   data?: string
+  playMode?: string
 }
 
 // Quiz configurations
@@ -88,7 +89,7 @@ const QUIZ_CONFIGS = {
 
 function QuizGame() {
   const navigate = useNavigate()
-  const { quiz: quizId, mode, data } = useSearch({ from: '/quiz-game' }) as QuizSearchParams
+  const { quiz: quizId, mode, data, playMode } = useSearch({ from: '/quiz-game' }) as QuizSearchParams
   const { address, chain, isConnected } = useAccount()
   const { switchChain } = useSwitchChain()
 
@@ -129,7 +130,7 @@ function QuizGame() {
   // Redirect ai-generated to web3-basics (default fallback)
   if (quizId === 'ai-generated') {
     toast.info('Redirecting to Web3 Basics quiz...')
-    navigate({ to: '/quiz-game', search: { quiz: 'web3-basics' } })
+    navigate({ to: '/quiz-game', search: { quiz: 'web3-basics', playMode } })
     return null
   }
   
@@ -207,7 +208,9 @@ function QuizGame() {
   const activeQuizId = userSession && typeof userSession === 'object' && 'quizId' in userSession ? (userSession as any).quizId : '';
 
   // Get entry amount from contract or fallback to hardcoded value
-  const entryAmount = defaultEntryPrice ? formatEther(defaultEntryPrice) : '0.00005';
+  // If playMode is 'free', use very small amount (1 wei) instead of 0 to satisfy contract requirements
+  const baseEntryAmount = defaultEntryPrice ? formatEther(defaultEntryPrice) : '0.00005';
+  const entryAmount = playMode === 'free' ? '0.000000000000000001' : baseEntryAmount; // 1 wei for free mode
 
   // Contract writes
   const { writeContract: startQuiz, isPending: isStartPending, data: startHash } = useWriteContract()
@@ -584,7 +587,7 @@ function QuizGame() {
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <button 
-              onClick={() => navigate({ to: '/quiz-game', search: { quiz: activeQuizId } })}
+              onClick={() => navigate({ to: '/quiz-game', search: { quiz: activeQuizId, playMode } })}
               style={{
                 backgroundColor: "#58CC02",
                 color: "#ffffff",
@@ -1002,6 +1005,20 @@ function QuizGame() {
             {quizConfig?.title || "Quiz"}
           </h1>
           
+          {/* Play Mode Indicator */}
+          <div style={{
+            fontSize: "0.8rem",
+            color: playMode === 'free' ? "#f59e0b" : "#22c55e",
+            fontWeight: "600",
+            marginBottom: "1rem",
+            padding: "0.25rem 0.75rem",
+            background: playMode === 'free' ? "#fef3c7" : "#dcfce7",
+            borderRadius: "12px",
+            display: "inline-block"
+          }}>
+            {playMode === 'free' ? '🎮 Free Play Mode' : '🏆 Reward Mode'}
+          </div>
+          
           {/* Mode Selection - Clear State */}
           <div style={{
             background: "#f8f9fa",
@@ -1011,7 +1028,10 @@ function QuizGame() {
             border: "1px solid #e9ecef"
           }}>
             <div style={{ fontSize: "0.9rem", color: "#666666", marginBottom: "1rem" }}>
-              Play → Earn XP → Climb Leaderboard → Win Rewards
+              {playMode === 'free' 
+                ? 'Free Practice Mode - Minimal cost (~1 wei), no XP rewards'
+                : 'Play → Earn XP → Climb Leaderboard → Win Rewards'
+              }
             </div>
             
             {/* Mode Toggle */}
@@ -1025,7 +1045,7 @@ function QuizGame() {
               border: "1px solid #e1e5e9"
             }}>
               <button
-                onClick={() => navigate({ to: '/quiz-game', search: { quiz: quizId, ...(data && { data }) } })}
+                onClick={() => navigate({ to: '/quiz-game', search: { quiz: quizId, playMode, ...(data && { data }) } })}
                 style={{
                   flex: 1,
                   padding: "0.5rem",
@@ -1042,7 +1062,7 @@ function QuizGame() {
                 Normal
               </button>
               <button
-                onClick={() => navigate({ to: '/quiz-game', search: { quiz: quizId, mode: 'ai-challenge', ...(data && { data }) } })}
+                onClick={() => navigate({ to: '/quiz-game', search: { quiz: quizId, mode: 'ai-challenge', playMode, ...(data && { data }) } })}
                 style={{
                   flex: 1,
                   padding: "0.5rem",
@@ -1062,10 +1082,18 @@ function QuizGame() {
             
             {/* Mode Description */}
             <div style={{ fontSize: "0.8rem", color: "#999999", textAlign: "center" }}>
-              {isAiChallengeMode ? (
-                "Compete vs AI bot • Beat AI score for 20% bonus XP"
+              {playMode === 'free' ? (
+                isAiChallengeMode ? (
+                  "Practice vs AI bot • Minimal cost, no rewards"
+                ) : (
+                  `${quizConfig?.questions.length || 0} questions • Practice mode, minimal cost`
+                )
               ) : (
-                `${quizConfig?.questions.length || 0} questions • 20% bonus for perfect score`
+                isAiChallengeMode ? (
+                  "Compete vs AI bot • Beat AI score for 20% bonus XP"
+                ) : (
+                  `${quizConfig?.questions.length || 0} questions • 20% bonus for perfect score`
+                )
               )}
             </div>
           </div>
@@ -1102,5 +1130,6 @@ export const Route = createFileRoute('/quiz-game')({
     quiz: search.quiz as string,
     mode: search.mode as string,
     data: search.data as string,
+    playMode: search.playMode as string,
   }),
 })
