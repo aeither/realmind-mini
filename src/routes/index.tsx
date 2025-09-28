@@ -212,7 +212,7 @@ function HomePage() {
           console.log(`Auto-switching from chain ${currentChainId} to supported chain ${supportedChainId}`);
           setHasAttemptedChainSwitch(true); // Set this before switching to avoid loops
           
-          await switchChain({ chainId: supportedChainId as 42220 | 8453 });
+          await switchChain({ chainId: supportedChainId as 42220 | 8453 | 41923 });
         } catch (error) {
           console.error('Failed to auto-switch chain:', error);
           // Don't reset hasAttemptedChainSwitch on error to avoid retry loops

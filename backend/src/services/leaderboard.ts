@@ -62,6 +62,12 @@ export class LeaderboardService {
       chainName: 'Celo',
       blockscoutApiUrl: 'https://celo.blockscout.com/api/v2',
       scanUrl: 'https://celoscan.io'
+    },
+    41923: { // EDU Chain
+      chainId: 41923,
+      chainName: 'EDU Chain',
+      blockscoutApiUrl: 'https://educhain.blockscout.com/api/v2',
+      scanUrl: 'https://educhain.blockscout.com'
     }
   }
 
@@ -237,8 +243,8 @@ export class LeaderboardService {
     if (!chainConfig) {
       return null
     }
-    // For Blockscout, use the blockscout URL format
-    if (chainConfig.blockscoutApiUrl.includes('blockscout')) {
+    // For Blockscout-based explorers, use the blockscout URL format
+    if (chainConfig.blockscoutApiUrl.includes('blockscout') || chainConfig.blockscoutApiUrl.endsWith('/api/v2')) {
       const baseUrl = chainConfig.blockscoutApiUrl.replace('/api/v2', '')
       return `${baseUrl}/token/${contractAddress}?tab=holders`
     }
