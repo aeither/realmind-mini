@@ -32,10 +32,10 @@ export default function handler(req, res) {
       ogImageUrl: `https://${host}/icon.png`,
       noindex: false
     },
-    accountAssociation: {
-      header: "eyJmaWQiOjIxNjM4MywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDIxNEQxNzJDMERjNjBmQTUxNERmOTU0QTgyOGJjQzU1MkJlMzA4MTUifQ",
-      payload: "eyJkb21haW4iOiJyZWFsbWluZC1taW5pLmRhaWx5d2lzZXIueHl6In0",
-      signature: "MHg0ZmQzMjg3M2UxNmViNDM4ODJlNmI0YTczMjgzMjQwYzY5ODVjYmFmNGMxZTg5N2M0NTQ1YWUzZTQxOTgwYTQxNWUwMjJkMTZmNjUyNDEyYjFmM2Q1NDcwNmU5NmZiOTM1ZDllZTAwNGE2YmIxYTI2MzBiOGVhMWIzY2RkY2FiODFj"
+    "accountAssociation": {
+      "header": "eyJmaWQiOjIxNjM4MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweENhMDU3RDcxRWY1NDE5RDZDNzhlNTI3MTU2NUFDZEMwMzAxZjA0ODAifQ",
+      "payload": "eyJkb21haW4iOiJyZWFsbWluZC1iYXNlLnZlcmNlbC5hcHAifQ",
+      "signature": "4FNu9p4+XKWLBvfmfu61NUeuy/eJBjKcUggXD56pMl58isNC7HaCpoS0s9SIJNC87QbJ7Ho7TP/izYhFmC7I2Bw="
     },
     baseBuilder: {
       allowedAddresses: [
