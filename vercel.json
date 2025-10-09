@@ -5,6 +5,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/.well-known/farcaster.json",
+      "destination": "/api/farcaster.json"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
