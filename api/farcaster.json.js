@@ -26,8 +26,8 @@ export default function handler(req, res) {
         "rewards"
       ],
       heroImageUrl: `https://${host}/quiz-preview.jpeg`,
-      tagline: "Learn & Earn",
-      ogTitle: "Realmind - Interactive Learning",
+      tagline: "Learn and Earn",
+      ogTitle: "Realmind Interactive Learning",
       ogDescription: "Test your knowledge and earn rewards on Hyperion Testnet!",
       ogImageUrl: `https://${host}/icon.png`,
       noindex: false
