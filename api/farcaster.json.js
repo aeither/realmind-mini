@@ -13,7 +13,7 @@ export default function handler(req, res) {
       splashBackgroundColor: "#FFC117",
       webhookUrl: `https://${host}/api/webhook`,
       subtitle: "Interactive Learning",
-      description: "Test your knowledge and earn rewards on Hyperion Testnet with interactive quiz games.",
+      description: "Test your knowledge and earn rewards with interactive quiz games.",
       primaryCategory: "education",
       screenshotUrls: [
         `https://${host}/icon.png`
@@ -28,7 +28,7 @@ export default function handler(req, res) {
       heroImageUrl: `https://${host}/quiz-preview.jpeg`,
       tagline: "Learn and Earn",
       ogTitle: "Realmind Interactive Learning",
-      ogDescription: "Test your knowledge and earn rewards on Hyperion Testnet!",
+      ogDescription: "Test your knowledge and earn rewards",
       ogImageUrl: `https://${host}/icon.png`,
       noindex: false
     },
