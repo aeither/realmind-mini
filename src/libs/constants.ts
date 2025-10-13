@@ -25,7 +25,7 @@ const CONTRACT_ADDRESSES = {
 const REWARDS_CONFIG = {
   // Base (Mainnet)
   8453: {
-    totalReward: 900000,
+    totalReward: 660000,
     currency: "YUZU",
     symbol: "🍊",
     maxWinners: 200,
@@ -41,7 +41,7 @@ const REWARDS_CONFIG = {
   },
   // EDU Chain
   41923: {
-    totalReward: 1500000,
+    totalReward: 1200000,
     currency: "YUZU",
     symbol: "🍊",
     maxWinners: 200,
