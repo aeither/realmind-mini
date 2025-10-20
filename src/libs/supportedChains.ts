@@ -2,7 +2,7 @@ import { base, celo } from "viem/chains";
 import { defineChain } from 'viem';
 
 // Define EDU Chain
-const eduChain = defineChain({
+export const eduChain = defineChain({
   id: 41923,
   name: 'EDU Chain',
   nativeCurrency: {
