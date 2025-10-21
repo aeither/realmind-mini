@@ -1,8 +1,10 @@
 import { Link } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { useAccount, useReadContract, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useReadContract, useDisconnect, useConnect, useConnectors } from 'wagmi';
 import { formatEther } from 'viem';
 import { getContractAddresses, token1ABI } from '../libs/constants';
+import { useEffect, useState } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 interface GlobalHeaderProps {
   showBackButton?: boolean;
@@ -16,9 +18,44 @@ function GlobalHeader({
   backText = "← Back"
 }: GlobalHeaderProps) {
   const { address, chain, isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  
+  const { connect } = useConnect();
+  const connectors = useConnectors();
+  const [isMiniApp, setIsMiniApp] = useState<boolean | null>(null);
+
+  // Detect if running in Farcaster Mini App
+  useEffect(() => {
+    const detectEnvironment = async () => {
+      try {
+        const isInMiniApp = await sdk.isInMiniApp();
+        setIsMiniApp(isInMiniApp);
+
+        if (isInMiniApp) {
+          const context = await sdk.context;
+          console.log('Farcaster context:', context.user.username);
+        }
+      } catch (error) {
+        console.error('Error detecting Mini App environment:', error);
+        setIsMiniApp(false);
+      }
+    };
+
+    detectEnvironment();
+  }, []);
+
+  const handleConnectWallet = () => {
+    // connectors[1] is Farcaster Mini App connector
+    const farcasterConnector = connectors.find(c => c.id === 'farcasterMiniApp');
+
+    if (isMiniApp && farcasterConnector) {
+      // In Farcaster Mini App, connect directly with Farcaster
+      connect({ connector: farcasterConnector });
+    } else {
+      // In browser, open modal with all wallet options
+      window.dispatchEvent(new Event('openWalletModal'));
+    }
+  };
+
   // Get contract addresses based on current chain
   const contractAddresses = chain ? getContractAddresses(chain.id) : null;
 
@@ -165,7 +202,7 @@ function GlobalHeader({
             </div>
           ) : (
             <button
-              onClick={() => connect({ connector: connectors[0] })}
+              onClick={handleConnectWallet}
               style={{
                 background: 'hsl(var(--primary))',
                 color: 'white',
@@ -177,7 +214,7 @@ function GlobalHeader({
                 cursor: 'pointer',
               }}
             >
-              Connect Wallet
+              {isMiniApp ? 'Connect with Farcaster' : 'Connect Wallet'}
             </button>
           )}
         </motion.div>

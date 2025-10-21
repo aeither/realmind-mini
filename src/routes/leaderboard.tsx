@@ -5,6 +5,7 @@ import GlobalHeader from '../components/GlobalHeader'
 import BottomNavigation from '../components/BottomNavigation'
 import { leaderboardService, type TokenHolder } from '../libs/leaderboardService'
 import { getContractAddresses, getRewardsConfig } from '../libs/constants'
+import { useUserProfiles } from '../hooks/useUserProfile'
 
 function LeaderboardPage() {
   const { chain, address } = useAccount()
@@ -20,6 +21,9 @@ function LeaderboardPage() {
   // Get contract addresses and rewards config based on current chain
   const contractAddresses = chain ? getContractAddresses(chain.id) : null
   const rewardsConfig = chain ? getRewardsConfig(chain.id) : null
+
+  // Fetch user profiles (ENS names and Farcaster profile pics)
+  const { profiles } = useUserProfiles(holders.map(h => h.address))
 
   const fetchLeaderboard = async () => {
     if (!chain || !contractAddresses) return
@@ -534,22 +538,49 @@ function LeaderboardPage() {
                         </td>
                         <td style={{ padding: "0.5rem" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            {/* Simple avatar */}
-                            <div style={{
-                              width: "24px",
-                              height: "24px",
-                              borderRadius: "50%",
-                              background: `hsl(${holder.address.slice(-6).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 60%)`,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "0.6rem",
-                              fontWeight: "600",
-                              color: "white"
-                            }}>
-                              {holder.address.slice(2, 4).toUpperCase()}
-                            </div>
-                            <code 
+                            {/* Avatar - Use Farcaster profile pic if available */}
+                            {(() => {
+                              const profile = profiles.get(holder.address.toLowerCase());
+                              const hasProfilePic = profile?.profilePicUrl;
+
+                              if (hasProfilePic) {
+                                return (
+                                  <img
+                                    src={profile.profilePicUrl}
+                                    alt={profile.username || 'Profile'}
+                                    style={{
+                                      width: "24px",
+                                      height: "24px",
+                                      borderRadius: "50%",
+                                      objectFit: "cover"
+                                    }}
+                                    onError={(e) => {
+                                      // Fallback to default avatar if image fails to load
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                );
+                              }
+
+                              // Default avatar
+                              return (
+                                <div style={{
+                                  width: "24px",
+                                  height: "24px",
+                                  borderRadius: "50%",
+                                  background: `hsl(${holder.address.slice(-6).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 60%)`,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "0.6rem",
+                                  fontWeight: "600",
+                                  color: "white"
+                                }}>
+                                  {holder.address.slice(2, 4).toUpperCase()}
+                                </div>
+                              );
+                            })()}
+                            <code
                               style={{
                                 background: address?.toLowerCase() === holder.address.toLowerCase() ? "#dbeafe" : "#f9fafb",
                                 padding: "0.2rem 0.4rem",
@@ -566,7 +597,17 @@ function LeaderboardPage() {
                               onClick={() => navigator.clipboard.writeText(holder.address)}
                               title="Click to copy address"
                             >
-                              {leaderboardService.truncateAddress(holder.address)}
+                              {(() => {
+                                const profile = profiles.get(holder.address.toLowerCase());
+                                // Show ENS name if available, otherwise Farcaster username, otherwise truncated address
+                                if (profile?.ensName) {
+                                  return profile.ensName;
+                                }
+                                if (profile?.username) {
+                                  return `@${profile.username}`;
+                                }
+                                return leaderboardService.truncateAddress(holder.address);
+                              })()}
                             </code>
                           </div>
                         </td>
