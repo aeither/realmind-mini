@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useReadContract } from 'wagmi';
+import { useAccount, useReadContract, useConnect, useDisconnect } from 'wagmi';
 import { formatEther } from 'viem';
 import { getContractAddresses, token1ABI } from '../libs/constants';
 
@@ -11,12 +10,14 @@ interface GlobalHeaderProps {
   backText?: string;
 }
 
-function GlobalHeader({ 
-  showBackButton = false, 
-  backTo = "/", 
-  backText = "← Back" 
+function GlobalHeader({
+  showBackButton = false,
+  backTo = "/",
+  backText = "← Back"
 }: GlobalHeaderProps) {
-  const { address, chain } = useAccount();
+  const { address, chain, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
   
   // Get contract addresses based on current chain
   const contractAddresses = chain ? getContractAddresses(chain.id) : null;
@@ -130,22 +131,55 @@ function GlobalHeader({
           </div>
         )}
         
-        {/* RainbowKit Connect Button */}
+        {/* Farcaster Connect Button */}
         <motion.div whileHover={{ scale: 1.02 }}>
-          <ConnectButton
-            accountStatus={{
-              smallScreen: 'address',
-              largeScreen: 'address',
-            }}
-            chainStatus={{
-              smallScreen: 'icon',
-              largeScreen: 'name',
-            }}
-            showBalance={{
-              smallScreen: false,
-              largeScreen: false,
-            }}
-          />
+          {isConnected ? (
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div style={{
+                background: 'hsl(var(--quiz-selected))',
+                borderRadius: '8px',
+                padding: 'clamp(0.4rem, 1.5vw, 0.6rem) clamp(0.6rem, 2.5vw, 1rem)',
+                border: '1px solid hsl(var(--primary))',
+                color: 'hsl(var(--primary))',
+                fontSize: 'clamp(0.8rem, 3vw, 0.9rem)',
+                fontWeight: '600',
+              }}>
+                <span className="hidden sm:inline">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
+                <span className="sm:hidden">{address?.slice(0, 4)}...{address?.slice(-2)}</span>
+              </div>
+              <button
+                onClick={() => disconnect()}
+                style={{
+                  background: 'hsl(var(--primary))',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: 'clamp(0.4rem, 1.5vw, 0.6rem) clamp(0.6rem, 2.5vw, 1rem)',
+                  fontSize: 'clamp(0.8rem, 3vw, 0.9rem)',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                }}
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => connect({ connector: connectors[0] })}
+              style={{
+                background: 'hsl(var(--primary))',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: 'clamp(0.4rem, 1.5vw, 0.6rem) clamp(0.6rem, 2.5vw, 1rem)',
+                fontSize: 'clamp(0.8rem, 3vw, 0.9rem)',
+                fontWeight: '600',
+                cursor: 'pointer',
+              }}
+            >
+              Connect Wallet
+            </button>
+          )}
         </motion.div>
       </motion.div>
     </header>

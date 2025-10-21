@@ -1,16 +1,21 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { http, createConfig } from 'wagmi';
 import { cookieStorage, createStorage } from 'wagmi';
 import { SUPPORTED_CHAINS } from './libs/supportedChains';
+import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector';
 
-const config = getDefaultConfig({
-  appName: 'Realmind',
-  projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_WALLETCONNECT_PROJECT_ID',
+const config = createConfig({
   chains: SUPPORTED_CHAINS,
+  transports: SUPPORTED_CHAINS.reduce((acc, chain) => {
+    acc[chain.id] = http();
+    return acc;
+  }, {} as Record<number, ReturnType<typeof http>>),
+  connectors: [
+    miniAppConnector()
+  ],
   ssr: true,
   storage: createStorage({
     storage: cookieStorage,
   }),
-  // Ensure proper chain persistence
   multiInjectedProviderDiscovery: true,
 });
 
