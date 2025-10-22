@@ -1,12 +1,15 @@
+import { OnchainKitProvider } from '@coinbase/onchainkit'
+import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Toaster } from 'sonner'
 import { WagmiProvider, cookieToInitialState } from 'wagmi'
+import { base } from 'wagmi/chains'
+import WalletModal from './components/WalletModal'
+import { WalletModalProvider } from './contexts/WalletModalContext'
 import { routeTree } from './routeTree.gen'
 import { config } from './wagmi'
-import { WalletModalProvider } from './contexts/WalletModalContext'
-import WalletModal from './components/WalletModal'
 
 const router = createRouter({ routeTree })
 
@@ -36,25 +39,54 @@ function App() {
   return (
     <WagmiProvider config={config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
-        <WalletModalProvider>
-          <RouterProvider router={router} />
-          <Toaster
-            theme="light"
-            position="bottom-right"
-            toastOptions={{
-              style: {
-                background: '#ffffff',
-                border: '1px solid #e5e7eb',
-                color: '#1f2937',
-                borderRadius: '12px'
-              },
-            }}
-          />
-          <WalletModalManager />
-        </WalletModalProvider>
+        <OnchainKitProvider
+          apiKey={import.meta.env.VITE_ONCHAINKIT_API_KEY}
+          chain={base}
+          config={{
+            appearance: {
+              mode: 'auto',
+              theme: 'default',
+              name: 'RealMind Mini',
+            },
+          }}
+          miniKit={{
+            enabled: true
+          }}
+        >
+          <MiniKitInitializer />
+          <WalletModalProvider>
+            <RouterProvider router={router} />
+            <Toaster
+              theme="light"
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  color: '#1f2937',
+                  borderRadius: '12px'
+                },
+              }}
+            />
+            <WalletModalManager />
+          </WalletModalProvider>
+        </OnchainKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
+}
+
+// Initialize MiniKit frame context
+function MiniKitInitializer() {
+  const { setFrameReady, isFrameReady } = useMiniKit();
+
+  useEffect(() => {
+    if (!isFrameReady) {
+      setFrameReady();
+    }
+  }, [setFrameReady, isFrameReady]);
+
+  return null;
 }
 
 // Separate component to use the wallet modal context

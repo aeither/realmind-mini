@@ -9,6 +9,7 @@ import { getContractAddresses } from '../libs/constants'
 import { SUPPORTED_CHAIN, SUPPORTED_CHAINS, CURRENCY_CONFIG } from '../libs/supportedChains'
 import GlobalHeader from '../components/GlobalHeader'
 import { AIQuizGenerator } from '../libs/aiQuizGenerator'
+import { useAddFrame, useMiniKit, useComposeCast } from '@coinbase/onchainkit/minikit'
 
 interface QuizSearchParams {
   quiz?: string
@@ -93,6 +94,11 @@ function QuizGame() {
   const { address, chain, isConnected } = useAccount()
   const { switchChain } = useSwitchChain()
 
+  // OnchainKit MiniKit hooks
+  const addFrame = useAddFrame()
+  const { context } = useMiniKit()
+  const { composeCast } = useComposeCast()
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [userAnswers, setUserAnswers] = useState<string[]>([])
   const [quizCompleted, setQuizCompleted] = useState(false)
@@ -106,6 +112,8 @@ function QuizGame() {
   const [lastAiAnswerCorrect, setLastAiAnswerCorrect] = useState<boolean | null>(null)
   const [showAnswerFeedback, setShowAnswerFeedback] = useState(false)
   const [isCompletingAiSession, setIsCompletingAiSession] = useState(false)
+  const [showSavePrompt, setShowSavePrompt] = useState(false)
+  const [isSavingFrame, setIsSavingFrame] = useState(false)
 
   // Function to restart the quiz in AI challenge mode
   const handleRestartQuiz = () => {
@@ -248,11 +256,81 @@ function QuizGame() {
         toast.success('Rewards claimed! Check your wallet 🎁')
       }
       setJustCompletedQuiz(true) // Mark that user just completed a quiz
-      
-      // Navigate to home page immediately after successful claim
-      navigate({ to: '/' })
+
+      // Check if user has already added the frame
+      const hasAddedFrame = context?.client?.added
+
+      if (!hasAddedFrame) {
+        // Show save prompt instead of navigating immediately
+        setShowSavePrompt(true)
+      } else {
+        // Navigate to home page immediately if already saved
+        navigate({ to: '/' })
+      }
     }
-  }, [isCompleteSuccess, navigate, isCompletingAiSession])
+  }, [isCompleteSuccess, navigate, isCompletingAiSession, context])
+
+  // Handle saving the frame
+  const handleSaveFrame = async () => {
+    setIsSavingFrame(true)
+    try {
+      const result = await addFrame()
+      if (result) {
+        toast.success('Mini App saved successfully! 🎉')
+        // Navigate to home after saving
+        navigate({ to: '/' })
+      } else {
+        // User cancelled or already saved
+        navigate({ to: '/' })
+      }
+    } catch (error) {
+      console.error('Failed to save frame:', error)
+      toast.error('Failed to save. You can try again later.')
+      navigate({ to: '/' })
+    } finally {
+      setIsSavingFrame(false)
+      setShowSavePrompt(false)
+    }
+  }
+
+  // Handle sharing quiz success
+  const handleShareSuccess = () => {
+    if (!quizConfig) return
+
+    const appUrl = window.location.origin
+    const percentage = Math.round((score / quizConfig.questions.length) * 100)
+
+    let shareText = ''
+
+    if (isAiChallengeMode) {
+      if (gameResult === 'user_wins') {
+        shareText = `🎉 Just beat the AI in "${quizConfig.title}"! ${score}-${aiScore} victory! Can you do better? 🤖`
+      } else if (gameResult === 'tie') {
+        shareText = `🤝 Tied with the AI in "${quizConfig.title}"! ${score}-${aiScore}. Think you can beat it?`
+      } else {
+        shareText = `🤖 The AI got me this time in "${quizConfig.title}"... but I'll be back! Challenge accepted!`
+      }
+    } else {
+      if (percentage === 100) {
+        shareText = `🎯 Perfect score on "${quizConfig.title}"! ${score}/${quizConfig.questions.length} correct! Think you can match it?`
+      } else if (percentage >= 80) {
+        shareText = `🔥 Scored ${score}/${quizConfig.questions.length} on "${quizConfig.title}"! Can you beat ${percentage}%?`
+      } else {
+        shareText = `Just completed "${quizConfig.title}" quiz! Test your knowledge and try to beat my score of ${score}/${quizConfig.questions.length}! 🎮`
+      }
+    }
+
+    try {
+      composeCast({
+        text: shareText,
+        embeds: [appUrl]
+      })
+      toast.success('Opening cast composer... 📱')
+    } catch (error) {
+      console.error('Failed to share:', error)
+      toast.error('Failed to open share dialog')
+    }
+  }
 
   // Reset the justCompletedQuiz flag after 10 seconds to prevent permanent bypass
   useEffect(() => {
@@ -622,6 +700,73 @@ function QuizGame() {
     )
   }
 
+  // Show save prompt if quiz is completed and user hasn't saved the app
+  if (showSavePrompt) {
+    return (
+      <motion.div style={{}} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <GlobalHeader />
+        <div style={{
+          maxWidth: "600px",
+          margin: "0 auto",
+          padding: "2rem",
+          textAlign: "center"
+        }}>
+          <div style={{
+            background: "#ffffff",
+            borderRadius: "16px",
+            padding: "3rem",
+            border: "1px solid hsl(var(--border))",
+            boxShadow: "var(--shadow-card)"
+          }}>
+            <h2 style={{ color: "#111827", marginBottom: "1rem", fontSize: "1.75rem", fontWeight: 800 }}>
+              🎉 Congratulations!
+            </h2>
+            <p style={{ color: "#374151", marginBottom: "2rem", fontSize: "1.05rem" }}>
+              You've completed a quiz! Save RealMind Mini to your collection to play anytime.
+            </p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <button
+                onClick={handleSaveFrame}
+                disabled={isSavingFrame}
+                style={{
+                  backgroundColor: isSavingFrame ? "#9ca3af" : "#58CC02",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "12px",
+                  padding: "1rem 2rem",
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  cursor: isSavingFrame ? "not-allowed" : "pointer",
+                  opacity: isSavingFrame ? 0.6 : 1
+                }}
+              >
+                {isSavingFrame ? "Saving..." : "💾 Save Mini App"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowSavePrompt(false)
+                  navigate({ to: '/' })
+                }}
+                style={{
+                  backgroundColor: "#e5e7eb",
+                  color: "#111827",
+                  border: "none",
+                  borderRadius: "12px",
+                  padding: "1rem 2rem",
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  cursor: "pointer"
+                }}
+              >
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
+
   // If quiz is completed, show end screen
   if (quizCompleted && quizConfig) {
     const percentage = Math.round((score / quizConfig.questions.length) * 100)
@@ -655,26 +800,43 @@ function QuizGame() {
                   <p style={{ color: "#ef4444", marginBottom: "2rem", fontSize: "1.1rem", fontWeight: 600 }}>
                     No bonus XP - you need to beat the AI to earn extra rewards!
                   </p>
-                  <button
-                    onClick={handleCompleteQuiz}
-                    disabled={isCompleteTransactionPending}
-                    style={{
-                      backgroundColor: isCompleteTransactionPending ? "#9ca3af" : "#58CC02",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "12px",
-                      padding: "1rem 2rem",
-                      fontSize: "1.1rem",
-                      fontWeight: 700,
-                      cursor: isCompleteTransactionPending ? "not-allowed" : "pointer",
-                      opacity: isCompleteTransactionPending ? 0.6 : 1
-                    }}
-                  >
-                    {isCompleteTransactionPending ? (isCompletePending ? "Confirm in wallet..." : "Completing...") : "✅ Complete Quiz Anyway"}
-                  </button>
+                  <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+                    <button
+                      onClick={handleCompleteQuiz}
+                      disabled={isCompleteTransactionPending}
+                      style={{
+                        backgroundColor: isCompleteTransactionPending ? "#9ca3af" : "#58CC02",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "12px",
+                        padding: "1rem 2rem",
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                        cursor: isCompleteTransactionPending ? "not-allowed" : "pointer",
+                        opacity: isCompleteTransactionPending ? 0.6 : 1
+                      }}
+                    >
+                      {isCompleteTransactionPending ? (isCompletePending ? "Confirm in wallet..." : "Completing...") : "✅ Complete Quiz Anyway"}
+                    </button>
+                    <button
+                      onClick={handleShareSuccess}
+                      style={{
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "12px",
+                        padding: "1rem 2rem",
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                        cursor: "pointer"
+                      }}
+                    >
+                      📢 Share Challenge
+                    </button>
+                  </div>
                 </>
               )}
-              
+
               {gameResult === 'user_wins' && (
                 <>
                   <h2 style={{ color: "#22c55e", marginBottom: "1rem", fontSize: "1.75rem", fontWeight: 800 }}>
@@ -698,26 +860,43 @@ function QuizGame() {
                       AI Challenge Bonus: 20% extra for beating the AI!
                     </p>
                   </div>
-                  <button
-                    onClick={handleCompleteQuiz}
-                    disabled={isCompleteTransactionPending}
-                    style={{
-                      backgroundColor: isCompleteTransactionPending ? "#9ca3af" : "#58CC02",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "12px",
-                      padding: "1rem 2rem",
-                      fontSize: "1.1rem",
-                      fontWeight: 700,
-                      cursor: isCompleteTransactionPending ? "not-allowed" : "pointer",
-                      opacity: isCompleteTransactionPending ? 0.6 : 1
-                    }}
-                  >
-                    {isCompleteTransactionPending ? (isCompletePending ? "Confirm in wallet..." : "Confirming on blockchain...") : "🎁 Claim Rewards"}
-                  </button>
+                  <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+                    <button
+                      onClick={handleCompleteQuiz}
+                      disabled={isCompleteTransactionPending}
+                      style={{
+                        backgroundColor: isCompleteTransactionPending ? "#9ca3af" : "#58CC02",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "12px",
+                        padding: "1rem 2rem",
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                        cursor: isCompleteTransactionPending ? "not-allowed" : "pointer",
+                        opacity: isCompleteTransactionPending ? 0.6 : 1
+                      }}
+                    >
+                      {isCompleteTransactionPending ? (isCompletePending ? "Confirm in wallet..." : "Confirming on blockchain...") : "🎁 Claim Rewards"}
+                    </button>
+                    <button
+                      onClick={handleShareSuccess}
+                      style={{
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "12px",
+                        padding: "1rem 2rem",
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                        cursor: "pointer"
+                      }}
+                    >
+                      📢 Share Victory
+                    </button>
+                  </div>
                 </>
               )}
-              
+
               {gameResult === 'tie' && (
                 <>
                   <h2 style={{ color: "#f59e0b", marginBottom: "1rem", fontSize: "1.75rem", fontWeight: 800 }}>
@@ -738,23 +917,40 @@ function QuizGame() {
                       No bonus for ties - beat the AI to earn extra XP!
                     </p>
                   </div>
-                  <button
-                    onClick={handleCompleteQuiz}
-                    disabled={isCompleteTransactionPending}
-                    style={{
-                      backgroundColor: isCompleteTransactionPending ? "#9ca3af" : "#58CC02",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "12px",
-                      padding: "1rem 2rem",
-                      fontSize: "1.1rem",
-                      fontWeight: 700,
-                      cursor: isCompleteTransactionPending ? "not-allowed" : "pointer",
-                      opacity: isCompleteTransactionPending ? 0.6 : 1
-                    }}
-                  >
-                    {isCompleteTransactionPending ? (isCompletePending ? "Confirm in wallet..." : "Confirming on blockchain...") : "🎁 Claim Rewards"}
-                  </button>
+                  <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+                    <button
+                      onClick={handleCompleteQuiz}
+                      disabled={isCompleteTransactionPending}
+                      style={{
+                        backgroundColor: isCompleteTransactionPending ? "#9ca3af" : "#58CC02",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "12px",
+                        padding: "1rem 2rem",
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                        cursor: isCompleteTransactionPending ? "not-allowed" : "pointer",
+                        opacity: isCompleteTransactionPending ? 0.6 : 1
+                      }}
+                    >
+                      {isCompleteTransactionPending ? (isCompletePending ? "Confirm in wallet..." : "Confirming on blockchain...") : "🎁 Claim Rewards"}
+                    </button>
+                    <button
+                      onClick={handleShareSuccess}
+                      style={{
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "12px",
+                        padding: "1rem 2rem",
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                        cursor: "pointer"
+                      }}
+                    >
+                      📢 Share Result
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -799,25 +995,43 @@ function QuizGame() {
                 </p>
               </div>
 
-              <button
-                onClick={handleCompleteQuiz}
-                disabled={isCompletePending}
-                style={{
-                  backgroundColor: isCompletePending ? "#9ca3af" : "#58CC02",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "12px",
-                  padding: "1rem 2rem",
-                  fontSize: "1.1rem",
-                  fontWeight: 700,
-                  cursor: isCompletePending ? "not-allowed" : "pointer",
-                  transition: "all 0.3s ease",
-                  minWidth: "140px",
-                  opacity: isCompletePending ? 0.6 : 1
-                }}
-              >
-                {isCompletePending ? "Claiming..." : "🎁 Claim Rewards"}
-              </button>
+              <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+                <button
+                  onClick={handleCompleteQuiz}
+                  disabled={isCompletePending}
+                  style={{
+                    backgroundColor: isCompletePending ? "#9ca3af" : "#58CC02",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "12px",
+                    padding: "1rem 2rem",
+                    fontSize: "1.1rem",
+                    fontWeight: 700,
+                    cursor: isCompletePending ? "not-allowed" : "pointer",
+                    transition: "all 0.3s ease",
+                    minWidth: "140px",
+                    opacity: isCompletePending ? 0.6 : 1
+                  }}
+                >
+                  {isCompletePending ? "Claiming..." : "🎁 Claim Rewards"}
+                </button>
+                <button
+                  onClick={handleShareSuccess}
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "12px",
+                    padding: "1rem 2rem",
+                    fontSize: "1.1rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    transition: "all 0.3s ease"
+                  }}
+                >
+                  📢 Share Score
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -6,6 +6,151 @@ import BottomNavigation from '../components/BottomNavigation'
 import { leaderboardService, type TokenHolder } from '../libs/leaderboardService'
 import { getContractAddresses, getRewardsConfig } from '../libs/constants'
 import { useUserProfiles } from '../hooks/useUserProfile'
+import { useViewProfile } from '@coinbase/onchainkit/minikit'
+
+interface LeaderboardRowProps {
+  holder: TokenHolder
+  rank: number
+  address: string | undefined
+  profiles: Map<string, { profilePicUrl?: string; username?: string; ensName?: string; fid?: number }>
+  getProportionalReward: (balance: string) => number
+  rewardsConfig: any
+}
+
+function LeaderboardRow({ holder, rank, address, profiles, getProportionalReward, rewardsConfig }: LeaderboardRowProps) {
+  const profile = profiles.get(holder.address.toLowerCase())
+  const viewProfile = useViewProfile(profile?.fid?.toString())
+
+  return (
+    <tr key={holder.address} style={{ borderTop: "1px solid #e5e7eb" }}>
+      <td style={{ padding: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {rank <= 3 && (
+            <span style={{ marginRight: "0.25rem", fontSize: "0.9rem" }}>
+              {rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}
+            </span>
+          )}
+          <span style={{
+            fontWeight: "600",
+            color: rank <= 3 ? "#58CC02" : "#111827",
+            fontSize: "0.85rem"
+          }}>
+            #{rank}
+          </span>
+        </div>
+      </td>
+      <td style={{ padding: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          {/* Avatar - Use Farcaster profile pic if available */}
+          {(() => {
+            const hasProfilePic = profile?.profilePicUrl
+
+            if (hasProfilePic) {
+              return (
+                <img
+                  src={profile.profilePicUrl}
+                  alt={profile.username || 'Profile'}
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    objectFit: "cover"
+                  }}
+                  onError={(e) => {
+                    // Fallback to default avatar if image fails to load
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              )
+            }
+
+            // Default avatar
+            return (
+              <div style={{
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                background: `hsl(${holder.address.slice(-6).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 60%)`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.6rem",
+                fontWeight: "600",
+                color: "white"
+              }}>
+                {holder.address.slice(2, 4).toUpperCase()}
+              </div>
+            )
+          })()}
+          <code
+            style={{
+              background: address?.toLowerCase() === holder.address.toLowerCase() ? "#dbeafe" : "#f9fafb",
+              padding: "0.2rem 0.4rem",
+              borderRadius: "4px",
+              fontSize: "0.7rem",
+              fontFamily: "monospace",
+              display: "block",
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              border: address?.toLowerCase() === holder.address.toLowerCase() ? "1px solid #3b82f6" : "none",
+              cursor: profile?.fid ? "pointer" : "default"
+            }}
+            onClick={() => {
+              if (profile?.fid) {
+                viewProfile()
+              }
+            }}
+            title={profile?.fid ? "Click to view Farcaster profile" : holder.address}
+          >
+            {(() => {
+              // Show ENS name if available, otherwise Farcaster username, otherwise truncated address
+              if (profile?.ensName) {
+                return profile.ensName
+              }
+              if (profile?.username) {
+                return `@${profile.username}`
+              }
+              return leaderboardService.truncateAddress(holder.address)
+            })()}
+          </code>
+        </div>
+      </td>
+      <td style={{ padding: "0.5rem", textAlign: "right" }}>
+        <span style={{ fontWeight: "600", color: "#111827", fontSize: "0.8rem" }}>
+          {leaderboardService.formatBalance(holder.balance)} XP
+        </span>
+      </td>
+      <td style={{ padding: "0.5rem", textAlign: "center" }}>
+        {rank <= (rewardsConfig?.maxWinners || 200) ? (
+          <span style={{
+            background: rank <= 3 ? "#58CC02" : "#f3f4f6",
+            color: rank <= 3 ? "white" : "#374151",
+            padding: "0.2rem 0.4rem",
+            borderRadius: "4px",
+            fontSize: "0.7rem",
+            fontWeight: "600",
+            display: "inline-block"
+          }}>
+            {rewardsConfig?.symbol || "💰"} {getProportionalReward(holder.balance)}
+          </span>
+        ) : (
+          <span style={{
+            background: "#fef3c7",
+            color: "#92400e",
+            padding: "0.2rem 0.4rem",
+            borderRadius: "4px",
+            fontSize: "0.7rem",
+            fontWeight: "600",
+            display: "inline-block"
+          }}>
+            Keep going! 🎯
+          </span>
+        )}
+      </td>
+    </tr>
+  )
+}
 
 function LeaderboardPage() {
   const { chain, address } = useAccount()
@@ -503,147 +648,31 @@ function LeaderboardPage() {
                     const getProportionalReward = (userXP: string) => {
                       const totalReward = rewardsConfig?.totalReward || 1000
                       const maxWinners = rewardsConfig?.maxWinners || 200
-                      
+
                       // Calculate total XP of eligible winners (top N or all if less than N)
                       const eligibleHolders = holders.slice(0, Math.min(holders.length, maxWinners))
                       const totalXP = eligibleHolders.reduce((sum, holder) => {
                         return sum + parseFloat(holder.balance)
                       }, 0)
-                      
+
                       if (totalXP === 0) return 0
-                      
+
                       // Calculate proportional reward: (user_xp / total_xp) * totalReward
                       const userXPValue = parseFloat(userXP)
                       const proportion = userXPValue / totalXP
                       return Math.floor(totalReward * proportion)
                     }
-                    
+
                     return (
-                      <tr key={holder.address} style={{ borderTop: "1px solid #e5e7eb" }}>
-                        <td style={{ padding: "0.5rem" }}>
-                          <div style={{ display: "flex", alignItems: "center" }}>
-                            {rank <= 3 && (
-                              <span style={{ marginRight: "0.25rem", fontSize: "0.9rem" }}>
-                                {rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}
-                              </span>
-                            )}
-                            <span style={{ 
-                              fontWeight: "600",
-                              color: rank <= 3 ? "#58CC02" : "#111827",
-                              fontSize: "0.85rem"
-                            }}>
-                              #{rank}
-                            </span>
-                          </div>
-                        </td>
-                        <td style={{ padding: "0.5rem" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            {/* Avatar - Use Farcaster profile pic if available */}
-                            {(() => {
-                              const profile = profiles.get(holder.address.toLowerCase());
-                              const hasProfilePic = profile?.profilePicUrl;
-
-                              if (hasProfilePic) {
-                                return (
-                                  <img
-                                    src={profile.profilePicUrl}
-                                    alt={profile.username || 'Profile'}
-                                    style={{
-                                      width: "24px",
-                                      height: "24px",
-                                      borderRadius: "50%",
-                                      objectFit: "cover"
-                                    }}
-                                    onError={(e) => {
-                                      // Fallback to default avatar if image fails to load
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                );
-                              }
-
-                              // Default avatar
-                              return (
-                                <div style={{
-                                  width: "24px",
-                                  height: "24px",
-                                  borderRadius: "50%",
-                                  background: `hsl(${holder.address.slice(-6).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 60%)`,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "0.6rem",
-                                  fontWeight: "600",
-                                  color: "white"
-                                }}>
-                                  {holder.address.slice(2, 4).toUpperCase()}
-                                </div>
-                              );
-                            })()}
-                            <code
-                              style={{
-                                background: address?.toLowerCase() === holder.address.toLowerCase() ? "#dbeafe" : "#f9fafb",
-                                padding: "0.2rem 0.4rem",
-                                borderRadius: "4px",
-                                fontSize: "0.7rem",
-                                fontFamily: "monospace",
-                                display: "block",
-                                maxWidth: "100%",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                border: address?.toLowerCase() === holder.address.toLowerCase() ? "1px solid #3b82f6" : "none",
-                                cursor: "pointer"
-                              }}
-                              onClick={() => navigator.clipboard.writeText(holder.address)}
-                              title="Click to copy address"
-                            >
-                              {(() => {
-                                const profile = profiles.get(holder.address.toLowerCase());
-                                // Show ENS name if available, otherwise Farcaster username, otherwise truncated address
-                                if (profile?.ensName) {
-                                  return profile.ensName;
-                                }
-                                if (profile?.username) {
-                                  return `@${profile.username}`;
-                                }
-                                return leaderboardService.truncateAddress(holder.address);
-                              })()}
-                            </code>
-                          </div>
-                        </td>
-                        <td style={{ padding: "0.5rem", textAlign: "right" }}>
-                          <span style={{ fontWeight: "600", color: "#111827", fontSize: "0.8rem" }}>
-                            {leaderboardService.formatBalance(holder.balance)} XP
-                          </span>
-                        </td>
-                        <td style={{ padding: "0.5rem", textAlign: "center" }}>
-                          {rank <= (rewardsConfig?.maxWinners || 200) ? (
-                            <span style={{
-                              background: rank <= 3 ? "#58CC02" : "#f3f4f6",
-                              color: rank <= 3 ? "white" : "#374151",
-                              padding: "0.2rem 0.4rem",
-                              borderRadius: "4px",
-                              fontSize: "0.7rem",
-                              fontWeight: "600",
-                              display: "inline-block"
-                            }}>
-                              {rewardsConfig?.symbol || "💰"} {getProportionalReward(holder.balance)}
-                            </span>
-                          ) : (
-                            <span style={{
-                              background: "#fef3c7",
-                              color: "#92400e",
-                              padding: "0.2rem 0.4rem",
-                              borderRadius: "4px",
-                              fontSize: "0.7rem",
-                              fontWeight: "600",
-                              display: "inline-block"
-                            }}>
-                              Keep going! 🎯
-                            </span>
-                          )}
-                        </td>
-                      </tr>
+                      <LeaderboardRow
+                        key={holder.address}
+                        holder={holder}
+                        rank={rank}
+                        address={address}
+                        profiles={profiles}
+                        getProportionalReward={getProportionalReward}
+                        rewardsConfig={rewardsConfig}
+                      />
                     )
                   })}
                 </tbody>

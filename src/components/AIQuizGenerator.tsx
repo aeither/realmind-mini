@@ -18,16 +18,31 @@ const DIFFICULTY_OPTIONS = [
 const FIXED_QUESTION_COUNT = 3;
 
 const POPULAR_TOPICS = [
+  // Crypto topics
   'Bitcoin Fundamentals',
-  'Ethereum & Smart Contracts', 
+  'Ethereum & Smart Contracts',
   'DeFi Protocols',
   'NFTs & Digital Art',
   'Cryptocurrency Trading',
   'Blockchain Security',
-  'Layer 2 Solutions',
-  'Staking & Yield Farming',
-  'Web3 Development',
-  'Crypto Regulations'
+
+  // Non-crypto topics - General Knowledge
+  'World History',
+  'Space & Astronomy',
+  'Geography & Countries',
+  'Science & Nature',
+
+  // Non-crypto topics - Technology & Culture
+  'Artificial Intelligence',
+  'Movies & Cinema',
+  'Music & Musicians',
+  'Sports & Athletes',
+
+  // Non-crypto topics - Learning & Skills
+  'Mathematics',
+  'Literature & Books',
+  'Psychology',
+  'Cooking & Food'
 ];
 
 export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps) {
@@ -138,7 +153,7 @@ export default function AIQuizGenerator({ className = '' }: AIQuizGeneratorProps
               type="text"
               value={formData.topic}
               onChange={(e) => setFormData(prev => ({ ...prev, topic: e.target.value }))}
-              placeholder="Enter any topic (e.g., 'Bitcoin for beginners', 'Advanced DeFi strategies')"
+              placeholder="Enter any topic (e.g., 'Space exploration', 'Italian Renaissance', 'Quantum Physics')"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all duration-200"
             />
             
