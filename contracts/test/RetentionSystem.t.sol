@@ -69,30 +69,28 @@ contract RetentionSystemTest is Test {
     function testStreakBuildsUp() public {
         vm.startPrank(user1);
 
-        uint256 startTime = block.timestamp;
-
         // Day 1
         retention.checkIn();
         assertEq(retention.currentStreak(user1), 1);
         assertEq(retention.totalEggs(user1), 1);
 
         // Day 2
-        vm.warp(startTime + ONE_DAY);
+        skip(ONE_DAY);
         retention.checkIn();
         assertEq(retention.currentStreak(user1), 2);
         assertEq(retention.totalEggs(user1), 2); // 1 + 1
 
         // Day 3 - should get 2 eggs now
-        vm.warp(startTime + (2 * ONE_DAY));
+        skip(ONE_DAY);
         retention.checkIn();
         assertEq(retention.currentStreak(user1), 3);
-        assertEq(retention.totalEggs(user1), 4); // 2 + 2
+        assertEq(retention.totalEggs(user1), 4); // 1 + 1 + 2
 
         // Day 4 - still 2 eggs
-        vm.warp(startTime + (3 * ONE_DAY));
+        skip(ONE_DAY);
         retention.checkIn();
         assertEq(retention.currentStreak(user1), 4);
-        assertEq(retention.totalEggs(user1), 6); // 4 + 2
+        assertEq(retention.totalEggs(user1), 6); // 1 + 1 + 2 + 2
 
         vm.stopPrank();
     }
@@ -325,8 +323,6 @@ contract RetentionSystemTest is Test {
     function testGetNextReward() public {
         vm.startPrank(user1);
 
-        uint256 startTime = block.timestamp;
-
         // Day 1 - next reward should be 1
         uint256 nextReward = retention.getNextReward(user1);
         assertEq(nextReward, BASE_EGGS);
@@ -334,14 +330,14 @@ contract RetentionSystemTest is Test {
         retention.checkIn();
 
         // Day 2 - next reward should still be 1
-        vm.warp(startTime + ONE_DAY);
+        skip(ONE_DAY);
         nextReward = retention.getNextReward(user1);
         assertEq(nextReward, BASE_EGGS);
 
         retention.checkIn();
 
         // Day 3 - next reward should be 2 (3-day streak)
-        vm.warp(startTime + (2 * ONE_DAY));
+        skip(ONE_DAY);
         nextReward = retention.getNextReward(user1);
         assertEq(nextReward, STREAK_3_EGGS);
 
@@ -349,12 +345,12 @@ contract RetentionSystemTest is Test {
 
         // Continue to day 7
         for (uint256 i = 4; i <= 6; i++) {
-            vm.warp(startTime + ((i - 1) * ONE_DAY));
+            skip(ONE_DAY);
             retention.checkIn();
         }
 
         // Day 7 - next reward should be 3
-        vm.warp(startTime + (6 * ONE_DAY));
+        skip(ONE_DAY);
         nextReward = retention.getNextReward(user1);
         assertEq(nextReward, STREAK_7_EGGS);
 
@@ -392,15 +388,15 @@ contract RetentionSystemTest is Test {
         assertFalse(retention.willStreakBreak(user1));
 
         // After 24 hours, still won't break
-        vm.warp(block.timestamp + ONE_DAY);
+        skip(ONE_DAY);
         assertFalse(retention.willStreakBreak(user1));
 
-        // After 48 hours, still won't break
-        vm.warp(block.timestamp + ONE_DAY);
+        // After 48 hours total, still won't break
+        skip(ONE_DAY);
         assertFalse(retention.willStreakBreak(user1));
 
         // After 48 hours + 1 second, will break
-        vm.warp(block.timestamp + 1);
+        skip(1);
         assertTrue(retention.willStreakBreak(user1));
 
         vm.stopPrank();
@@ -427,7 +423,7 @@ contract RetentionSystemTest is Test {
         assertEq(timeRemaining, 0);
     }
 
-    function testTimeUntilNextCheckInForNewUser() public {
+    function testTimeUntilNextCheckInForNewUser() public view {
         // New user should have 0 time until check-in
         uint256 timeRemaining = retention.timeUntilNextCheckIn(user1);
         assertEq(timeRemaining, 0);
@@ -468,12 +464,11 @@ contract RetentionSystemTest is Test {
     function testCompleteJourney() public {
         vm.startPrank(user1);
 
-        uint256 startTime = block.timestamp;
         uint256 totalEggs = 0;
 
         // Day 1-2: 1 egg each
         for (uint256 i = 1; i <= 2; i++) {
-            if (i > 1) vm.warp(startTime + ((i - 1) * ONE_DAY));
+            if (i > 1) skip(ONE_DAY);
             retention.checkIn();
             totalEggs += BASE_EGGS;
             assertEq(retention.totalEggs(user1), totalEggs);
@@ -481,7 +476,7 @@ contract RetentionSystemTest is Test {
 
         // Day 3-6: 2 eggs each
         for (uint256 i = 3; i <= 6; i++) {
-            vm.warp(startTime + ((i - 1) * ONE_DAY));
+            skip(ONE_DAY);
             retention.checkIn();
             totalEggs += STREAK_3_EGGS;
             assertEq(retention.totalEggs(user1), totalEggs);
@@ -489,7 +484,7 @@ contract RetentionSystemTest is Test {
 
         // Day 7+: 3 eggs each
         for (uint256 i = 7; i <= 10; i++) {
-            vm.warp(startTime + ((i - 1) * ONE_DAY));
+            skip(ONE_DAY);
             retention.checkIn();
             totalEggs += STREAK_7_EGGS;
             assertEq(retention.totalEggs(user1), totalEggs);

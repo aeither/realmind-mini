@@ -19,7 +19,7 @@ interface LeaderboardRowProps {
 
 function LeaderboardRow({ holder, rank, address, profiles, getProportionalReward, rewardsConfig }: LeaderboardRowProps) {
   const profile = profiles.get(holder.address.toLowerCase())
-  const viewProfile = useViewProfile(profile?.fid?.toString())
+  const viewProfile = useViewProfile()
 
   return (
     <tr key={holder.address} style={{ borderTop: "1px solid #e5e7eb" }}>
@@ -98,7 +98,7 @@ function LeaderboardRow({ holder, rank, address, profiles, getProportionalReward
             }}
             onClick={() => {
               if (profile?.fid) {
-                viewProfile()
+                viewProfile(profile.fid)
               }
             }}
             title={profile?.fid ? "Click to view Farcaster profile" : holder.address}

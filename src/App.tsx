@@ -48,9 +48,6 @@ function App() {
               name: 'RealMind Mini',
             },
           }}
-          miniKit={{
-            enabled: true
-          }}
         >
           <WalletModalProvider>
             <RouterProvider router={router} />
