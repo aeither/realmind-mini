@@ -355,23 +355,24 @@ function HomePage() {
             </p>
 
             {/* Play Mode Toggle - More Intuitive */}
+          <div style={{
+            background: "rgba(255,255,255,0.2)",
+            borderRadius: "16px",
+            padding: "0.75rem",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.3)"
+          }}>
             <div style={{
-              background: "rgba(255,255,255,0.2)",
-              borderRadius: "16px",
-              padding: "0.75rem",
-              backdropFilter: "blur(10px)",
-              border: "1px solid rgba(255,255,255,0.3)"
+              fontSize: "0.8rem",
+              color: "rgba(255,255,255,0.9)",
+              marginBottom: "0.5rem",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              transition: "all 0.3s ease"
             }}>
-              <div style={{
-                fontSize: "0.8rem",
-                color: "rgba(255,255,255,0.9)",
-                marginBottom: "0.5rem",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em"
-              }}>
-                Play Mode
-              </div>
+              {playMode === 'free' ? '🎮 PLAY MODE' : '🏆 PLAY MODE'}
+            </div>
               <div style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
@@ -384,6 +385,7 @@ function HomePage() {
                   onClick={() => {
                     if (playMode !== 'free') togglePlayMode()
                   }}
+                  className={playMode === 'free' ? 'play-mode-button-active' : ''}
                   style={{
                     background: playMode === 'free'
                       ? "linear-gradient(135deg, #fff, #f0f0f0)"
@@ -403,13 +405,14 @@ function HomePage() {
                     gap: "0.25rem"
                   }}
                 >
-                  <span style={{ fontSize: "1.25rem" }}>🎮</span>
-                  <span>Free Play</span>
+                  <span style={{ fontSize: "1.25rem", transition: "transform 0.3s ease" }}>🎮</span>
+                  <span style={{ fontSize: "0.85rem" }}>Free Play</span>
                 </button>
                 <button
                   onClick={() => {
                     if (playMode !== 'reward') togglePlayMode()
                   }}
+                  className={playMode === 'reward' ? 'play-mode-button-active' : ''}
                   style={{
                     background: playMode === 'reward'
                       ? "linear-gradient(135deg, #58CC02, #46a001)"
@@ -429,9 +432,25 @@ function HomePage() {
                     gap: "0.25rem"
                   }}
                 >
-                  <span style={{ fontSize: "1.25rem" }}>🏆</span>
-                  <span>Rewards</span>
+                  <span style={{ fontSize: "1.25rem", transition: "transform 0.3s ease" }}>🏆</span>
+                  <span style={{ fontSize: "0.85rem" }}>Rewards</span>
                 </button>
+              </div>
+              {/* Mode description */}
+              <div style={{
+                marginTop: "0.75rem",
+                padding: "0.5rem",
+                background: "rgba(0,0,0,0.1)",
+                borderRadius: "8px",
+                fontSize: "0.7rem",
+                color: "rgba(255,255,255,0.85)",
+                textAlign: "center",
+                lineHeight: 1.4,
+                transition: "all 0.3s ease"
+              }}>
+                {playMode === 'free' 
+                  ? '🎮 Practice mode - No entry fee required' 
+                  : '🏆 Stake to play and earn YUZU rewards'}
               </div>
             </div>
           </div>
@@ -442,7 +461,7 @@ function HomePage() {
         </div>
 
         {/* Quick Play Section - Horizontal Scroll */}
-        <div style={{ marginBottom: "2rem", overflow: "hidden" }}>
+        <div style={{ marginBottom: "2rem", overflow: "visible", paddingBottom: "1rem" }}>
           <h3 style={{
             color: "#111827",
             fontSize: "1.5rem",
@@ -462,7 +481,8 @@ function HomePage() {
             style={{
               width: "100vw",
               marginLeft: "calc(-1 * (100vw - 100%) / 2)",
-              paddingBottom: "2rem"
+              paddingBottom: "2rem",
+              overflow: "visible"
             }}
           >
             {/* Daily Quiz Card */}
@@ -633,7 +653,7 @@ function HomePage() {
         </div>
 
         {/* Learning Paths - Horizontal Scroll */}
-        <div style={{ marginBottom: "2rem", overflow: "hidden" }}>
+        <div style={{ marginBottom: "2rem", overflow: "visible", paddingBottom: "1rem" }}>
           <h3 style={{
             color: "#111827",
             fontSize: "1.5rem",
@@ -653,7 +673,8 @@ function HomePage() {
             style={{
               width: "100vw",
               marginLeft: "calc(-1 * (100vw - 100%) / 2)",
-              paddingBottom: "2rem"
+              paddingBottom: "2rem",
+              overflow: "visible"
             }}
           >
             {AVAILABLE_QUIZZES.map((quiz, index) => {

@@ -11,8 +11,8 @@ interface NeynarProfile {
   fid: number
   username: string
   displayName: string
-  pfp: { url: string }
-  profile: { bio: { text: string } }
+  pfp?: { url: string }
+  profile?: { bio?: { text: string } }
   followerCount: number
   followingCount: number
   verifications: string[]
@@ -121,7 +121,7 @@ function ProfilePage() {
                 }}>
                   {/* Profile Picture */}
                   <img
-                    src={neynarProfile.pfp.url}
+                    src={neynarProfile.pfp?.url || 'https://via.placeholder.com/100?text=👤'}
                     alt={neynarProfile.username}
                     style={{
                       width: "100px",

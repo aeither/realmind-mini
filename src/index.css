@@ -514,10 +514,13 @@ h1, h2, h3, h4, h5, h6, p, label, span {
 /* Swiper Mobile Optimization */
 .swiper {
   overflow: visible !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .swiper-wrapper {
   -webkit-overflow-scrolling: touch;
+  padding-bottom: 1rem !important;
 }
 
 /* Ensure slides aren't clipped on mobile */
@@ -525,6 +528,13 @@ h1, h2, h3, h4, h5, h6, p, label, span {
   flex-shrink: 0;
   display: flex;
   height: auto;
+  box-sizing: border-box;
+}
+
+/* Prevent cards from being cut off */
+.swiper-slide > * {
+  width: 100%;
+  overflow: visible;
 }
 
 /* Smooth scrolling for better mobile experience */
@@ -533,4 +543,23 @@ h1, h2, h3, h4, h5, h6, p, label, span {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
+}
+
+/* Play mode switch animation */
+@keyframes slide-switch {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.play-mode-button-active {
+  animation: slide-switch 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
