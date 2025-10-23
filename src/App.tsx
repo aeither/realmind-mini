@@ -41,13 +41,7 @@ function App() {
         <OnchainKitProvider
           apiKey={import.meta.env.VITE_ONCHAINKIT_API_KEY}
           chain={base}
-          config={{
-            appearance: {
-              mode: 'auto',
-              theme: 'default',
-              name: 'RealMind Mini',
-            },
-          }}
+          miniKit={{ enabled: true, autoConnect: true }}
         >
           <WalletModalProvider>
             <RouterProvider router={router} />

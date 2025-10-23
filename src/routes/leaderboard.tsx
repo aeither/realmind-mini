@@ -158,7 +158,6 @@ function LeaderboardPage() {
   const [holders, setHolders] = useState<TokenHolder[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [totalHolders, setTotalHolders] = useState(0)
   const [daysRemaining, setDaysRemaining] = useState(0)
   const [userRank, setUserRank] = useState<number | null>(null)
   const [showTooltip, setShowTooltip] = useState<string | null>(null)
@@ -185,8 +184,7 @@ function LeaderboardPage() {
 
       if (result.success && result.holders) {
         setHolders(result.holders)
-        setTotalHolders(result.totalHolders || 0)
-        
+
         // Find user's rank if connected
         if (address) {
           const userIndex = result.holders.findIndex(holder => 
