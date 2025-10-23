@@ -83,22 +83,21 @@ export default function ProgressDashboard({ compact = false }: ProgressDashboard
     <div style={{
       background: '#ffffff',
       borderRadius: '16px',
-      padding: '2rem',
+      padding: '1.5rem',
       border: '1px solid #e5e7eb',
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
     }}>
       {/* Header with Larry */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        flexWrap: 'wrap',
-        gap: '1rem'
+        marginBottom: '2rem'
       }}>
-        <div style={{ flex: 1 }}>
+        {/* Title Section - Centered */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '1.5rem'
+        }}>
           <h3 style={{
-            fontSize: '1.5rem',
+            fontSize: '1.75rem',
             fontWeight: 800,
             color: '#111827',
             marginBottom: '0.5rem'
@@ -106,18 +105,25 @@ export default function ProgressDashboard({ compact = false }: ProgressDashboard
             Your Progress
           </h3>
           <p style={{
-            fontSize: '0.9rem',
+            fontSize: '0.95rem',
             color: '#6b7280'
           }}>
             Keep learning every day!
           </p>
         </div>
 
-        <LemonLarry
-          mood="happy"
-          size="small"
-          message={getTimeBasedMessage()}
-        />
+        {/* Larry Section - Mobile Friendly */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <LemonLarry
+            mood="happy"
+            size="small"
+            message={getTimeBasedMessage()}
+          />
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -303,11 +309,12 @@ export default function ProgressDashboard({ compact = false }: ProgressDashboard
       {/* Additional Stats */}
       <div style={{
         display: 'flex',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: '1rem',
         background: '#f9fafb',
         borderRadius: '12px',
-        gap: '1rem',
+        gap: '2rem',
         flexWrap: 'wrap'
       }}>
         <div style={{ textAlign: 'center' }}>

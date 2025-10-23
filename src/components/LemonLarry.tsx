@@ -101,9 +101,9 @@ function LemonLarry({
   }
 
   const containerSize = {
-    small: '80px',
-    medium: '140px',
-    large: '200px'
+    small: '220px',
+    medium: '300px',
+    large: '350px'
   }
 
   return (
@@ -113,6 +113,7 @@ function LemonLarry({
         flexDirection: 'column',
         alignItems: 'center',
         gap: '1rem',
+        width: '100%',
         maxWidth: containerSize[size]
       }}
     >
@@ -180,7 +181,8 @@ function LemonLarry({
           borderRadius: '12px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           position: 'relative',
-          maxWidth: '250px',
+          maxWidth: size === 'small' ? '200px' : '280px',
+          width: '100%',
           animation: 'fadeInUp 0.3s ease-out',
           border: '2px solid #FFD700'
         }}>

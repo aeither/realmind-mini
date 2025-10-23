@@ -118,13 +118,13 @@ function HomePage() {
   const [countdown, setCountdown] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
   const [currentQuizDescription, setCurrentQuizDescription] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  
+
   // Mode preference state - default to 'reward' (current behavior)
   const [playMode, setPlayMode] = useState<'free' | 'reward'>(() => {
     const saved = localStorage.getItem('realmind-play-mode')
     return (saved as 'free' | 'reward') || 'reward'
   })
-  
+
   // Get backend URL from environment
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -161,7 +161,7 @@ function HomePage() {
     const tomorrow = new Date();
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     tomorrow.setUTCHours(0, 0, 0, 0); // Next UTC midnight
-    
+
     const timeDiff = tomorrow.getTime() - now.getTime();
 
     if (timeDiff <= 0) {
@@ -212,19 +212,19 @@ function HomePage() {
     const attemptChainSwitch = async () => {
       // Only attempt once to avoid loops
       if (hasAttemptedChainSwitch) return;
-      
+
       // Only if user is connected
       if (!isConnected) return;
-      
+
       // Only if user is on wrong chain
       const currentChainId = chain?.id;
       const supportedChainId = SUPPORTED_CHAIN_IDS[0]; // Get the main supported chain
-      
+
       if (currentChainId && currentChainId !== supportedChainId) {
         try {
           console.log(`Auto-switching from chain ${currentChainId} to supported chain ${supportedChainId}`);
           setHasAttemptedChainSwitch(true); // Set this before switching to avoid loops
-          
+
           await switchChain({ chainId: supportedChainId as 42220 | 8453 | 41923 });
         } catch (error) {
           console.error('Failed to auto-switch chain:', error);
@@ -242,7 +242,7 @@ function HomePage() {
       setLoading(true);
       const res = await fetch(`${backendUrl}/daily-quiz/cached`);
       const data = await res.json();
-      
+
       if (data.success && data.quizzes && data.quizzes.length > 0) {
         const quiz = data.quizzes[0];
         // Convert to frontend format and encode for URL
@@ -265,14 +265,14 @@ function HomePage() {
 
         // UTF-8 safe base64 encoding
         const utf8ToBase64 = (str: string): string => {
-          return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, 
+          return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
             (match, p1) => String.fromCharCode(parseInt(p1, 16))
           ));
         };
-        
+
         const encodedQuiz = utf8ToBase64(JSON.stringify(quizConfig));
         const quizUrl = `/quiz-game?quiz=ai-custom&data=${encodedQuiz}`;
-        
+
         // Navigate to quiz with play mode
         const separator = quizUrl.includes('?') ? '&' : '?'
         const finalUrl = `${quizUrl}${separator}playMode=${playMode}`
@@ -293,8 +293,8 @@ function HomePage() {
   }
 
   return (
-    <div style={{ 
-      minHeight: "100vh", 
+    <div style={{
+      minHeight: "100vh",
       paddingBottom: "80px", // Space for bottom nav
       background: "#f9fafb"
     }}>
@@ -316,7 +316,7 @@ function HomePage() {
           boxShadow: "0 8px 24px rgba(255, 215, 0, 0.3)",
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-start",
           flexWrap: "wrap",
           gap: "1rem",
           position: "relative",
@@ -333,46 +333,65 @@ function HomePage() {
             background: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\"><circle cx=\"20\" cy=\"20\" r=\"2\" fill=\"white\"/></svg>') repeat"
           }} />
 
-          <div style={{ flex: 1, minWidth: "250px", position: "relative", zIndex: 1 }}>
-            <h2 style={{
-              fontSize: "1.4rem",
-              marginBottom: "0.25rem",
-              fontWeight: 800,
-              color: "#fff",
-              textShadow: "0 2px 4px rgba(0,0,0,0.2)",
-              textAlign: "left"
-            }}>
-              Welcome Back!
-            </h2>
-            <p style={{
-              fontSize: "0.85rem",
-              color: "rgba(255,255,255,0.95)",
-              marginBottom: "1rem",
-              textShadow: "0 1px 2px rgba(0,0,0,0.1)",
-              textAlign: "left"
-            }}>
-              Ready to learn and earn rewards?
-            </p>
+          <div style={{ flex: 1, minWidth: "250px", maxWidth: "600px", position: "relative", zIndex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center" }}>
+
+                <h2 style={{
+                  fontSize: "1.4rem",
+                  marginBottom: "0.25rem",
+                  fontWeight: 800,
+                  color: "#fff",
+                  textShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                  textAlign: "left"
+                }}>
+                  Welcome Back!
+                </h2>
+                <p style={{
+                  fontSize: "0.85rem",
+                  color: "rgba(255,255,255,0.95)",
+                  marginBottom: "1rem",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                  textAlign: "left"
+                }}>
+                  Ready to learn and earn rewards?
+                </p>
+              </div>
+              {/* Emoji on the right side */}
+              <div style={{
+                position: "relative",
+                zIndex: 1,
+                fontSize: "4rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: "80px"
+              }}>
+                👋
+              </div>
+            </div>
+
+
 
             {/* Play Mode Toggle - More Intuitive */}
-          <div style={{
-            background: "rgba(255,255,255,0.2)",
-            borderRadius: "16px",
-            padding: "0.75rem",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255,255,255,0.3)"
-          }}>
             <div style={{
-              fontSize: "0.8rem",
-              color: "rgba(255,255,255,0.9)",
-              marginBottom: "0.5rem",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              transition: "all 0.3s ease"
+              background: "rgba(255,255,255,0.2)",
+              borderRadius: "16px",
+              padding: "0.75rem",
+              backdropFilter: "blur(10px)",
+              border: "1px solid rgba(255,255,255,0.3)"
             }}>
-              {playMode === 'free' ? '🎮 PLAY MODE' : '🏆 PLAY MODE'}
-            </div>
+              <div style={{
+                fontSize: "0.8rem",
+                color: "rgba(255,255,255,0.9)",
+                marginBottom: "0.5rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                transition: "all 0.3s ease"
+              }}>
+                {playMode === 'free' ? '🎮 PLAY MODE' : '🏆 PLAY MODE'}
+              </div>
               <div style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
@@ -448,15 +467,11 @@ function HomePage() {
                 lineHeight: 1.4,
                 transition: "all 0.3s ease"
               }}>
-                {playMode === 'free' 
-                  ? '🎮 Practice mode - No entry fee required' 
-                  : '🏆 Stake to play and earn YUZU rewards'}
+                {playMode === 'free'
+                  ? '🎮 Practice mode - No entry fee required'
+                  : '🏆 Play to participate in the rewards'}
               </div>
             </div>
-          </div>
-
-          <div style={{ position: "relative", zIndex: 1, fontSize: "4rem" }}>
-            👋
           </div>
         </div>
 
@@ -487,167 +502,167 @@ function HomePage() {
           >
             {/* Daily Quiz Card */}
             <SwiperSlide style={{ width: "min(350px, calc(100vw - 48px))" }}>
-            <div style={{
-              background: "linear-gradient(135deg, #58CC02, #46a001)",
-              borderRadius: "16px",
-              padding: "2rem",
-              boxShadow: "0 8px 24px rgba(88, 204, 2, 0.3)",
-              position: "relative",
-              overflow: "hidden",
-              color: "#fff"
-            }}>
               <div style={{
-                position: "absolute",
-                top: "-50px",
-                right: "-50px",
-                width: "150px",
-                height: "150px",
-                background: "rgba(255,255,255,0.1)",
-                borderRadius: "50%"
-              }} />
-              <div style={{
+                background: "linear-gradient(135deg, #58CC02, #46a001)",
+                borderRadius: "16px",
+                padding: "2rem",
+                boxShadow: "0 8px 24px rgba(88, 204, 2, 0.3)",
                 position: "relative",
-                zIndex: 1
+                overflow: "hidden",
+                color: "#fff"
               }}>
                 <div style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "1rem"
+                  position: "absolute",
+                  top: "-50px",
+                  right: "-50px",
+                  width: "150px",
+                  height: "150px",
+                  background: "rgba(255,255,255,0.1)",
+                  borderRadius: "50%"
+                }} />
+                <div style={{
+                  position: "relative",
+                  zIndex: 1
                 }}>
-                  <div style={{ fontSize: "3rem" }}>🎯</div>
-                  {countdown && (
-                    <div style={{
-                      background: "rgba(255,255,255,0.2)",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "8px",
-                      fontSize: "0.8rem",
-                      fontWeight: 700,
-                      backdropFilter: "blur(10px)"
-                    }}>
-                      {countdown.hours.toString().padStart(2, '0')}:{countdown.minutes.toString().padStart(2, '0')}:{countdown.seconds.toString().padStart(2, '0')}
-                    </div>
-                  )}
-                </div>
-                <h4 style={{
-                  fontSize: "1.5rem",
-                  fontWeight: 800,
-                  marginBottom: "0.5rem",
-                  textShadow: "0 2px 4px rgba(0,0,0,0.2)"
-                }}>
-                  Daily Quiz
-                </h4>
-                <p style={{
-                  fontSize: "0.9rem",
-                  marginBottom: "1.5rem",
-                  opacity: 0.95
-                }}>
-                  {currentQuizDescription || "Complete today's quiz to earn bonus XP!"}
-                </p>
-                <button
-                  onClick={startDailyQuiz}
-                  disabled={loading}
-                  style={{
-                    background: "#fff",
-                    color: "#58CC02",
-                    border: "none",
-                    borderRadius: "12px",
-                    padding: "1rem 2rem",
-                    fontSize: "1rem",
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: "1rem"
+                  }}>
+                    <div style={{ fontSize: "3rem" }}>🎯</div>
+                    {countdown && (
+                      <div style={{
+                        background: "rgba(255,255,255,0.2)",
+                        padding: "0.5rem 0.75rem",
+                        borderRadius: "8px",
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                        backdropFilter: "blur(10px)"
+                      }}>
+                        {countdown.hours.toString().padStart(2, '0')}:{countdown.minutes.toString().padStart(2, '0')}:{countdown.seconds.toString().padStart(2, '0')}
+                      </div>
+                    )}
+                  </div>
+                  <h4 style={{
+                    fontSize: "1.5rem",
                     fontWeight: 800,
-                    cursor: loading ? "not-allowed" : "pointer",
-                    opacity: loading ? 0.7 : 1,
-                    transition: "all 0.3s ease",
-                    width: "100%",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!loading) {
-                      e.currentTarget.style.transform = "translateY(-2px)"
-                      e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.2)"
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!loading) {
-                      e.currentTarget.style.transform = "translateY(0)"
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)"
-                    }
-                  }}
-                >
-                  {loading ? "Loading..." : "🚀 Start Now"}
-                </button>
+                    marginBottom: "0.5rem",
+                    textShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                  }}>
+                    Daily Quiz
+                  </h4>
+                  <p style={{
+                    fontSize: "0.9rem",
+                    marginBottom: "1.5rem",
+                    opacity: 0.95
+                  }}>
+                    {currentQuizDescription || "Complete today's quiz to earn bonus XP!"}
+                  </p>
+                  <button
+                    onClick={startDailyQuiz}
+                    disabled={loading}
+                    style={{
+                      background: "#fff",
+                      color: "#58CC02",
+                      border: "none",
+                      borderRadius: "12px",
+                      padding: "1rem 2rem",
+                      fontSize: "1rem",
+                      fontWeight: 800,
+                      cursor: loading ? "not-allowed" : "pointer",
+                      opacity: loading ? 0.7 : 1,
+                      transition: "all 0.3s ease",
+                      width: "100%",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!loading) {
+                        e.currentTarget.style.transform = "translateY(-2px)"
+                        e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.2)"
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!loading) {
+                        e.currentTarget.style.transform = "translateY(0)"
+                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)"
+                      }
+                    }}
+                  >
+                    {loading ? "Loading..." : "🚀 Start Now"}
+                  </button>
+                </div>
               </div>
-            </div>
             </SwiperSlide>
 
             {/* AI Quiz Card */}
             <SwiperSlide style={{ width: "min(350px, calc(100vw - 48px))" }}>
-            <div style={{
-              background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-              borderRadius: "16px",
-              padding: "2rem",
-              boxShadow: "0 8px 24px rgba(59, 130, 246, 0.3)",
-              position: "relative",
-              overflow: "hidden",
-              color: "#fff"
-            }}>
               <div style={{
-                position: "absolute",
-                bottom: "-50px",
-                left: "-50px",
-                width: "150px",
-                height: "150px",
-                background: "rgba(255,255,255,0.1)",
-                borderRadius: "50%"
-              }} />
-              <div style={{
+                background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                borderRadius: "16px",
+                padding: "2rem",
+                boxShadow: "0 8px 24px rgba(59, 130, 246, 0.3)",
                 position: "relative",
-                zIndex: 1
+                overflow: "hidden",
+                color: "#fff"
               }}>
-                <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🤖</div>
-                <h4 style={{
-                  fontSize: "1.5rem",
-                  fontWeight: 800,
-                  marginBottom: "0.5rem",
-                  textShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                <div style={{
+                  position: "absolute",
+                  bottom: "-50px",
+                  left: "-50px",
+                  width: "150px",
+                  height: "150px",
+                  background: "rgba(255,255,255,0.1)",
+                  borderRadius: "50%"
+                }} />
+                <div style={{
+                  position: "relative",
+                  zIndex: 1
                 }}>
-                  AI Quiz Generator
-                </h4>
-                <p style={{
-                  fontSize: "0.9rem",
-                  marginBottom: "1.5rem",
-                  opacity: 0.95
-                }}>
-                  Create custom quizzes on any topic you want to learn!
-                </p>
-                <button
-                  onClick={() => navigate({ to: `/ai-quiz?playMode=${playMode}` })}
-                  style={{
-                    background: "#fff",
-                    color: "#3b82f6",
-                    border: "none",
-                    borderRadius: "12px",
-                    padding: "1rem 2rem",
-                    fontSize: "1rem",
+                  <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🤖</div>
+                  <h4 style={{
+                    fontSize: "1.5rem",
                     fontWeight: 800,
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    width: "100%",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-2px)"
-                    e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.2)"
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)"
-                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)"
-                  }}
-                >
-                  🧠 Generate Quiz
-                </button>
+                    marginBottom: "0.5rem",
+                    textShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                  }}>
+                    AI Quiz Generator
+                  </h4>
+                  <p style={{
+                    fontSize: "0.9rem",
+                    marginBottom: "1.5rem",
+                    opacity: 0.95
+                  }}>
+                    Create custom quizzes on any topic you want to learn!
+                  </p>
+                  <button
+                    onClick={() => navigate({ to: `/ai-quiz?playMode=${playMode}` })}
+                    style={{
+                      background: "#fff",
+                      color: "#3b82f6",
+                      border: "none",
+                      borderRadius: "12px",
+                      padding: "1rem 2rem",
+                      fontSize: "1rem",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      width: "100%",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-2px)"
+                      e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.2)"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)"
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)"
+                    }}
+                  >
+                    🧠 Generate Quiz
+                  </button>
+                </div>
               </div>
-            </div>
             </SwiperSlide>
           </Swiper>
         </div>
@@ -685,97 +700,97 @@ function HomePage() {
               ]
               return (
                 <SwiperSlide key={quiz.id} style={{ width: "min(320px, calc(100vw - 48px))" }}>
-                <div
-                  style={{
-                    background: "#ffffff",
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                    border: "2px solid transparent"
-                  }}
-                  onClick={() => navigate({ to: '/quiz-game', search: { quiz: quiz.id, playMode } })}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-4px)"
-                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.15)"
-                    e.currentTarget.style.borderColor = "#FFD700"
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)"
-                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)"
-                    e.currentTarget.style.borderColor = "transparent"
-                  }}
-                >
-                  {/* Colored header */}
-                  <div style={{
-                    background: gradients[index],
-                    padding: "2rem 1.5rem",
-                    textAlign: "center",
-                    color: "#fff"
-                  }}>
+                  <div
+                    style={{
+                      background: "#ffffff",
+                      borderRadius: "16px",
+                      overflow: "hidden",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                      border: "2px solid transparent"
+                    }}
+                    onClick={() => navigate({ to: '/quiz-game', search: { quiz: quiz.id, playMode } })}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-4px)"
+                      e.currentTarget.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.15)"
+                      e.currentTarget.style.borderColor = "#FFD700"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)"
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)"
+                      e.currentTarget.style.borderColor = "transparent"
+                    }}
+                  >
+                    {/* Colored header */}
                     <div style={{
-                      fontSize: "3.5rem",
-                      marginBottom: "0.5rem",
-                      filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))"
-                    }}>
-                      {quiz.icon}
-                    </div>
-                    <h4 style={{
-                      fontSize: "1.25rem",
-                      fontWeight: 800,
-                      margin: 0,
-                      textShadow: "0 2px 4px rgba(0,0,0,0.2)"
-                    }}>
-                      {quiz.title}
-                    </h4>
-                  </div>
-
-                  {/* Content */}
-                  <div style={{ padding: "1.5rem" }}>
-                    <p style={{
-                      color: "#6b7280",
-                      fontSize: "0.9rem",
-                      lineHeight: 1.5,
-                      marginBottom: "1.5rem",
-                      minHeight: "60px"
-                    }}>
-                      {quiz.description}
-                    </p>
-
-                    {/* Stats */}
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      paddingTop: "1rem",
-                      borderTop: "1px solid #e5e7eb"
+                      background: gradients[index],
+                      padding: "2rem 1.5rem",
+                      textAlign: "center",
+                      color: "#fff"
                     }}>
                       <div style={{
-                        display: "flex",
-                        gap: "0.5rem",
-                        alignItems: "center",
-                        color: "#6b7280",
-                        fontSize: "0.85rem"
+                        fontSize: "3.5rem",
+                        marginBottom: "0.5rem",
+                        filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))"
                       }}>
-                        <span>📝 {quiz.questions} questions</span>
-                        <span>•</span>
-                        <span>⏱️ {quiz.estimatedTime}</span>
+                        {quiz.icon}
                       </div>
-                      <span style={{
-                        background: gradients[index],
-                        color: "#fff",
-                        padding: "0.3rem 0.75rem",
-                        borderRadius: "12px",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                      <h4 style={{
+                        fontSize: "1.25rem",
+                        fontWeight: 800,
+                        margin: 0,
+                        textShadow: "0 2px 4px rgba(0,0,0,0.2)"
                       }}>
-                        {quiz.category}
-                      </span>
+                        {quiz.title}
+                      </h4>
+                    </div>
+
+                    {/* Content */}
+                    <div style={{ padding: "1.5rem" }}>
+                      <p style={{
+                        color: "#6b7280",
+                        fontSize: "0.9rem",
+                        lineHeight: 1.5,
+                        marginBottom: "1.5rem",
+                        minHeight: "60px"
+                      }}>
+                        {quiz.description}
+                      </p>
+
+                      {/* Stats */}
+                      <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        paddingTop: "1rem",
+                        borderTop: "1px solid #e5e7eb"
+                      }}>
+                        <div style={{
+                          display: "flex",
+                          gap: "0.5rem",
+                          alignItems: "center",
+                          color: "#6b7280",
+                          fontSize: "0.85rem"
+                        }}>
+                          <span>📝 {quiz.questions} questions</span>
+                          <span>•</span>
+                          <span>⏱️ {quiz.estimatedTime}</span>
+                        </div>
+                        <span style={{
+                          background: gradients[index],
+                          color: "#fff",
+                          padding: "0.3rem 0.75rem",
+                          borderRadius: "12px",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                        }}>
+                          {quiz.category}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
                 </SwiperSlide>
               )
             })}
