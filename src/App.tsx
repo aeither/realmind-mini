@@ -1,5 +1,4 @@
 import { OnchainKitProvider } from '@coinbase/onchainkit'
-import { useMiniKit } from '@coinbase/onchainkit/minikit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
@@ -53,7 +52,6 @@ function App() {
             enabled: true
           }}
         >
-          <MiniKitInitializer />
           <WalletModalProvider>
             <RouterProvider router={router} />
             <Toaster
@@ -74,19 +72,6 @@ function App() {
       </QueryClientProvider>
     </WagmiProvider>
   )
-}
-
-// Initialize MiniKit frame context
-function MiniKitInitializer() {
-  const { setFrameReady, isFrameReady } = useMiniKit();
-
-  useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [setFrameReady, isFrameReady]);
-
-  return null;
 }
 
 // Separate component to use the wallet modal context
