@@ -3,6 +3,7 @@ import { useAccount } from 'wagmi'
 import { useState, useEffect } from 'react'
 import GlobalHeader from '../components/GlobalHeader'
 import BottomNavigation from '../components/BottomNavigation'
+import ProgressDashboard from '../components/ProgressDashboard'
 import { leaderboardService, type TokenHolder } from '../libs/leaderboardService'
 import { getContractAddresses, getRewardsConfig } from '../libs/constants'
 import { useUserProfiles } from '../hooks/useUserProfile'
@@ -20,135 +21,219 @@ interface LeaderboardRowProps {
 function LeaderboardRow({ holder, rank, address, profiles, getProportionalReward, rewardsConfig }: LeaderboardRowProps) {
   const profile = profiles.get(holder.address.toLowerCase())
   const viewProfile = useViewProfile()
+  const isTopThree = rank <= 3
+  const isCurrentUser = address?.toLowerCase() === holder.address.toLowerCase()
+
+  // Calculate XP percentage (for future use - could compare to top player)
+  const xpPercentage = 100
+
+  const rankColors = {
+    1: { bg: "linear-gradient(135deg, #FFD700, #FFA500)", color: "#fff", shadow: "0 4px 12px rgba(255, 215, 0, 0.4)" },
+    2: { bg: "linear-gradient(135deg, #C0C0C0, #999999)", color: "#fff", shadow: "0 4px 12px rgba(192, 192, 192, 0.4)" },
+    3: { bg: "linear-gradient(135deg, #CD7F32, #965A38)", color: "#fff", shadow: "0 4px 12px rgba(205, 127, 50, 0.4)" }
+  }
+
+  const rankStyle = isTopThree ? rankColors[rank as 1 | 2 | 3] : null
 
   return (
-    <tr key={holder.address} style={{ borderTop: "1px solid #e5e7eb" }}>
-      <td style={{ padding: "0.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          {rank <= 3 && (
-            <span style={{ marginRight: "0.25rem", fontSize: "0.9rem" }}>
-              {rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}
-            </span>
+    <div style={{
+      background: isCurrentUser ? "linear-gradient(135deg, #dbeafe, #e0e7ff)" : "#ffffff",
+      borderRadius: "12px",
+      padding: "1rem",
+      marginBottom: "0.75rem",
+      border: isCurrentUser ? "2px solid #3b82f6" : isTopThree ? `2px solid ${rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : '#CD7F32'}` : "1px solid #e5e7eb",
+      boxShadow: isTopThree ? rankStyle?.shadow : "0 2px 4px rgba(0,0,0,0.05)",
+      transition: "all 0.3s ease"
+    }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "1rem",
+        flexWrap: "wrap"
+      }}>
+        {/* Rank Badge */}
+        <div style={{
+          background: rankStyle?.bg || "#f3f4f6",
+          color: rankStyle?.color || "#374151",
+          width: isTopThree ? "60px" : "50px",
+          height: isTopThree ? "60px" : "50px",
+          borderRadius: "50%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: 800,
+          fontSize: isTopThree ? "1.5rem" : "1.25rem",
+          flexShrink: 0,
+          boxShadow: isTopThree ? "0 4px 8px rgba(0,0,0,0.15)" : "none",
+          position: "relative"
+        }}>
+          {isTopThree && (
+            <div style={{ fontSize: "1.5rem", marginBottom: "-0.25rem" }}>
+              {rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉'}
+            </div>
           )}
-          <span style={{
-            fontWeight: "600",
-            color: rank <= 3 ? "#58CC02" : "#111827",
-            fontSize: "0.85rem"
-          }}>
+          <div style={{ fontSize: isTopThree ? "1rem" : "1.25rem" }}>
             #{rank}
-          </span>
+          </div>
         </div>
-      </td>
-      <td style={{ padding: "0.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          {/* Avatar - Use Farcaster profile pic if available */}
-          {(() => {
-            const hasProfilePic = profile?.profilePicUrl
 
-            if (hasProfilePic) {
-              return (
-                <img
-                  src={profile.profilePicUrl}
-                  alt={profile.username || 'Profile'}
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "50%",
-                    objectFit: "cover"
-                  }}
-                  onError={(e) => {
-                    // Fallback to default avatar if image fails to load
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              )
-            }
-
-            // Default avatar
-            return (
-              <div style={{
-                width: "24px",
-                height: "24px",
-                borderRadius: "50%",
-                background: `hsl(${holder.address.slice(-6).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 60%)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "0.6rem",
-                fontWeight: "600",
-                color: "white"
-              }}>
-                {holder.address.slice(2, 4).toUpperCase()}
-              </div>
-            )
-          })()}
-          <code
-            style={{
-              background: address?.toLowerCase() === holder.address.toLowerCase() ? "#dbeafe" : "#f9fafb",
-              padding: "0.2rem 0.4rem",
-              borderRadius: "4px",
-              fontSize: "0.7rem",
-              fontFamily: "monospace",
-              display: "block",
-              maxWidth: "100%",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              border: address?.toLowerCase() === holder.address.toLowerCase() ? "1px solid #3b82f6" : "none",
-              cursor: profile?.fid ? "pointer" : "default"
-            }}
-            onClick={() => {
-              if (profile?.fid) {
-                viewProfile(profile.fid)
-              }
-            }}
-            title={profile?.fid ? "Click to view Farcaster profile" : holder.address}
-          >
+        {/* User Info */}
+        <div style={{ flex: 1, minWidth: "200px" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            marginBottom: "0.5rem"
+          }}>
+            {/* Avatar */}
             {(() => {
-              // Show ENS name if available, otherwise Farcaster username, otherwise truncated address
-              if (profile?.ensName) {
-                return profile.ensName
+              const hasProfilePic = profile?.profilePicUrl
+
+              if (hasProfilePic) {
+                return (
+                  <img
+                    src={profile.profilePicUrl}
+                    alt={profile.username || 'Profile'}
+                    style={{
+                      width: isTopThree ? "48px" : "40px",
+                      height: isTopThree ? "48px" : "40px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "3px solid #fff",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                )
               }
-              if (profile?.username) {
-                return `@${profile.username}`
-              }
-              return leaderboardService.truncateAddress(holder.address)
+
+              return (
+                <div style={{
+                  width: isTopThree ? "48px" : "40px",
+                  height: isTopThree ? "48px" : "40px",
+                  borderRadius: "50%",
+                  background: `hsl(${holder.address.slice(-6).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 60%)`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.25rem",
+                  fontWeight: 700,
+                  color: "white",
+                  border: "3px solid #fff",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+                }}>
+                  {holder.address.slice(2, 4).toUpperCase()}
+                </div>
+              )
             })()}
-          </code>
+
+            <div>
+              <div
+                style={{
+                  fontSize: isTopThree ? "1.1rem" : "1rem",
+                  fontWeight: 700,
+                  color: "#111827",
+                  marginBottom: "0.125rem",
+                  cursor: profile?.fid ? "pointer" : "default"
+                }}
+                onClick={() => {
+                  if (profile?.fid) {
+                    viewProfile(profile.fid)
+                  }
+                }}
+                title={profile?.fid ? "Click to view Farcaster profile" : undefined}
+              >
+                {(() => {
+                  if (profile?.ensName) return profile.ensName
+                  if (profile?.username) return `@${profile.username}`
+                  return leaderboardService.truncateAddress(holder.address)
+                })()}
+                {isCurrentUser && (
+                  <span style={{
+                    marginLeft: "0.5rem",
+                    fontSize: "0.75rem",
+                    background: "#3b82f6",
+                    color: "#fff",
+                    padding: "0.125rem 0.5rem",
+                    borderRadius: "12px",
+                    fontWeight: 600
+                  }}>
+                    You
+                  </span>
+                )}
+              </div>
+              <div style={{
+                fontSize: "0.8rem",
+                color: "#6b7280",
+                fontFamily: "monospace"
+              }}>
+                {holder.address.slice(0, 6)}...{holder.address.slice(-4)}
+              </div>
+            </div>
+          </div>
+
+          {/* XP Progress Bar */}
+          <div style={{
+            width: "100%",
+            height: "8px",
+            background: "#e5e7eb",
+            borderRadius: "4px",
+            overflow: "hidden",
+            marginBottom: "0.5rem"
+          }}>
+            <div style={{
+              width: `${xpPercentage}%`,
+              height: "100%",
+              background: isTopThree ? rankStyle?.bg : "linear-gradient(90deg, #58CC02, #46a001)",
+              borderRadius: "4px",
+              transition: "width 1s ease-out"
+            }} />
+          </div>
+
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}>
+            <span style={{
+              fontSize: "0.95rem",
+              fontWeight: 700,
+              color: isTopThree ? "#111827" : "#374151"
+            }}>
+              ⚡ {leaderboardService.formatBalance(holder.balance)} XP
+            </span>
+
+            {rank <= (rewardsConfig?.maxWinners || 200) ? (
+              <span style={{
+                background: isTopThree ? rankStyle?.bg : "linear-gradient(135deg, #58CC02, #46a001)",
+                color: "#fff",
+                padding: "0.375rem 0.75rem",
+                borderRadius: "8px",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+              }}>
+                🏆 {rewardsConfig?.symbol || "💰"} {getProportionalReward(holder.balance)}
+              </span>
+            ) : (
+              <span style={{
+                background: "#fef3c7",
+                color: "#92400e",
+                padding: "0.375rem 0.75rem",
+                borderRadius: "8px",
+                fontSize: "0.85rem",
+                fontWeight: 700
+              }}>
+                Keep going! 🎯
+              </span>
+            )}
+          </div>
         </div>
-      </td>
-      <td style={{ padding: "0.5rem", textAlign: "right" }}>
-        <span style={{ fontWeight: "600", color: "#111827", fontSize: "0.8rem" }}>
-          {leaderboardService.formatBalance(holder.balance)} XP
-        </span>
-      </td>
-      <td style={{ padding: "0.5rem", textAlign: "center" }}>
-        {rank <= (rewardsConfig?.maxWinners || 200) ? (
-          <span style={{
-            background: rank <= 3 ? "#58CC02" : "#f3f4f6",
-            color: rank <= 3 ? "white" : "#374151",
-            padding: "0.2rem 0.4rem",
-            borderRadius: "4px",
-            fontSize: "0.7rem",
-            fontWeight: "600",
-            display: "inline-block"
-          }}>
-            {rewardsConfig?.symbol || "💰"} {getProportionalReward(holder.balance)}
-          </span>
-        ) : (
-          <span style={{
-            background: "#fef3c7",
-            color: "#92400e",
-            padding: "0.2rem 0.4rem",
-            borderRadius: "4px",
-            fontSize: "0.7rem",
-            fontWeight: "600",
-            display: "inline-block"
-          }}>
-            Keep going! 🎯
-          </span>
-        )}
-      </td>
-    </tr>
+      </div>
+    </div>
   )
 }
 
@@ -624,57 +709,40 @@ function LeaderboardPage() {
               </button>
             </div>
             
-            {/* Leaderboard Table */}
-            <div style={{ 
-              background: "#ffffff",
-              borderRadius: "8px",
-              border: "1px solid #e5e7eb",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)"
-            }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "#f9fafb" }}>
-                    <th style={{ textAlign: "left", padding: "0.5rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem", width: "80px" }}>Rank</th>
-                    <th style={{ textAlign: "left", padding: "0.5rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem" }}>Address</th>
-                    <th style={{ textAlign: "right", padding: "0.5rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem", width: "100px" }}>XP</th>
-                    <th style={{ textAlign: "center", padding: "0.5rem", fontWeight: "600", color: "#111827", fontSize: "0.85rem", width: "120px" }}>Reward</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {holders.map((holder, index) => {
-                    const rank = index + 1
-                    const getProportionalReward = (userXP: string) => {
-                      const totalReward = rewardsConfig?.totalReward || 1000
-                      const maxWinners = rewardsConfig?.maxWinners || 200
+            {/* Leaderboard List */}
+            <div>
+              {holders.map((holder, index) => {
+                const rank = index + 1
+                const getProportionalReward = (userXP: string) => {
+                  const totalReward = rewardsConfig?.totalReward || 1000
+                  const maxWinners = rewardsConfig?.maxWinners || 200
 
-                      // Calculate total XP of eligible winners (top N or all if less than N)
-                      const eligibleHolders = holders.slice(0, Math.min(holders.length, maxWinners))
-                      const totalXP = eligibleHolders.reduce((sum, holder) => {
-                        return sum + parseFloat(holder.balance)
-                      }, 0)
+                  // Calculate total XP of eligible winners (top N or all if less than N)
+                  const eligibleHolders = holders.slice(0, Math.min(holders.length, maxWinners))
+                  const totalXP = eligibleHolders.reduce((sum, holder) => {
+                    return sum + parseFloat(holder.balance)
+                  }, 0)
 
-                      if (totalXP === 0) return 0
+                  if (totalXP === 0) return 0
 
-                      // Calculate proportional reward: (user_xp / total_xp) * totalReward
-                      const userXPValue = parseFloat(userXP)
-                      const proportion = userXPValue / totalXP
-                      return Math.floor(totalReward * proportion)
-                    }
+                  // Calculate proportional reward: (user_xp / total_xp) * totalReward
+                  const userXPValue = parseFloat(userXP)
+                  const proportion = userXPValue / totalXP
+                  return Math.floor(totalReward * proportion)
+                }
 
-                    return (
-                      <LeaderboardRow
-                        key={holder.address}
-                        holder={holder}
-                        rank={rank}
-                        address={address}
-                        profiles={profiles}
-                        getProportionalReward={getProportionalReward}
-                        rewardsConfig={rewardsConfig}
-                      />
-                    )
-                  })}
-                </tbody>
-              </table>
+                return (
+                  <LeaderboardRow
+                    key={holder.address}
+                    holder={holder}
+                    rank={rank}
+                    address={address}
+                    profiles={profiles}
+                    getProportionalReward={getProportionalReward}
+                    rewardsConfig={rewardsConfig}
+                  />
+                )
+              })}
             </div>
 
             {/* Footer */}

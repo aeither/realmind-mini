@@ -18,10 +18,10 @@ export default function BottomNavigation() {
       path: '/leaderboard'
     },
     {
-      id: 'ai-quiz',
-      label: 'AI Quiz',
-      icon: '🤖',
-      path: '/ai-quiz'
+      id: 'profile',
+      label: 'Profile',
+      icon: '👤',
+      path: '/profile'
     }
   ]
 

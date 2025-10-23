@@ -510,3 +510,27 @@ h1, h2, h3, h4, h5, h6, p, label, span {
     color: hsl(var(--foreground));
   }
 }
+
+/* Swiper Mobile Optimization */
+.swiper {
+  overflow: visible !important;
+}
+
+.swiper-wrapper {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure slides aren't clipped on mobile */
+.swiper-slide {
+  flex-shrink: 0;
+  display: flex;
+  height: auto;
+}
+
+/* Smooth scrolling for better mobile experience */
+@media (max-width: 768px) {
+  .swiper {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
