@@ -48,7 +48,7 @@ export default function DailyMissions() {
         xpReward: 15,
         progress: playedToday ? 1 : 0,
         target: 1,
-        completed: playedToday && updatedProgress.currentStreak > 0
+        completed: Boolean(playedToday && updatedProgress.currentStreak > 0)
       },
       {
         id: 'perfect_score',

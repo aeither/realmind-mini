@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import GlobalHeader from '../components/GlobalHeader'
 import BottomNavigation from '../components/BottomNavigation'
 import ProgressDashboard from '../components/ProgressDashboard'
-import AchievementsGallery from '../components/AchievementsGallery'
 
 interface NeynarProfile {
   fid: number
@@ -361,13 +360,6 @@ function ProfilePage() {
             title="Referral Program"
             description="Invite friends and earn rewards for growing the community"
           />
-        )}
-
-        {/* Achievements Gallery */}
-        {isConnected && (
-          <div style={{ marginBottom: "2rem" }}>
-            <AchievementsGallery />
-          </div>
         )}
       </div>
 
