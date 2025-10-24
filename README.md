@@ -1,277 +1,146 @@
 # RealMind
 
-> Interactive blockchain learning platform with gamified quizzes and onchain rewards
+> Blockchain quiz platform with seasonal leaderboard competitions on Base
 
-## Overview
+**Live Demo:** [https://farcaster.xyz/miniapps/QSFpirt1Zyre/realmind/](https://farcaster.xyz/miniapps/QSFpirt1Zyre/realmind/)
 
-RealMind transforms blockchain education into an engaging, rewarding experience through gamified quiz games deployed on Base, Celo, and EDU Chain networks.
+## The Problem It Solves
 
-**Live Demo:** [https://realmind-base.dailywiser.xyz/](https://realmind-base.dailywiser.xyz/)
+RealMind transforms blockchain education into an engaging, rewarding experience through gamified quiz games deployed on Base.
 
-## What We Do
-
-**RealMind is a play-to-learn onchain quiz platform where users earn crypto rewards for mastering blockchain concepts.**
-
-We've created a Duolingo-style learning experience for Web3, where users:
-- Pay a small entry fee to start quiz games
-- Answer questions about Web3, DeFi, and blockchain fundamentals
-- Earn in tokens based on quiz performance
-- Compete on global leaderboards for seasonal rewards
+People use it to:
+- Learn blockchain, DeFi, and crypto fundamentals through interactive quizzes
+- Earn crypto rewards for mastering Web3 concepts
+- Compete on global leaderboards for seasonal prizes
 - Track their learning progress with XP points
+
+RealMind makes learning:
+- **Interactive**: Duolingo-style gamified experience with immediate feedback
+- **Fun**: Pay-to-play model with micro-stakes creates excitement
+- **Rewarding**: Earn returns based on quiz performance
+- **Transparent**: All quiz sessions and rewards verified on-chain via smart contracts
 
 ## Unique Value Proposition
 
-**What Makes RealMind Different:**
+RealMind focuses on knowledge verification rather than social engagement tasks common in quest platforms.
 
-Unlike quest platforms (Layer3, Galxe, RabbitHole, Zealy) that focus on task completion for airdrops, RealMind is a **knowledge-based learning platform** where users must genuinely understand concepts to earn rewards.
+**Core Differentiation:**
+- Knowledge-based quizzes with verifiable onchain results
+- Seasonal leaderboard competitions instead of one-time airdrops
+- Progressive curriculum structure from beginner to advanced topics
+- Integration with Farcaster for streamlined user onboarding
 
-### Key Differentiators:
+**Current Status:**
+- Live on Base mainnet
+- Smart contract-based leaderboard and reward distribution
+- XP progression system across multiple quiz categories
+- Processed 100+ quiz sessions
 
-1. **Educational Depth over Task Completion**
-   - Quest platforms: Simple social tasks (follow, retweet, join Discord)
-   - **RealMind**: Comprehensive quizzes requiring actual blockchain knowledge
-   - Users must demonstrate understanding, not just complete checkboxes
+## Technical Challenges
 
-2. **Immediate Financial Rewards**
-   - Quest platforms: Future airdrops with uncertain value
-   - **RealMind**: token payouts upon season end
-   - Transparent, smart contract-based reward calculation
+**1. Smart Contract Session Management**
+- **Issue**: Users could start multiple concurrent quiz sessions, breaking reward calculations
+- **Solution**: Implemented auto-completion logic where starting a new quiz automatically completes any previous session with 0 score
 
-3. **Onchain Learning Verification**
-   - All quiz sessions are recorded on-chain with permanent proof of knowledge
-   - Performance metrics tracked via smart contracts
-   - Creates a verifiable learning credential system
+**2. Quiz Generation Reliability**
+- **Issue**: Scheduled cron jobs for daily quiz generation failed intermittently
+- **Solution**: Built fallback system where the `/daily-quiz` endpoint auto-generates content on-the-fly if cached quiz doesn't exist
 
-4. **Progressive Learning Paths**
-   - Structured curriculum from Web3 basics to advanced DeFi concepts
-   - Difficulty-based reward multipliers incentivize skill development
-   - XP system tracks long-term learning progress
+**3. Wallet Integration**
+- **Issue**: Wallet connection flow needed optimization for Farcaster users
+- **Solution**: Integrated OnchainKit for Coinbase Smart Wallet and Farcaster MiniApp SDK for seamless onboarding
 
-5. **Skin in the Game**
-   - Pay-to-play model ensures serious learners
-   - Entry fee creates commitment and filters low-quality participants
-   - Higher engagement quality vs. free quest platforms
 
-**Technical Differentiators:**
-- Smart contract-based quiz session management with on-chain tracking
-- Transparent, algorithmic reward distribution (no manual airdrops)
-- Real-time leaderboards with seasonal competitions
-- Integrated wallet support (OnchainKit, Farcaster MiniApp)
+## Comparison to Similar Platforms
 
-## Alpha Test Plan
-
-**Testing Strategy & Metrics (Path to 10K Users)**
-
-### Phase 1: Initial Validation (Weeks 1-2) - Target: 100 Users
-**Goals:**
-- Validate core quiz mechanics and smart contract functionality
-- Test reward distribution accuracy
-- Identify critical UX friction points
-
-**Metrics to Track:**
-- Quiz completion rate (target: >60%)
-- Average time per quiz (baseline measurement)
-- Transaction success rate (target: >95%)
-- User drop-off points in quiz flow
-- Wallet connection success rate
-
-**Testing Methodology:**
-- Invite early crypto community members from Farcaster, Twitter
-- Conduct 1-on-1 user interviews (10-15 users)
-- Monitor on-chain analytics for session completion
-- A/B test entry fee amounts (0.001 ETH vs 0.01 ETH)
-
-### Phase 2: Product-Market Fit (Weeks 3-6) - Target: 1,000 Users
-**Goals:**
-- Refine quiz content based on user feedback
-- Optimize reward mechanisms for retention
-- Validate seasonal leaderboard appeal
-
-**Metrics to Track:**
-- Daily Active Users (DAU) and retention (D1, D7, D30)
-- Average quizzes per user (target: >2)
-- Reward claim rate (target: >80%)
-- Leaderboard engagement (% users checking rankings)
-- User referral rate (organic growth indicator)
-- Gas cost analysis per transaction
-
-**Iteration Process:**
-- Weekly content updates based on completion rates
-- Bi-weekly surveys to understand user motivations
-- Monitor which quiz topics have highest engagement
-- Test different reward multipliers (currently 10-90% bonus)
-- Implement feedback loops for question quality
-
-### Phase 3: Growth & Scaling (Weeks 7-) - Target: 10,000 Users
-**Goals:**
-- Launch referral program to accelerate growth
-- Expand quiz content library (target: 10+ categories)
-- Introduce daily/weekly engagement features
-
-**Metrics to Track:**
-- Cost of user acquisition (CAC)
-- Lifetime value (LTV) based on quiz frequency
-- Viral coefficient from referral program
-- Content engagement by category
-- Revenue from protocol fees vs. user retention
-- Cross-chain usage patterns
-
-**Growth Tactics:**
-- Partnership with 3-5 Web3 education communities
-- Sponsored quiz campaigns with blockchain projects
-- Farcaster Frames integration for viral sharing
-- Weekly leaderboard prize announcements
-- Content creator partnerships (YouTube, Twitter educators)
-
-### Success Criteria:
-- **Engagement**: >50% of users complete at least 2 quizzes
-- **Retention**: >30% week-over-week retention
-- **Quality**: >70% quiz completion rate (indicates appropriate difficulty)
-- **Revenue**: Protocol fees cover operational costs
-- **Growth**: Achieve 25% month-over-month user growth
-- **Technical**: <2% transaction failure rate
-
-### Feedback Mechanisms:
-1. **In-app surveys** after quiz completion
-2. **Discord community** for real-time feedback
-3. **On-chain analytics** for behavior tracking
-4. **User interviews** (bi-weekly with power users)
-5. **A/B testing** for reward structures and UI flows
-
-## Competitive Analysis
-
-### Direct Competitors & How We Differentiate
-
-| Platform | Model | RealMind's Advantage |
+| Platform | Focus | RealMind Difference |
 |----------|-------|---------------------|
-| **Layer3** | Quest completion for XP/future airdrops | ✅ Immediate crypto rewards, knowledge-based (not social tasks), on-chain verification |
-| **Galxe** | Social task campaigns for NFT badges | ✅ Educational focus, instant token payouts, progressive learning paths |
-| **RabbitHole** | On-chain task completion for skills | ✅ Quiz-based knowledge testing, lower entry barrier, faster completion |
-| **Zealy** | Community quest platform | ✅ Decentralized rewards, on-chain proof of learning, transparent payouts |
-| **Coinbase Learn** | Educational content with small rewards | ✅ Multi-chain support, competitive leaderboards, higher earning potential |
+| **Layer3** | Quest platform for social tasks and airdrops | Knowledge-based quizzes with verifiable onchain results |
+| **Galxe** | NFT badge campaigns for social engagement | Structured curriculum with seasonal competitions |
+| **RabbitHole** | Onchain protocol interaction quests | Quiz-based learning without protocol interaction risk |
+| **Coinbase Learn** | Educational videos with token rewards | Competitive leaderboards and repeatable earning |
+| **Zealy** | Community quest management | Smart contract-based reward distribution |
 
-### Why Users Choose RealMind Over Alternatives:
+**Key Differentiation:**  
+RealMind combines blockchain education with seasonal leaderboard competitions and onchain verification of quiz performance.
 
-1. **No Waiting for Airdrops**
-   - Layer3/Galxe users wait weeks/months for uncertain token distributions
-   - RealMind: Instant smart contract payouts after quiz completion
+## Target Users
 
-2. **Real Knowledge Validation**
-   - Quest platforms: Click "follow" buttons, join Discord servers
-   - RealMind: Prove understanding through comprehensive quizzes
-   - Creates actual learning outcomes, not just engagement metrics
+### DeFi Beginners
+- Learning blockchain fundamentals before interacting with protocols
+- Prefer structured curriculum with progressive difficulty
+- Content: Web3 basics, wallet mechanics, DeFi fundamentals
 
-3. **Higher Earning Potential**
-   - Coinbase Learn: ~$3-5 per lesson (limited availability)
-   - RealMind: Returns on entry fee (repeatable, scalable)
-   - Seasonal leaderboard bonuses for top performers
+### Quest Platform Users
+- Familiar with platforms like Layer3, Galxe, Zealy
+- Looking for knowledge-based challenges
+- Content: Advanced DeFi topics, protocol-specific quizzes
 
-4. **Decentralized & Transparent**
-   - Traditional platforms control reward distribution
-   - RealMind: Smart contracts automatically distribute based on performance
-   - All rewards verifiable on-chain
+### Competitive Learners
+- Motivated by leaderboard rankings and seasonal competitions
+- High engagement with repeated quiz attempts
+- Content: Challenging quizzes with timed tournaments
 
-5. **Gamified Progression System**
-   - Most platforms offer one-time quests
-   - RealMind: XP system, seasonal rankings, achievement tracking
-   - Encourages long-term engagement and skill development
+## Distribution Strategy
 
-### Market Positioning:
-**RealMind = Duolingo × DeFi**
-- Educational rigor of structured learning platforms
-- Financial incentives of play-to-earn gaming
-- Transparency and verification of blockchain technology
+### Community Channels
+1. **Farcaster**
+   - Farcaster Frames for quiz sharing
+   - MiniApp SDK integration for streamlined onboarding
+   - Partnership with crypto education communities
 
-## Ideal Customer Profile
+2. **Social Media**
+   - Leaderboard winner announcements
+   - Educational content tied to quiz topics
+   - Engagement with Web3 education creators
 
-### Target Customer Segmentation
+3. **Discord Communities**
+   - Custom branded quizzes for Base ecosystem projects
+   - Community-specific educational content
 
-**Segment 1: Web3 Learners (Primary - 60% of users)**
-- **Profile:** New to crypto, motivated to learn fundamentals
-- **Pain Point:** Overwhelmed by Web3 complexity, need structured learning
-- **Why RealMind:** Gamified education makes blockchain accessible + financial incentive
-- **Content Strategy:** Web3 Basics, beginner-friendly DeFi topics
-- **Entry Fee:** Lower tier (0.001-0.005 ETH) for accessibility
+### Partnership Opportunities
+1. **Base Ecosystem Grants**
+   - User growth incentive programs
+   - Co-marketing with Base Foundation
 
-**Segment 2: Crypto Earners (Secondary - 25% of users)**
-- **Profile:** Experienced DeFi users, already doing quests on Layer3/Galxe
-- **Pain Point:** Tired of low-value social tasks, want better earning opportunities
-- **Why RealMind:** Higher ROI, instant rewards, skill-based (not luck-based)
-- **Content Strategy:** Advanced DeFi, protocol-specific quizzes, sponsored content
-- **Entry Fee:** Mid-tier (0.01-0.05 ETH) for better rewards
+2. **Protocol Sponsorships**
+   - DeFi protocols sponsor educational quizzes about their products
+   - Custom quiz content for partner communities
 
-**Segment 3: Competitive Learners (Tertiary - 15% of users)**
-- **Profile:** Power users who love leaderboards and achievements
-- **Pain Point:** Want recognition for knowledge and competitive environment
-- **Why RealMind:** Seasonal rankings, top 200 rewards, XP progression
-- **Content Strategy:** Challenging quizzes, time-based competitions, exclusive tournaments
-- **Entry Fee:** Higher tier (0.05-0.1 ETH) for premium competitions
+3. **Education Platform Integration**
+   - Integrate with existing blockchain education platforms
+   - Provide assessment layer for structured courses
 
-**Demographics:**
-- Age: 18-40 years old
-- Tech-savvy individuals interested in cryptocurrency and DeFi
-- Users comfortable with crypto wallets and basic transactions
-- Global audience (English-speaking initially, multi-language expansion planned)
+---
 
-**User Behavior:**
-- Active on crypto Twitter, Farcaster, Discord communities, and Web3 platforms
-- Looking for engaging ways to learn blockchain concepts
-- Motivated by both knowledge acquisition and financial rewards
-- Enjoy gamified experiences and competitive elements
-- Willing to pay small amounts for quality educational content
+## How It Works
 
-## Technical Stack
+1. **Connect Wallet** - OnchainKit or Farcaster MiniApp integration
+2. **Choose Quiz** - Web3 Basics, DeFi Fundamentals, or advanced topics
+3. **Complete Quiz** - 10 questions with time limit
+4. **Earn Points** - Quiz performance contributes to leaderboard ranking
+5. **Seasonal Rewards** - Top performers receive rewards at the end of each season
 
-**Frontend:**
-- React 18 + TypeScript + Vite
-- TanStack Router for routing
-- Wagmi v2 + Viem for Web3 interactions
-- Framer Motion for animations
-- Tailwind CSS v4 for styling
+## Development Status
 
-**Blockchain:**
-- Smart contracts deployed onchain
-- ERC-20 token for rewards
-- Quiz session management contracts
-- Seasonal rewards distribution system
+**Current Stage:** Live on Base mainnet
 
-**Wallet Integration:**
-- OnchainKit (Coinbase)
-- RainbowKit
-- WalletConnect v2
-- Farcaster MiniApp SDK
+**Deployed Contracts:** Quiz game logic, YUZU token (ERC-20), seasonal rewards, leaderboard tracking
 
-## Backend API Endpoints
+**Active Features:** Wallet integration (OnchainKit, Farcaster), multiple quiz categories, seasonal leaderboards
 
-**Quiz Generation:**
-- `GET /daily-quiz` - Get daily quiz (auto-generates if cache is empty)
-  - First checks Redis cache for existing quiz
-  - If no cached quiz, automatically generates new one via `generateScheduledQuiz()`
-  - Stores generated quiz for future requests
-  - Returns quiz immediately
-- `GET /daily-quiz/cached` - Get cached quizzes only (no auto-generation)
-- `POST /generate-quiz` - Generate custom quiz on-demand
-- `GET /cron/daily-quiz` - Scheduled cron job for daily quiz generation
+**In Development:** Additional quiz categories, NFT achievement badges, referral system
 
-**Resilient Quiz Generation:**
-The `/daily-quiz` endpoint is designed to be resilient against cron failures:
-1. ✅ **Cached Quiz Available** → Returns immediately from Redis
-2. ⚠️ **No Cached Quiz** → Automatically generates new quiz on-the-fly
-3. 💾 **Stores for Next Time** → New quiz cached in Redis for future requests
-4. 🔄 **No Downtime** → Always returns a quiz, even if cron jobs fail
+## Quick Start
 
-## Deployment & Setup
-
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
-
-**Quick Start:**
 ```bash
 # Install dependencies
 pnpm install
 
 # Set environment variables
 VITE_WALLETCONNECT_PROJECT_ID=your_project_id
-VITE_CDP_CLIENT_API_KEY=your_cdp_api_key
+VITE_ONCHAINKIT_API_KEY=your_api_key
+VITE_SUPPORTED_CHAIN_ID=8453  # Base mainnet
 
 # Run development server
 pnpm run dev
@@ -280,125 +149,17 @@ pnpm run dev
 pnpm run build
 ```
 
-## Key Features
+See [DEPLOYMENT.md](./DEPLOYMENT.md) and [WARP.md](./WARP.md) for detailed instructions.
 
-### 1. Onchain Quiz Games
-Pay-to-play quiz system where users:
-- Select quiz topics (Web3 Basics, DeFi Fundamentals, Core DAO)
-- Complete timed quiz sessions (1 hour time limit)
-- Earn rewards based on performance
-- All sessions tracked on-chain for transparency
+---
 
-### 2. Learn & Earn
-- Master Web3, DeFi, and blockchain concepts
-- Instant feedback on answers
-- Progressive difficulty levels
-- Knowledge base integration
+## Tech Stack
 
-### 3. Global Leaderboards
-- Compete with learners worldwide
-- Seasonal rankings
-- Top 200 winners per season
-- Real-time score updates
+**Frontend:** React 18 + TypeScript + Vite, TanStack Router, Wagmi v2, Tailwind CSS v4, Framer Motion  
+**Smart Contracts:** Solidity 0.8.24+, Foundry, OpenZeppelin  
+**Wallet:** OnchainKit (Coinbase), WalletConnect v2, Farcaster MiniApp SDK  
+**Backend:** Node.js + TypeScript, Vercel
 
-### 4. Token Rewards
-- YUZU token distribution
-- Performance-based multipliers
-- Automated smart contract payouts
-- Transparent reward calculation
+---
 
-## How It Works
-
-1. **Connect Wallet** → Connect to Base, Celo, or EDU Chain
-2. **Choose Quiz** → Select from Web3, DeFi, or blockchain topics
-3. **Pay Entry Fee** → Stake 0.001-0.1 ETH to start
-4. **Answer Questions** → Complete quiz within 1 hour
-5. **Earn Rewards** → Receive up to 190% returns in YUZU tokens
-
-## Development Status
-
-**Current Stage:** Live on mainnet with active users
-
-**Deployed Contracts:**
-- ✅ Quiz game smart contracts
-- ✅ ERC-20 token contracts (YUZU)
-- ✅ Season rewards distribution system
-- ✅ Leaderboard tracking
-
-**Active Features:**
-- ✅ Multi-chain support
-- ✅ Wallet connection (RainbowKit, OnchainKit)
-- ✅ Quiz game interface with 3 quiz categories
-- ✅ On-chain session management
-- ✅ Token reward distribution
-- ✅ Global leaderboards
-- ✅ Responsive UI with animations
-
-**In Development:**
-- 🔄 Additional quiz categories
-- 🔄 NFT badges for achievements
-- 🔄 Guild/team competitions
-- 🔄 PvP quiz duels
-- 🔄 Daily Check ins
-- 🔄 Referral
-
-## Business Model
-
-**Revenue Streams:**
-1. **Quiz Entry Fees:** Users pay micro-stakes (0.001-0.1 ETH) to play
-2. **Protocol Fees:** Small percentage of entry fees retained by protocol
-3. **Sponsored Quizzes:** Blockchain projects sponsor branded quiz content
-4. **Premium Features:** Advanced analytics, custom quizzes, NFT badges
-
-## Team
-
-**Founders:**
-- Giovanni - Full-stack developer & smart contract engineer
-  - Background: Web3 development, DeFi protocols, educational platforms
-
-**Technical Development:**
-- Solo founder project with plans to expand team
-
-**Timeline:**
-- Current status: Live and actively iterating
-
-## Why?
-
-1. **Scale & Growth:** We want to deepen integration with ecosystem tools, expand our user base, and distribute meaningful rewards to learners on the network.
-
-2. **Technical Support:** Get guidance on optimizing gas costs, improving smart contract security, and leveraging chain-specific features to enhance user experience.
-
-3. **Community & Network:** Connect with other builders in the ecosystem, potential partners for sponsored quizzes, and investors interested in Web3 education.
-
-4. **Product Feedback:** Learn from experienced founders and mentors to refine our product-market fit and growth strategy.
-
-5. **Go-to-Market:** Accelerate user acquisition through ecosystem partnerships with educational institutions, crypto communities, and Web3 projects.
-
-6. **Long-term Vision:** Build RealMind into the go-to learn-to-earn platform for blockchain education, leveraging the best chains and ecosystems to maximize impact.
-
-## Roadmap
-
-**Phase 1 - Foundation (Completed):**
-- ✅ Launch on Base, Celo, EDU Chain mainnets
-- ✅ Deploy YUZU token and reward contracts
-- 🔄 Onboard first 1,000 users
-- 🔄 Complete first seasonal leaderboard
-
-**Phase 2 - Engagement Features:**
-- Daily tasks and check-in rewards
-- Referral system with bonus rewards
-- Expand to 10+ quiz categories
-- Launch NFT achievement badges
-
-**Phase 3 - Social & Competition:**
-- PvP quiz duels
-- Introduce guild/team features
-- Integration with Farcaster Frames
-- Sponsored quiz content from Web3 projects
-
-**Phase 4 - Scale & Enterprise:**
-- Multi-language support (5+ languages)
-- Advanced analytics dashboard
-- Custom quiz builder for educators
-- Partnerships with blockchain education platforms
-- Enterprise partnerships for corporate training
+**Built by Giovanni** | [Live Demo](https://realmind-base.dailywiser.xyz/) | Built on Base

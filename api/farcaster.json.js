@@ -1,5 +1,5 @@
 export default function handler(req, res) {
-  const host = req.headers.host || 'realmind-mini.dailywiser.xyz';
+  const host = req.headers.host || 'realmind-base.dailywiser.xyz';
 
   // Generate domain-specific farcaster.json configuration
   const config = {
