@@ -180,10 +180,8 @@ function HomePage() {
     try {
       const res = await fetch(`${backendUrl}/daily-quiz/cached`);
       const data = await res.json();
-
-      if (data.success && data.quizzes && data.quizzes.length > 0) {
-        const quiz = data.quizzes[0];
-        setCurrentQuizDescription(quiz.description || 'Test your knowledge');
+      if (data.success && data.quiz) {
+        setCurrentQuizDescription(data.quiz.description || 'Test your knowledge');
       }
     } catch (error) {
       console.error('Error fetching quiz info:', error);
@@ -243,8 +241,8 @@ function HomePage() {
       const res = await fetch(`${backendUrl}/daily-quiz/cached`);
       const data = await res.json();
 
-      if (data.success && data.quizzes && data.quizzes.length > 0) {
-        const quiz = data.quizzes[0];
+      if (data.success) {
+        const quiz = data.quizzes[0] || data.quiz;
         // Convert to frontend format and encode for URL
         const quizConfig = {
           id: quiz.id,
@@ -278,10 +276,12 @@ function HomePage() {
         const finalUrl = `${quizUrl}${separator}playMode=${playMode}`
         navigate({ to: finalUrl });
       } else {
-        console.error('No daily quiz available');
+        console.error('No daily quiz available:', data.error || 'Unknown error');
+        alert(data.error || 'No daily quiz available. Please try again later.');
       }
     } catch (error) {
       console.error('Error starting daily quiz:', error);
+      alert('Failed to load daily quiz. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -293,10 +293,11 @@ function HomePage() {
   }
 
   return (
-    <div style={{
-      minHeight: "100vh",
+    <div style={{ 
+      minHeight: "100vh", 
       paddingBottom: "80px", // Space for bottom nav
-      background: "#f9fafb"
+      background: "#f9fafb",
+      overflowX: "hidden"
     }}>
       <GlobalHeader />
 
@@ -305,7 +306,8 @@ function HomePage() {
         paddingTop: "70px", // Proper spacing for header
         padding: "1rem",
         maxWidth: "1200px",
-        margin: "0 auto"
+        margin: "0 auto",
+        overflowX: "hidden"
       }}>
         {/* Welcome Banner with Larry */}
         <div style={{
@@ -476,7 +478,7 @@ function HomePage() {
         </div>
 
         {/* Quick Play Section - Horizontal Scroll */}
-        <div style={{ marginBottom: "2rem", overflow: "visible", paddingBottom: "1rem" }}>
+        <div style={{ marginBottom: "2rem", overflowX: "hidden", paddingBottom: "1rem" }}>
           <h3 style={{
             color: "#111827",
             fontSize: "1.5rem",
@@ -486,6 +488,7 @@ function HomePage() {
           }}>
             🚀 Quick Play
           </h3>
+          <div style={{ overflowX: "hidden", margin: "0 -1rem" }}>
           <Swiper
             modules={[FreeMode, Pagination]}
             spaceBetween={16}
@@ -494,10 +497,7 @@ function HomePage() {
             slidesOffsetAfter={16}
             freeMode={true}
             style={{
-              width: "100vw",
-              marginLeft: "calc(-1 * (100vw - 100%) / 2)",
-              paddingBottom: "2rem",
-              overflow: "visible"
+              paddingBottom: "2rem"
             }}
           >
             {/* Daily Quiz Card */}
@@ -665,10 +665,11 @@ function HomePage() {
               </div>
             </SwiperSlide>
           </Swiper>
+          </div>
         </div>
 
         {/* Learning Paths - Horizontal Scroll */}
-        <div style={{ marginBottom: "2rem", overflow: "visible", paddingBottom: "1rem" }}>
+        <div style={{ marginBottom: "2rem", overflowX: "hidden", paddingBottom: "1rem" }}>
           <h3 style={{
             color: "#111827",
             fontSize: "1.5rem",
@@ -678,6 +679,7 @@ function HomePage() {
           }}>
             📚 Learning Paths
           </h3>
+          <div style={{ overflowX: "hidden", margin: "0 -1rem" }}>
           <Swiper
             modules={[FreeMode, Pagination]}
             spaceBetween={16}
@@ -686,10 +688,7 @@ function HomePage() {
             slidesOffsetAfter={16}
             freeMode={true}
             style={{
-              width: "100vw",
-              marginLeft: "calc(-1 * (100vw - 100%) / 2)",
-              paddingBottom: "2rem",
-              overflow: "visible"
+              paddingBottom: "2rem"
             }}
           >
             {AVAILABLE_QUIZZES.map((quiz, index) => {
@@ -795,6 +794,7 @@ function HomePage() {
               )
             })}
           </Swiper>
+          </div>
         </div>
 
         {/* Daily Missions - Greyed Out & at Bottom */}

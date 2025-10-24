@@ -172,22 +172,71 @@ Example format:
 const quizService = new QuizService()
 const leaderboardService = new LeaderboardService()
 
-// Daily Quiz Endpoint - Get the latest daily quiz
+// Daily Quiz Endpoint - Get the latest daily quiz with automatic generation fallback
 app.get('/daily-quiz', async (c) => {
   try {
-    const result = await quizService.generateDailyQuiz()
+    console.log('📥 Daily quiz request received')
     
-    if (result.success) {
-      return c.json(result)
+    // First, try to get cached quizzes
+    const cachedResult = await quizService.getCachedDailyQuizzes()
+    
+    if (cachedResult.success && cachedResult.quizzes && cachedResult.quizzes.length > 0) {
+      console.log('✅ Returning cached daily quiz')
+      return c.json({
+        success: true,
+        quiz: cachedResult.quizzes[0], // Return first quiz
+        source: 'cached',
+        timestamp: new Date().toISOString()
+      })
+    }
+    
+    // No cached quiz available - generate one automatically
+    console.log('⚠️ No cached quizzes available, generating new quiz automatically...')
+    const generateResult = await quizService.generateScheduledQuiz()
+    
+    if (generateResult.success && generateResult.quiz) {
+      console.log('✅ Quiz generated successfully:', generateResult.quiz.title)
+      
+      // Convert StoredDailyQuiz to FrontendQuizConfig format
+      const frontendQuiz = {
+        id: generateResult.quiz.id,
+        title: generateResult.quiz.title,
+        description: generateResult.quiz.description,
+        difficulty: generateResult.quiz.difficulty,
+        topic: generateResult.quiz.trending_topic,
+        questionCount: generateResult.quiz.questionCount,
+        questions: generateResult.quiz.questions.map(q => ({
+          question: q.question,
+          options: q.options,
+          correct: q.correct,
+          explanation: q.explanation
+        })),
+        createdAt: generateResult.quiz.createdAt,
+        source: generateResult.source
+      }
+      
+      return c.json({
+        success: true,
+        quiz: frontendQuiz,
+        source: 'generated-on-demand',
+        timestamp: new Date().toISOString()
+      })
     } else {
-      return c.json(result, 500)
+      console.error('❌ Failed to generate quiz:', generateResult.error)
+      return c.json({
+        success: false,
+        error: 'Failed to retrieve or generate daily quiz',
+        details: generateResult.error,
+        timestamp: new Date().toISOString()
+      }, 500)
     }
   } catch (error) {
     console.error('Error in daily quiz endpoint:', error)
     return c.json({
       success: false,
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
     }, 500)
   }
 })

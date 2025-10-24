@@ -241,6 +241,25 @@ Unlike quest platforms (Layer3, Galxe, RabbitHole, Zealy) that focus on task com
 - WalletConnect v2
 - Farcaster MiniApp SDK
 
+## Backend API Endpoints
+
+**Quiz Generation:**
+- `GET /daily-quiz` - Get daily quiz (auto-generates if cache is empty)
+  - First checks Redis cache for existing quiz
+  - If no cached quiz, automatically generates new one via `generateScheduledQuiz()`
+  - Stores generated quiz for future requests
+  - Returns quiz immediately
+- `GET /daily-quiz/cached` - Get cached quizzes only (no auto-generation)
+- `POST /generate-quiz` - Generate custom quiz on-demand
+- `GET /cron/daily-quiz` - Scheduled cron job for daily quiz generation
+
+**Resilient Quiz Generation:**
+The `/daily-quiz` endpoint is designed to be resilient against cron failures:
+1. ✅ **Cached Quiz Available** → Returns immediately from Redis
+2. ⚠️ **No Cached Quiz** → Automatically generates new quiz on-the-fly
+3. 💾 **Stores for Next Time** → New quiz cached in Redis for future requests
+4. 🔄 **No Downtime** → Always returns a quiz, even if cron jobs fail
+
 ## Deployment & Setup
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
